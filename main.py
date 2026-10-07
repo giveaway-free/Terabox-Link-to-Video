@@ -1,7 +1,11 @@
 import os
 import re
+import time
 import asyncio
 import threading
+from urllib.parse import urlparse, parse_qs, unquote
+from typing import Dict, Any, Optional, List
+import concurrent.futures
 
 # Python 3.12+ / 3.14 compatibility fix
 try:
@@ -14,7 +18,6 @@ from flask import Flask
 from pyrogram import Client, filters
 from pyrogram.types import Message
 import requests
-from terabox_api import resolve_terabox_link
 
 # ==================== RENDER WEB SERVER (KEEP ALIVE) ====================
 web_app = Flask(__name__)
@@ -26,6 +29,133 @@ def home():
 def run_web():
     port = int(os.environ.get("PORT", 10000))
     web_app.run(host="0.0.0.0", port=port)
+
+# ==================== TERABOX RESOLVER ENGINE (STANDALONE) ====================
+API_ENDPOINT = "https://api.teraboxdl.site/api/test"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
+_cached_working_proxy: Optional[str] = None
+_proxy_pool: List[str] = []
+_proxy_pool_time: float = 0
+
+def fetch_fresh_proxies() -> List[str]:
+    global _proxy_pool, _proxy_pool_time
+    now = time.time()
+    if _proxy_pool and (now - _proxy_pool_time < 300):
+        return _proxy_pool
+
+    sources = [
+        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=3000&country=all&ssl=yes&anonymity=elite",
+        "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/http.txt",
+    ]
+    proxies = []
+    for src in sources:
+        try:
+            r = requests.get(src, timeout=4)
+            if r.status_code == 200:
+                lines = [line.strip() for line in r.text.splitlines() if line.strip() and ":" in line]
+                proxies.extend(lines)
+                if len(proxies) >= 30:
+                    break
+        except Exception:
+            continue
+
+    _proxy_pool = list(dict.fromkeys(proxies))[:50]
+    _proxy_pool_time = now
+    return _proxy_pool
+
+def _try_single_request(url: str, proxy: Optional[str] = None, timeout: int = 6) -> Optional[dict]:
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json", "Content-Type": "application/json"}
+    payload = {"url": url.strip()}
+    proxies = {"http": f"http://{proxy}", "https": f"http://{proxy}"} if proxy and not proxy.startswith("http") else ({"http": proxy, "https": proxy} if proxy else None)
+
+    try:
+        r = requests.post(API_ENDPOINT, json=payload, headers=headers, proxies=proxies, timeout=timeout)
+        if r.status_code == 200:
+            data = r.json()
+            if data.get("status") == "success" and data.get("data", {}).get("list"):
+                return data
+    except Exception:
+        pass
+    return None
+
+def resolve_via_rotating_proxies(share_url: str) -> dict:
+    global _cached_working_proxy
+    if _cached_working_proxy:
+        data = _try_single_request(share_url, _cached_working_proxy, timeout=5)
+        if data:
+            return data
+
+    proxies = fetch_fresh_proxies()
+    if not proxies:
+        raise RuntimeError("Could not retrieve active proxies for IP bypass.")
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
+        future_to_proxy = {executor.submit(_try_single_request, share_url, p, 6): p for p in proxies[:25]}
+        for future in concurrent.futures.as_completed(future_to_proxy):
+            p = future_to_proxy[future]
+            try:
+                data = future.result()
+                if data:
+                    _cached_working_proxy = p
+                    return data
+            except Exception:
+                continue
+
+    raise RuntimeError("All proxy rotation nodes failed.")
+
+def resolve_terabox_link(share_url: str) -> Dict[str, Any]:
+    url_str = share_url.strip()
+
+    if "player.teraboxdl.site" in url_str:
+        parsed = urlparse(url_str)
+        qs = parse_qs(parsed.query)
+        return {
+            "filename": qs.get("filename", ["video.mp4"])[0],
+            "size": 0,
+            "formatted_size": qs.get("size", [""])[0] or "--",
+            "direct_link": qs.get("direct", [""])[0],
+            "thumbnail_url": qs.get("poster", [None])[0],
+        }
+
+    if "dl-worker.teraboxdl.site" in url_str:
+        return {
+            "filename": "video.mp4",
+            "size": 0,
+            "formatted_size": "--",
+            "direct_link": url_str,
+            "thumbnail_url": None,
+        }
+
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json", "Content-Type": "application/json"}
+    payload = {"url": url_str}
+    data = None
+    try:
+        r = requests.post(API_ENDPOINT, json=payload, headers=headers, timeout=5)
+        if r.status_code == 200:
+            resp_json = r.json()
+            if resp_json.get("status") == "success" and resp_json.get("data", {}).get("list"):
+                data = resp_json
+        else:
+            data = resolve_via_rotating_proxies(url_str)
+    except Exception:
+        data = resolve_via_rotating_proxies(url_str)
+
+    if not data or data.get("status") != "success":
+        raise RuntimeError("Failed to resolve TeraBox link.")
+
+    file_list = data.get("data", {}).get("list", [])
+    if not file_list:
+        raise ValueError("No files found in the provided TeraBox link.")
+
+    f = file_list[0]
+    return {
+        "filename": f.get("server_filename", "video.mp4"),
+        "size": int(f.get("size", 0)),
+        "formatted_size": f.get("formatted_size", f"{int(f.get('size', 0)) / (1024*1024):.2f} MB"),
+        "direct_link": f.get("direct_link") or f.get("stream_download_url") or f.get("dlink"),
+        "thumbnail_url": f.get("thumbs", {}).get("url3")
+    }
 
 # ==================== CONFIGURATION ====================
 API_ID = int(os.environ.get("API_ID", "1234567"))
@@ -39,7 +169,7 @@ bot = Client(
     bot_token=BOT_TOKEN
 )
 
-# ==================== ALL TERABOX & VIDEY DOMAINS ====================
+# সকল TeraBox ও Videy ডোমেইন লিস্ট
 TERABOX_DOMAINS = [
     "terabox.com", "1024tera.com", "1024terabox.com", "terasharefile.com",
     "terabox.app", "freeterabox.com", "mirrobox.com", "nephobox.com",
@@ -49,7 +179,6 @@ TERABOX_DOMAINS = [
 ]
 
 def extract_terabox_url(text: str) -> str:
-    """Detects and extracts any valid TeraBox or mirror share link."""
     urls = re.findall(r'(https?://[^\s]+)', text)
     for u in urls:
         u_lower = u.lower()
@@ -99,7 +228,7 @@ async def handle_link(client, message: Message):
         temp_path = f"temp_{message.id}_{safe_name}"
 
         # Render-এর 1 Gbps ক্লাউডে ডাউনলোড
-        r = requests.get(direct_url, stream=True, headers={"User-Agent": "Mozilla/5.0"}, timeout=120)
+        r = requests.get(direct_url, stream=True, headers={"User-Agent": USER_AGENT}, timeout=120)
         r.raise_for_status()
         with open(temp_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 1024 * 2):
