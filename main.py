@@ -14,6 +14,7 @@ from flask import Flask
 from pyrogram import Client, filters
 from pyrogram.types import Message
 import requests
+from terabox_api import resolve_terabox_link
 
 # ==================== RENDER WEB SERVER (KEEP ALIVE) ====================
 web_app = Flask(__name__)
@@ -38,56 +39,58 @@ bot = Client(
     bot_token=BOT_TOKEN
 )
 
-TERABOX_REGEX = r'(https?://(?:www\.)?(?:terabox|1024tera|terasharefile|teraboxapp|freeterabox|mirrobox|nephobox)\.com/\S+)'
+# ==================== ALL TERABOX & VIDEY DOMAINS ====================
+TERABOX_DOMAINS = [
+    "terabox.com", "1024tera.com", "1024terabox.com", "terasharefile.com",
+    "terabox.app", "freeterabox.com", "mirrobox.com", "nephobox.com",
+    "4funbox.com", "momerybox.com", "tibibox.com", "teraboxlink.com",
+    "teraboxshare.com", "playterabox.com", "flexdisk.net", "teraboxdl.site",
+    "teraboxurl.com", "videyyy.com", "freevidey.com", "videynow.com", "myvidey.com"
+]
 
-def resolve_terabox_direct(share_url: str):
-    """TeraBoxDL API থেকে ডাইরেক্ট CDN লিঙ্ক ফেচ করে"""
-    api_url = "https://api.teraboxdl.site/api/test"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Referer": "https://teraboxdl.site/"
-    }
-    r = requests.post(api_url, json={"url": share_url}, headers=headers, timeout=20)
-    r.raise_for_status()
-    data = r.json()
-    if data.get("status") == "success" and data.get("data", {}).get("list"):
-        item = data["data"]["list"][0]
-        return {
-            "title": item.get("server_filename", "video.mp4"),
-            "size": int(item.get("size", 0)),
-            "direct_url": item.get("direct_link") or item.get("stream_download_url")
-        }
-    raise RuntimeError("Failed to extract direct CDN link from TeraBox.")
+def extract_terabox_url(text: str) -> str:
+    """Detects and extracts any valid TeraBox or mirror share link."""
+    urls = re.findall(r'(https?://[^\s]+)', text)
+    for u in urls:
+        u_lower = u.lower()
+        if any(d in u_lower for d in TERABOX_DOMAINS):
+            return u
+        if any(k in u_lower for k in ["tera", "box", "1024", "videy"]) and any(p in u_lower for p in ["/s/", "/sharing/", "surl=", "/v/"]):
+            return u
+    if urls:
+        return urls[0]
+    return ""
 
 @bot.on_message(filters.command("start"))
 async def start_cmd(client, message: Message):
     await message.reply_text(
         "⚡ <b>TeraBox Turbo Cloud Bot</b>\n\n"
-        "যেকোনো TeraBox ভিডিও লিঙ্ক পাঠান, Render Cloud Pipe দিয়ে হাই-স্পিডে ভিডিও চলে আসবে!",
+        "যেকোনো TeraBox বা Videy ভিডিও লিঙ্ক পাঠান, Render Cloud Pipe দিয়ে হাই-স্পিডে ভিডিও চলে আসবে!",
         parse_mode="html"
     )
 
 @bot.on_message(filters.text & filters.private)
 async def handle_link(client, message: Message):
     text = message.text.strip()
-    match = re.search(TERABOX_REGEX, text)
-    if not match:
+    url = extract_terabox_url(text)
+    if not url:
         await message.reply_text("❌ অনুগ্রহ করে একটি ভ্যালিড TeraBox ভিডিও লিঙ্ক পাঠান।")
         return
 
-    url = match.group(1)
     status_msg = await message.reply_text("🔍 <i>TeraBox ক্লাউড লিঙ্ক অ্যানালাইসিস করছি...</i>", parse_mode="html")
 
     try:
-        info = resolve_terabox_direct(url)
-        title = info["title"]
-        size_mb = info["size"] / (1024 * 1024)
-        direct_url = info["direct_url"]
+        info = resolve_terabox_link(url)
+        title = info["filename"]
+        size_bytes = info["size"]
+        size_mb = (size_bytes / (1024 * 1024)) if size_bytes else 0
+        direct_url = info["direct_link"]
+        size_label = f"{size_mb:.2f} MB" if size_mb else info.get("formatted_size", "--")
 
         await status_msg.edit_text(
             f"⚡ <b>ক্লাউড পাইপলাইনে পাঠানো হচ্ছে...</b>\n"
             f"📁 <code>{title}</code>\n"
-            f"📦 <b>Size:</b> {size_mb:.2f} MB\n\n"
+            f"📦 <b>Size:</b> {size_label}\n\n"
             f"🚀 <i>Render 1 Gbps Backbone দিয়ে সরাসরি ডেলিভারি হচ্ছে...</i>",
             parse_mode="html"
         )
@@ -96,19 +99,20 @@ async def handle_link(client, message: Message):
         temp_path = f"temp_{message.id}_{safe_name}"
 
         # Render-এর 1 Gbps ক্লাউডে ডাউনলোড
-        r = requests.get(direct_url, stream=True, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
+        r = requests.get(direct_url, stream=True, headers={"User-Agent": "Mozilla/5.0"}, timeout=120)
+        r.raise_for_status()
         with open(temp_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 1024 * 2):
                 if chunk:
                     f.write(chunk)
 
-        # টেলিগ্রামে পাঠানো (Pyrogram MTProto - No 20MB / 50MB limits!)
+        # টেলিগ্রামে পাঠানো (Pyrogram MTProto - No 20MB limit!)
         await client.send_video(
             chat_id=message.chat.id,
             video=temp_path,
             caption=(
                 f"🎬 <b>{title}</b>\n"
-                f"📦 <b>Size:</b> {size_mb:.2f} MB\n\n"
+                f"📦 <b>Size:</b> {size_label}\n\n"
                 f"⚡ <i>Delivered via Render Cloud Backbone</i>"
             ),
             parse_mode="html",
@@ -125,9 +129,6 @@ async def handle_link(client, message: Message):
 
 
 if __name__ == "__main__":
-    # 1. ব্যাকগ্রাউন্ডে Flask ওয়েব সার্ভার চালু রাখা
     threading.Thread(target=run_web, daemon=True).start()
-    
-    # 2. মূল টেলিগ্রাম বট চালু করা
     print("[+] TeraBox Turbo Bot Starting on Render...")
     bot.run()
