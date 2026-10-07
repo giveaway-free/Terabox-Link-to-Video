@@ -2,13 +2,20 @@ import os
 import re
 import asyncio
 import threading
+
+# Python 3.12+ / 3.14 compatibility fix
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
 from flask import Flask
 from pyrogram import Client, filters
 from pyrogram.types import Message
 import requests
 
 # ==================== RENDER WEB SERVER (KEEP ALIVE) ====================
-# Render-এর Free Web Service সচল রাখার জন্য একটি লাইটওয়েট ওয়েব সার্ভার
 web_app = Flask(__name__)
 
 @web_app.route("/")
@@ -20,7 +27,6 @@ def run_web():
     web_app.run(host="0.0.0.0", port=port)
 
 # ==================== CONFIGURATION ====================
-# Render Environment Variables থেকে নেওয়া হবে
 API_ID = int(os.environ.get("API_ID", "1234567"))
 API_HASH = os.environ.get("API_HASH", "your_api_hash_here")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "your_bot_token_here")
@@ -119,7 +125,7 @@ async def handle_link(client, message: Message):
 
 
 if __name__ == "__main__":
-    # 1. ব্যাকগ্রাউন্ডে Flask ওয়েব সার্ভার চালু রাখা (Render Free Web Service-এর জন্য)
+    # 1. ব্যাকগ্রাউন্ডে Flask ওয়েব সার্ভার চালু রাখা
     threading.Thread(target=run_web, daemon=True).start()
     
     # 2. মূল টেলিগ্রাম বট চালু করা
