@@ -21,9 +21,9 @@ def run_web():
 
 # ==================== CONFIGURATION ====================
 # Render Environment Variables থেকে নেওয়া হবে
-API_ID = int(os.environ.get("API_ID", "1234567"))
-API_HASH = os.environ.get("API_HASH", "your_api_hash_here")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "your_bot_token_here")
+API_ID = int(os.environ.get("API_ID", "1906923"))
+API_HASH = os.environ.get("API_HASH", "ded2e82b54cb1955a87eda02ef6bb02e")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "7796341783:AAGqJ3wgAimmyaYPastm7MMFSyXxdHYRuO8")
 
 bot = Client(
     "terabox_render_bot",
