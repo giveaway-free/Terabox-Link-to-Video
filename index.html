@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Stream Player</title>
+    <title>TeraBox Stream Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -14,6 +15,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border-color: #334155;
+            --error-color: #ef4444;
         }
 
         * { 
@@ -21,8 +23,8 @@
             margin: 0; 
             padding: 0; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            -webkit-touch-callout: none; /* Disable long press popup in webview */
-            -webkit-user-select: none;   /* Disable text selection */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
             user-select: none;
         }
 
@@ -38,6 +40,46 @@
             margin: 0 auto; 
         }
 
+        .search-box {
+            background: var(--card-bg);
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            background: #090d16;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .search-box button {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0 18px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-box button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .video-wrapper { 
             width: 100%; 
             background: #000; 
@@ -46,6 +88,7 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); 
             margin-bottom: 20px; 
             border: 1px solid var(--border-color);
+            display: none;
         }
 
         video { 
@@ -56,7 +99,7 @@
         }
 
         .file-title { 
-            font-size: 16px; 
+            font-size: 15px; 
             font-weight: 600; 
             margin-bottom: 20px; 
             line-height: 1.4;
@@ -66,6 +109,7 @@
             padding: 14px 16px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
+            display: none;
         }
 
         .grid-info { 
@@ -73,6 +117,7 @@
             grid-template-columns: 1fr 1fr; 
             gap: 12px; 
             margin-bottom: 24px; 
+            display: none;
         }
 
         .card { 
@@ -101,7 +146,7 @@
         }
         
         .btn-download {
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             gap: 10px;
@@ -118,21 +163,36 @@
             transition: all 0.2s ease;
         }
 
-        .btn-download:active {
-            transform: scale(0.98);
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div class="container">
-    <div class="video-wrapper">
-        <video id="video" controls autoplay playsinline></video>
+    <div class="search-box">
+        <input type="text" id="terabox-url" placeholder="Paste TeraBox Link here..." autocomplete="off">
+        <button id="fetch-btn" onclick="processTeraBoxUrl()">Fetch & Play</button>
     </div>
 
-    <div class="file-title" id="video-title">Loading video title...</div>
+    <div id="error-box" class="error-msg"></div>
 
-    <div class="grid-info">
+    <div class="video-wrapper" id="video-wrapper">
+        <video id="video" controls playsinline></video>
+    </div>
+
+    <div class="file-title" id="video-title">Loading...</div>
+
+    <div class="grid-info" id="grid-info">
         <div class="card">
             <div class="card-label">📦 SIZE</div>
             <div class="card-value" id="info-size">--</div>
@@ -157,54 +217,138 @@
 </div>
 
 <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const videoSrc = urlParams.get('src');
-    const title = urlParams.get('title') || 'TeraBox Video';
-    const size = urlParams.get('size') || 'Unknown';
-    const res = urlParams.get('res') || 'Auto';
-    const dur = urlParams.get('dur') || '--';
-    const type = urlParams.get('type') || 'Video';
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+    }
 
-    document.getElementById('video-title').innerText = title;
-    document.getElementById('info-size').innerText = size;
-    document.getElementById('info-res').innerText = res;
-    document.getElementById('info-dur').innerText = dur;
-    document.getElementById('info-type').innerText = type;
+    let currentStreamUrl = "";
 
-    const video = document.getElementById('video');
-    const dlBtn = document.getElementById('download-btn');
+    function formatSize(bytes) {
+        if (!bytes || isNaN(bytes)) return "Unknown";
+        let b = parseFloat(bytes);
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let idx = 0;
+        while (b >= 1024 && idx < units.length - 1) {
+            b /= 1024;
+            idx++;
+        }
+        return b.toFixed(2) + " " + units[idx];
+    }
 
-    if (videoSrc) {
-        // Handle JS redirect for download without exposing URL on long press
-        dlBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.open(videoSrc, '_blank');
-        });
+    function formatDuration(sec) {
+        if (!sec || isNaN(sec)) return "--";
+        let seconds = parseInt(sec, 10);
+        let m = Math.floor(seconds / 60);
+        let s = seconds % 60;
+        let h = Math.floor(m / 60);
+        let remM = m % 60;
+        if (h > 0) {
+            return `${String(h).padStart(2, '0')}:${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+        return `${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
 
-        if (Hls.isSupported() && (videoSrc.includes('.m3u8') || !videoSrc.includes('.mp4'))) {
-            const hls = new Hls();
-            hls.loadSource(videoSrc);
-            hls.attachMedia(video);
-        } else {
-            video.src = videoSrc;
+    function extractResFromTitle(title) {
+        const match = title.match(/(\d{3,4}p)/i);
+        return match ? match[1] : "Auto";
+    }
+
+    function showError(msg) {
+        const errBox = document.getElementById('error-box');
+        errBox.innerText = msg;
+        errBox.style.display = 'block';
+    }
+
+    function hideError() {
+        document.getElementById('error-box').style.display = 'none';
+    }
+
+    async function processTeraBoxUrl(manualUrl = null) {
+        hideError();
+        const inputField = document.getElementById('terabox-url');
+        const url = manualUrl || inputField.value.trim();
+
+        if (!url) {
+            showError("Please enter a valid TeraBox URL!");
+            return;
         }
 
-        video.onloadedmetadata = function() {
-            if (dur === '--' && video.duration) {
-                const totalSeconds = Math.floor(video.duration);
-                const m = Math.floor(totalSeconds / 60);
-                const s = totalSeconds % 60;
-                const h = Math.floor(m / 60);
-                const remM = m % 60;
-                let formatted = "";
-                if (h > 0) {
-                    formatted = `${String(h).padStart(2, '0')}:${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-                } else {
-                    formatted = `${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-                }
-                document.getElementById('info-dur').innerText = formatted;
+        const fetchBtn = document.getElementById('fetch-btn');
+        fetchBtn.disabled = true;
+        fetchBtn.innerText = "Loading...";
+
+        try {
+            const response = await fetch("https://teraplayer-backend-temp.onrender.com/api/preview", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: url, password: "" })
+            });
+
+            const data = await response.json();
+
+            if (data && (data.download_url || data.stream_url || (data.list && data.list.length > 0))) {
+                let item = (data.list && data.list.length > 0) ? data.list[0] : data;
+                let title = item.server_filename || item.title || data.title || "TeraBox Video";
+                let streamUrl = item.dlink || item.fast_download_url || data.download_url || data.stream_url;
+                let size = item.size || data.size ? formatSize(item.size || data.size) : "Unknown";
+                let duration = item.duration || data.duration ? formatDuration(item.duration || data.duration) : "--";
+                let resolution = extractResFromTitle(title);
+
+                playVideo(streamUrl, title, size, resolution, duration);
+            } else {
+                showError("Failed to fetch stream link. Please check the URL.");
             }
-        };
+        } catch (err) {
+            showError("Network error. Please try again later.");
+        } finally {
+            fetchBtn.disabled = false;
+            fetchBtn.innerText = "Fetch & Play";
+        }
+    }
+
+    function playVideo(streamUrl, title, size, res, dur) {
+        currentStreamUrl = streamUrl;
+
+        document.getElementById('video-wrapper').style.display = 'block';
+        document.getElementById('video-title').style.display = 'block';
+        document.getElementById('grid-info').style.display = 'grid';
+        document.getElementById('download-btn').style.display = 'flex';
+
+        document.getElementById('video-title').innerText = title;
+        document.getElementById('info-size').innerText = size;
+        document.getElementById('info-res').innerText = res;
+        document.getElementById('info-dur').innerText = dur;
+
+        const video = document.getElementById('video');
+
+        if (Hls.isSupported() && (streamUrl.includes('.m3u8') || !streamUrl.includes('.mp4'))) {
+            const hls = new Hls();
+            hls.loadSource(streamUrl);
+            hls.attachMedia(video);
+        } else {
+            video.src = streamUrl;
+        }
+
+        video.play();
+    }
+
+    document.getElementById('download-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentStreamUrl) {
+            window.open(currentStreamUrl, '_blank');
+        }
+    });
+
+    // Handle auto-load from URL query parameters if provided
+    const urlParams = new URLSearchParams(window.location.search);
+    const directSrc = urlParams.get('src');
+    if (directSrc) {
+        const title = urlParams.get('title') || 'TeraBox Video';
+        const size = urlParams.get('size') || 'Unknown';
+        const res = urlParams.get('res') || 'Auto';
+        const dur = urlParams.get('dur') || '--';
+        playVideo(directSrc, title, size, res, dur);
     }
 </script>
 
