@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Stream Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
@@ -21,6 +21,9 @@
             margin: 0; 
             padding: 0; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            -webkit-touch-callout: none; /* Disable long press popup in webview */
+            -webkit-user-select: none;   /* Disable text selection */
+            user-select: none;
         }
 
         body { 
@@ -77,7 +80,6 @@
             padding: 14px; 
             border-radius: 12px; 
             border: 1px solid var(--border-color);
-            transition: transform 0.2s ease;
         }
 
         .card-label { 
@@ -111,7 +113,7 @@
             border-radius: 14px;
             font-size: 16px;
             font-weight: 600;
-            text-decoration: none;
+            cursor: pointer;
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
             transition: all 0.2s ease;
         }
@@ -121,7 +123,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <div class="container">
     <div class="video-wrapper">
@@ -149,9 +151,9 @@
         </div>
     </div>
 
-    <a id="download-btn" href="#" class="btn-download" target="_blank" download>
+    <button id="download-btn" class="btn-download">
         ⬇️ Direct Download
-    </a>
+    </button>
 </div>
 
 <script>
@@ -173,7 +175,11 @@
     const dlBtn = document.getElementById('download-btn');
 
     if (videoSrc) {
-        dlBtn.href = videoSrc;
+        // Handle JS redirect for download without exposing URL on long press
+        dlBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.open(videoSrc, '_blank');
+        });
 
         if (Hls.isSupported() && (videoSrc.includes('.m3u8') || !videoSrc.includes('.mp4'))) {
             const hls = new Hls();
