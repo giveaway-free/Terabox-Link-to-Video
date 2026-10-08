@@ -4,152 +4,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <script src="https://telegram.org/js/telegram-web-app.js?v=1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/artplayer@latest/dist/artplayer.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #f8fafc; color: #0f172a; padding: 15px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 16px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; padding: 15px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .video-wrapper { width: 100%; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        video { width: 100%; height: auto; display: block; max-height: 70vh; }
+        .file-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; word-break: break-all; }
+        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .card { background: #f1f5f9; padding: 12px; border-radius: 10px; }
+        .card-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+        .card-value { font-size: 14px; font-weight: 600; color: #0f172a; }
         
-        .player-wrapper {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        #artplayer { width: 100%; height: 100%; }
-
-        .video-title { font-size: 18px; font-weight: 700; line-height: 1.3; color: #0f172a; word-break: break-word; }
-        
-        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .info-card {
-            background: #f1f5f9;
-            padding: 12px 16px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .info-card .label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; }
-        .info-card .value { font-size: 14px; font-weight: 600; color: #1e293b; }
-
-        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
-        .btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
+        .btn-download {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            width: 100%;
+            padding: 14px;
+            background-color: #ffffff;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
             text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
         }
-        .btn-primary { background: #7c3aed; color: #ffffff; }
-        .btn-secondary { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; }
+        .btn-download:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="player-wrapper">
-        <div id="artplayer"></div>
+    <div class="video-wrapper">
+        <video id="video" controls autoplay playsinline></video>
     </div>
 
-    <h1 class="video-title" id="title">Loading Title...</h1>
+    <div class="file-title" id="video-title">Loading video title...</div>
 
     <div class="grid-info">
-        <div class="info-card">
-            <span class="label">📦 SIZE</span>
-            <span class="value" id="size">--</span>
+        <div class="card">
+            <div class="card-label">📦 SIZE</div>
+            <div class="card-value" id="info-size">--</div>
         </div>
-        <div class="info-card">
-            <span class="label">⏱ DURATION</span>
-            <span class="value" id="duration">--</span>
+        <div class="card">
+            <div class="card-label">⏱️ DURATION</div>
+            <div class="card-value" id="info-dur">--</div>
         </div>
-        <div class="info-card">
-            <span class="label">⚡ RESOLUTION</span>
-            <span class="value">1080p Max</span>
+        <div class="card">
+            <div class="card-label">⚡ RESOLUTION</div>
+            <div class="card-value" id="info-res">--</div>
         </div>
-        <div class="info-card">
-            <span class="label">📁 TYPE</span>
-            <span class="value">Video</span>
+        <div class="card">
+            <div class="card-label">📂 TYPE</div>
+            <div class="card-value" id="info-type">Video</div>
         </div>
     </div>
 
-    <div class="btn-group">
-        <button class="btn btn-primary" onclick="playVideo()">
-            ▶ Watch Now
-        </button>
-        <button class="btn btn-secondary" id="downloadBtn" onclick="triggerDownload()">
-            ↓ Direct Download
-        </button>
-    </div>
+    <a id="download-btn" href="#" class="btn-download" target="_blank" download>
+        ↓ Direct Download
+    </a>
 </div>
 
 <script>
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-    }
-
     const urlParams = new URLSearchParams(window.location.search);
     const videoSrc = urlParams.get('src');
-    const videoTitle = urlParams.get('title') || "TeraBox_Video.mp4";
-    const videoSize = urlParams.get('size') || "Auto";
+    const title = urlParams.get('title') || 'TeraBox Video';
+    const size = urlParams.get('size') || 'Unknown';
+    const res = urlParams.get('res') || '1080p';
+    const dur = urlParams.get('dur') || '--';
+    const type = urlParams.get('type') || 'Video';
 
-    document.getElementById('title').innerText = videoTitle;
-    document.getElementById('size').innerText = videoSize;
+    document.getElementById('video-title').innerText = title;
+    document.getElementById('info-size').innerText = size;
+    document.getElementById('info-res').innerText = res;
+    document.getElementById('info-dur').innerText = dur;
+    document.getElementById('info-type').innerText = type;
 
-    const art = new Artplayer({
-        container: '#artplayer',
-        url: videoSrc,
-        type: 'm3u8',
-        autoplay: false,
-        fullscreen: true,
-        miniProgressBar: true,
-        customType: {
-            m3u8: function (video, url) {
-                if (Hls.isSupported()) {
-                    const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-                    hls.loadSource(url);
-                    hls.attachMedia(video);
-                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                        const durationSec = video.duration;
-                        if(durationSec && !isNaN(durationSec)) {
-                            const mins = Math.floor(durationSec / 60);
-                            const secs = Math.floor(durationSec % 60);
-                            document.getElementById('duration').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-                        }
-                    });
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = url;
+    const video = document.getElementById('video');
+    const dlBtn = document.getElementById('download-btn');
+
+    if (videoSrc) {
+        dlBtn.href = videoSrc;
+
+        if (Hls.isSupported() && (videoSrc.includes('.m3u8') || !videoSrc.includes('.mp4'))) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+        } else {
+            video.src = videoSrc;
+        }
+
+        video.onloadedmetadata = function() {
+            if (dur === '--' && video.duration) {
+                const totalSeconds = Math.floor(video.duration);
+                const m = Math.floor(totalSeconds / 60);
+                const s = totalSeconds % 60;
+                const h = Math.floor(m / 60);
+                const remM = m % 60;
+                let formatted = "";
+                if (h > 0) {
+                    formatted = `${String(h).padStart(2, '0')}:${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                } else {
+                    formatted = `${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
                 }
-            },
-        },
-    });
-
-    function playVideo() {
-        art.play();
-        document.querySelector('.player-wrapper').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function triggerDownload() {
-        if (!videoSrc) return;
-        const btn = document.getElementById('downloadBtn');
-        btn.innerText = "⏳ Directing to Download...";
-        
-        window.location.href = videoSrc;
-
-        setTimeout(() => {
-            btn.innerText = "↓ Direct Download";
-        }, 3000);
+                document.getElementById('info-dur').innerText = formatted;
+            }
+            if (res === '1080p' && video.videoHeight) {
+                document.getElementById('info-res').innerText = video.videoHeight + 'p';
+            }
+        };
     }
 </script>
 
