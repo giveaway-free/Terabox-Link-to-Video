@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js?v=1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/artplayer@latest/dist/artplayer.js"></script>
     <style>
@@ -140,21 +140,16 @@
         document.querySelector('.player-wrapper').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Direct Browser Download Navigation (100% Reliable for CORS Stream Links)
     function triggerDownload() {
         if (!videoSrc) return;
         const btn = document.getElementById('downloadBtn');
-        btn.innerText = "⏳ Opening Download Link...";
+        btn.innerText = "⏳ Directing to Download...";
         
-        // Open link directly via invisible iframe to force browser download without page redirect
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = videoSrc;
-        document.body.appendChild(iframe);
+        window.location.href = videoSrc;
 
         setTimeout(() => {
             btn.innerText = "↓ Direct Download";
-        }, 4000);
+        }, 3000);
     }
 </script>
 
