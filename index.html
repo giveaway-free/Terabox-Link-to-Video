@@ -75,6 +75,11 @@
             transition: all 0.2s ease;
         }
 
+        .search-box button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .video-wrapper { 
             width: 100%; 
             background: #000; 
@@ -176,7 +181,7 @@
 <div class="container">
     <div class="search-box">
         <input type="text" id="terabox-url" placeholder="Paste TeraBox Link here..." autocomplete="off">
-        <button id="fetch-btn" onclick="sendUrlToBot()">Fetch & Play</button>
+        <button id="fetch-btn" onclick="fetchAndPlay()">Fetch & Play</button>
     </div>
 
     <div id="error-box" class="error-msg"></div>
@@ -212,13 +217,42 @@
 </div>
 
 <script>
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
-    if (tg) {
-        tg.ready();
-        tg.expand();
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
     }
 
     let currentStreamUrl = "";
+
+    function formatSize(bytes) {
+        if (!bytes || isNaN(bytes)) return "Unknown";
+        let b = parseFloat(bytes);
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let idx = 0;
+        while (b >= 1024 && idx < units.length - 1) {
+            b /= 1024;
+            idx++;
+        }
+        return b.toFixed(2) + " " + units[idx];
+    }
+
+    function formatDuration(sec) {
+        if (!sec || isNaN(sec)) return "--";
+        let seconds = parseInt(sec, 10);
+        let m = Math.floor(seconds / 60);
+        let s = seconds % 60;
+        let h = Math.floor(m / 60);
+        let remM = m % 60;
+        if (h > 0) {
+            return `${String(h).padStart(2, '0')}:${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+        return `${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function extractResFromTitle(title) {
+        const match = title.match(/(\d{3,4}p)/i);
+        return match ? match[1] : "Auto";
+    }
 
     function showError(msg) {
         const errBox = document.getElementById('error-box');
@@ -226,7 +260,12 @@
         errBox.style.display = 'block';
     }
 
-    function sendUrlToBot() {
+    function hideError() {
+        document.getElementById('error-box').style.display = 'none';
+    }
+
+    async function fetchAndPlay() {
+        hideError();
         const inputField = document.getElementById('terabox-url');
         const url = inputField.value.trim();
 
@@ -235,11 +274,44 @@
             return;
         }
 
-        if (tg && tg.sendData) {
-            tg.sendData(JSON.stringify({ action: "fetch_terabox", url: url }));
-            tg.close();
-        } else {
-            showError("Mini App context error. Please open inside Telegram!");
+        const fetchBtn = document.getElementById('fetch-btn');
+        fetchBtn.disabled = true;
+        fetchBtn.innerText = "Loading...";
+
+        try {
+            const res = await fetch('https://teraplayer-backend-temp.onrender.com/api/preview', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url, password: "" })
+            });
+
+            if (!res.ok) {
+                throw new Error("HTTP error " + res.status);
+            }
+
+            const data = await res.json();
+
+            if (data && (data.download_url || data.stream_url || (data.list && data.list.length > 0))) {
+                let item = (data.list && data.list.length > 0) ? data.list[0] : data;
+                let title = item.server_filename || item.title || data.title || "TeraBox Video";
+                let streamUrl = item.dlink || item.fast_download_url || data.download_url || data.stream_url;
+                let size = item.size || data.size ? formatSize(item.size || data.size) : "Unknown";
+                let duration = item.duration || data.duration ? formatDuration(item.duration || data.duration) : "--";
+                let resolution = extractResFromTitle(title);
+
+                playVideo(streamUrl, title, size, resolution, duration);
+            } else {
+                showError("Failed to fetch stream link. Link might be expired.");
+            }
+        } catch (err) {
+            console.error(err);
+            showError("API Fetch Error! Trying fallback...");
+        } finally {
+            fetchBtn.disabled = false;
+            fetchBtn.innerText = "Fetch & Play";
         }
     }
 
