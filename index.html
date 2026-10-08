@@ -60,7 +60,7 @@
         </div>
         <div class="card">
             <div class="card-label">⚡ RESOLUTION</div>
-            <div class="card-value" id="info-res">--</div>
+            <div class="card-value" id="info-res">Auto Detecting...</div>
         </div>
         <div class="card">
             <div class="card-label">📂 TYPE</div>
@@ -78,15 +78,18 @@
     const videoSrc = urlParams.get('src');
     const title = urlParams.get('title') || 'TeraBox Video';
     const size = urlParams.get('size') || 'Unknown';
-    const res = urlParams.get('res') || '1080p';
+    let res = urlParams.get('res') || '';
     const dur = urlParams.get('dur') || '--';
     const type = urlParams.get('type') || 'Video';
 
     document.getElementById('video-title').innerText = title;
     document.getElementById('info-size').innerText = size;
-    document.getElementById('info-res').innerText = res;
     document.getElementById('info-dur').innerText = dur;
     document.getElementById('info-type').innerText = type;
+
+    if (res && res !== 'Unknown' && res !== 'Auto') {
+        document.getElementById('info-res').innerText = res;
+    }
 
     const video = document.getElementById('video');
     const dlBtn = document.getElementById('download-btn');
@@ -103,6 +106,12 @@
         }
 
         video.onloadedmetadata = function() {
+            // Auto detect real resolution from loaded video
+            if (video.videoHeight) {
+                document.getElementById('info-res').innerText = video.videoHeight + 'p';
+            }
+            
+            // Auto detect duration if missing
             if (dur === '--' && video.duration) {
                 const totalSeconds = Math.floor(video.duration);
                 const m = Math.floor(totalSeconds / 60);
@@ -116,9 +125,6 @@
                     formatted = `${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
                 }
                 document.getElementById('info-dur').innerText = formatted;
-            }
-            if (res === '1080p' && video.videoHeight) {
-                document.getElementById('info-res').innerText = video.videoHeight + 'p';
             }
         };
     }
