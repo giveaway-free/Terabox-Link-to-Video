@@ -6,37 +6,118 @@
     <title>Stream Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: #f8fafc; color: #0f172a; padding: 15px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .video-wrapper { width: 100%; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        video { width: 100%; height: auto; display: block; max-height: 70vh; }
-        .file-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; word-break: break-all; }
-        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .card { background: #f1f5f9; padding: 12px; border-radius: 10px; }
-        .card-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-        .card-value { font-size: 14px; font-weight: 600; color: #0f172a; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding: 16px; 
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
+
+        .video-wrapper { 
+            width: 100%; 
+            background: #000; 
+            border-radius: 16px; 
+            overflow: hidden; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); 
+            margin-bottom: 20px; 
+            border: 1px solid var(--border-color);
+        }
+
+        video { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            max-height: 70vh; 
+        }
+
+        .file-title { 
+            font-size: 16px; 
+            font-weight: 600; 
+            margin-bottom: 20px; 
+            line-height: 1.4;
+            color: var(--text-main);
+            word-break: break-all; 
+            background: var(--card-bg);
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .grid-info { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin-bottom: 24px; 
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            padding: 14px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease;
+        }
+
+        .card-label { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            margin-bottom: 6px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+
+        .card-value { 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
         
         .btn-download {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             width: 100%;
-            padding: 14px;
-            background-color: #ffffff;
-            color: #0f172a;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 15px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
             font-weight: 600;
             text-decoration: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
             transition: all 0.2s ease;
         }
-        .btn-download:hover {
-            background-color: #f8fafc;
-            border-color: #cbd5e1;
+
+        .btn-download:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
@@ -69,7 +150,7 @@
     </div>
 
     <a id="download-btn" href="#" class="btn-download" target="_blank" download>
-        ↓ Direct Download
+        ⬇️ Direct Download
     </a>
 </div>
 
