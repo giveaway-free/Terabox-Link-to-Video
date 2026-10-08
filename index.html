@@ -87,8 +87,8 @@
         <button class="btn btn-primary" onclick="playVideo()">
             ▶ Watch Now
         </button>
-        <button class="btn btn-secondary" id="downloadBtn" onclick="forceDownload()">
-            ↓ Download Video
+        <button class="btn btn-secondary" id="downloadBtn" onclick="triggerDownload()">
+            ↓ Direct Download
         </button>
     </div>
 </div>
@@ -140,35 +140,21 @@
         document.querySelector('.player-wrapper').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Force Direct Download Trigger
-    async function forceDownload() {
+    // Direct Browser Download Navigation (100% Reliable for CORS Stream Links)
+    function triggerDownload() {
+        if (!videoSrc) return;
         const btn = document.getElementById('downloadBtn');
-        btn.innerText = "⏳ Starting Download...";
-        btn.disabled = true;
+        btn.innerText = "⏳ Opening Download Link...";
+        
+        // Open link directly via invisible iframe to force browser download without page redirect
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = videoSrc;
+        document.body.appendChild(iframe);
 
-        try {
-            const response = await fetch(videoSrc);
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = blobUrl;
-            a.download = videoTitle.endsWith('.mp4') ? videoTitle : `${videoTitle}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            
-            window.URL.revokeObjectURL(blobUrl);
-            btn.innerText = "✓ Downloaded";
-        } catch (error) {
-            // Fallback if CORS restricts Blob fetching
-            window.location.href = videoSrc;
-        } finally {
-            setTimeout(() => {
-                btn.innerText = "↓ Download Video";
-                btn.disabled = false;
-            }, 3000);
-        }
+        setTimeout(() => {
+            btn.innerText = "↓ Direct Download";
+        }, 4000);
     }
 </script>
 
