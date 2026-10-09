@@ -51,9 +51,10 @@
             margin-bottom: 16px; 
             border: 1px solid var(--border-color);
             display: none;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* Mobile / WebView Guaranteed Fullscreen Fallback */
+        /* Guaranteed Fullscreen Fallback */
         .video-wrapper.pseudo-fullscreen {
             position: fixed !important;
             top: 0 !important;
@@ -78,6 +79,49 @@
             object-fit: contain;
         }
 
+        /* In-App Floating Mini Player Window */
+        .video-wrapper.floating-window {
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 16px !important;
+            width: 220px !important;
+            height: 130px !important;
+            z-index: 99999 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85) !important;
+            border: 2px solid var(--accent-color) !important;
+            margin: 0 !important;
+        }
+
+        .video-wrapper.floating-window video {
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+
+        .floating-bar {
+            display: none;
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            z-index: 20;
+            gap: 4px;
+        }
+
+        .video-wrapper.floating-window .floating-bar {
+            display: flex;
+        }
+
+        .floating-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
         video { 
             width: 100%; 
             height: auto; 
@@ -86,7 +130,7 @@
             cursor: pointer;
         }
 
-        /* Feedback Ripple */
+        /* Action Indicator */
         .overlay-indicator {
             position: absolute;
             top: 50%;
@@ -94,9 +138,9 @@
             transform: translate(-50%, -50%) scale(0.6);
             background: rgba(0, 0, 0, 0.75);
             color: #fff;
-            padding: 14px 22px;
+            padding: 12px 20px;
             border-radius: 30px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             opacity: 0;
             pointer-events: none;
@@ -130,7 +174,6 @@
             opacity: 1;
         }
 
-        /* Scrubber */
         .timeline-container {
             width: 100%;
             display: flex;
@@ -182,7 +225,6 @@
             text-align: right;
         }
 
-        /* Controls Row */
         .controls-row {
             display: flex;
             align-items: center;
@@ -373,12 +415,16 @@
     <div class="video-wrapper" id="video-wrapper">
         <video id="video" playsinline webkit-playsinline></video>
         
-        <!-- Ripple overlay -->
+        <!-- Floating Window Toolbar (Restore / Close) -->
+        <div class="floating-bar" id="floating-bar">
+            <button class="floating-btn" id="btn-restore-pip" title="Restore Size">↗ Expand</button>
+            <button class="floating-btn" id="btn-close-pip" title="Close Float">✕</button>
+        </div>
+
         <div class="overlay-indicator" id="overlay-indicator">▶</div>
 
         <!-- Controls -->
         <div class="player-controls" id="player-controls">
-            <!-- Timeline -->
             <div class="timeline-container">
                 <div class="progress-bar" id="progress-bar">
                     <div class="progress-filled" id="progress-filled"></div>
@@ -386,7 +432,6 @@
                 <div class="time-display" id="time-display">00:00 / 00:00</div>
             </div>
 
-            <!-- Single Row Buttons -->
             <div class="controls-row">
                 <div class="controls-group">
                     <button class="ctrl-btn" id="btn-play" title="Play/Pause">
@@ -419,8 +464,8 @@
                         <option value="2">2.0x</option>
                     </select>
 
-                    <!-- Floating Window / PiP Button -->
-                    <button class="ctrl-btn" id="btn-pip" title="Floating Window (PiP)">
+                    <!-- Floating Window Button -->
+                    <button class="ctrl-btn" id="btn-pip" title="Floating Window">
                         <svg viewBox="0 0 24 24"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z"/></svg>
                     </button>
 
@@ -477,6 +522,8 @@
     const volumeSlider = document.getElementById('volume-slider');
     const speedSelect = document.getElementById('speed-select');
     const btnPip = document.getElementById('btn-pip');
+    const btnRestorePip = document.getElementById('btn-restore-pip');
+    const btnClosePip = document.getElementById('btn-close-pip');
     const btnFullscreen = document.getElementById('btn-fullscreen');
     const fsIcon = document.getElementById('fs-icon');
     const progressBar = document.getElementById('progress-bar');
@@ -524,7 +571,11 @@
     }
 
     btnPlay.addEventListener('click', togglePlay);
-    video.addEventListener('click', togglePlay);
+    video.addEventListener('click', () => {
+        if (!videoWrapper.classList.contains('floating-window')) {
+            togglePlay();
+        }
+    });
 
     btnRewind.addEventListener('click', () => {
         video.currentTime = Math.max(0, video.currentTime - 10);
@@ -566,29 +617,63 @@
         showOverlay(`${e.target.value}x`);
     });
 
-    /* --- Floating Window / Picture-in-Picture (PiP) --- */
+    /* --- Hybrid Floating Window / In-App PiP System --- */
+    function toggleFloatingWindow() {
+        if (videoWrapper.classList.contains('floating-window')) {
+            videoWrapper.classList.remove('floating-window');
+            showOverlay('Window Restored');
+        } else {
+            // Exit fullscreen if active
+            videoWrapper.classList.remove('pseudo-fullscreen');
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            }
+            videoWrapper.classList.add('floating-window');
+            showOverlay('Floating Mode');
+        }
+    }
+
     btnPip.addEventListener('click', async () => {
-        try {
-            if (document.pictureInPictureElement) {
-                await document.exitPictureInPicture();
-                showOverlay('Exit PiP');
-            } else if (document.pictureInPictureEnabled && video.requestPictureInPicture) {
-                await video.requestPictureInPicture();
-                showOverlay('Floating Window');
-            } else if (video.webkitSetPresentationMode) {
-                // iOS Safari support
+        // Try OS-level PiP first
+        if (document.pictureInPictureEnabled && video.requestPictureInPicture) {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                    return;
+                } else {
+                    await video.requestPictureInPicture();
+                    return;
+                }
+            } catch (err) {
+                // Telegram WebApp blocks native PiP -> Instant In-App Floating Fallback
+                toggleFloatingWindow();
+            }
+        } else if (video.webkitSetPresentationMode) {
+            try {
                 const mode = video.webkitPresentationMode === 'picture-in-picture' ? 'inline' : 'picture-in-picture';
                 video.webkitSetPresentationMode(mode);
-            } else {
-                showOverlay('PiP Not Supported');
+            } catch(e) {
+                toggleFloatingWindow();
             }
-        } catch (err) {
-            console.error("PiP Error:", err);
-            showOverlay('PiP Error');
+        } else {
+            // Direct In-App Floating Window Fallback
+            toggleFloatingWindow();
         }
     });
 
-    /* --- Multi-platform Robust Fullscreen Support --- */
+    btnRestorePip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        videoWrapper.classList.remove('floating-window');
+    });
+
+    btnClosePip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        videoWrapper.classList.remove('floating-window');
+        video.pause();
+        updatePlayIcon(false);
+    });
+
+    /* --- Robust Fullscreen Support --- */
     function isFullscreen() {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || videoWrapper.classList.contains('pseudo-fullscreen'));
     }
@@ -602,15 +687,18 @@
     }
 
     btnFullscreen.addEventListener('click', () => {
+        // If in floating window, restore first
+        if (videoWrapper.classList.contains('floating-window')) {
+            videoWrapper.classList.remove('floating-window');
+        }
+
         if (!isFullscreen()) {
-            // Priority 1: Standard Fullscreen on wrapper
             if (videoWrapper.requestFullscreen) {
                 videoWrapper.requestFullscreen().catch(() => tryDirectVideoFullscreen());
             } else {
                 tryDirectVideoFullscreen();
             }
         } else {
-            // Exit Fullscreen
             if (document.exitFullscreen) {
                 document.exitFullscreen().catch(() => {});
             } else if (document.webkitExitFullscreen) {
@@ -622,13 +710,10 @@
     });
 
     function tryDirectVideoFullscreen() {
-        // Priority 2: iOS webkitEnterFullscreen directly on video element
         if (video.webkitEnterFullscreen) {
             video.webkitEnterFullscreen();
             updateFsIcon(true);
-        } 
-        // Priority 3: Fallback pseudo-fullscreen (guaranteed in Telegram WebApp webviews)
-        else {
+        } else {
             videoWrapper.classList.add('pseudo-fullscreen');
             updateFsIcon(true);
         }
