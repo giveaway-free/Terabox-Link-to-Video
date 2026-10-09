@@ -36,7 +36,7 @@
         }
 
         .container { 
-            max-width: 600px; 
+            max-width: 650px; 
             margin: 0 auto; 
         }
 
@@ -53,6 +53,31 @@
             display: none;
         }
 
+        /* Mobile / WebView Guaranteed Fullscreen Fallback */
+        .video-wrapper.pseudo-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            z-index: 999999 !important;
+            border-radius: 0 !important;
+            border: none !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            background: #000 !important;
+        }
+
+        .video-wrapper.pseudo-fullscreen video {
+            max-height: 100vh !important;
+            height: 100% !important;
+            width: 100% !important;
+            object-fit: contain;
+        }
+
         video { 
             width: 100%; 
             height: auto; 
@@ -61,17 +86,17 @@
             cursor: pointer;
         }
 
-        /* Center Tap Feedback Indicator */
+        /* Feedback Ripple */
         .overlay-indicator {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.6);
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             color: #fff;
-            padding: 14px 20px;
+            padding: 14px 22px;
             border-radius: 30px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             opacity: 0;
             pointer-events: none;
@@ -84,7 +109,7 @@
             transform: translate(-50%, -50%) scale(1);
         }
 
-        /* Bottom Player Controls Bar */
+        /* Player Controls Bar */
         .player-controls {
             position: absolute;
             bottom: 0;
@@ -105,7 +130,7 @@
             opacity: 1;
         }
 
-        /* Scrubber / Progress Bar */
+        /* Scrubber */
         .timeline-container {
             width: 100%;
             display: flex;
@@ -157,7 +182,7 @@
             text-align: right;
         }
 
-        /* Responsive Controls Row */
+        /* Controls Row */
         .controls-row {
             display: flex;
             align-items: center;
@@ -178,9 +203,9 @@
             border: none;
             color: var(--text-main);
             font-size: 13px;
-            padding: 6px;
-            min-width: 32px;
-            height: 32px;
+            padding: 5px;
+            min-width: 30px;
+            height: 30px;
             border-radius: 6px;
             cursor: pointer;
             display: inline-flex;
@@ -201,20 +226,18 @@
         .btn-skip {
             font-size: 11px;
             font-weight: 700;
-            padding: 4px 6px;
-            gap: 2px;
+            padding: 3px 5px;
             background: rgba(255, 255, 255, 0.08);
             border-radius: 6px;
         }
 
-        /* Volume Box */
         .volume-box {
             display: flex;
             align-items: center;
             gap: 4px;
         }
         .volume-slider {
-            width: 50px;
+            width: 45px;
             height: 4px;
             -webkit-appearance: none;
             background: rgba(255, 255, 255, 0.25);
@@ -231,7 +254,6 @@
             cursor: pointer;
         }
 
-        /* Compact Speed Dropdown */
         .speed-select {
             background: rgba(30, 41, 59, 0.9);
             border: 1px solid var(--border-color);
@@ -239,25 +261,15 @@
             font-size: 11px;
             font-weight: 600;
             border-radius: 6px;
-            padding: 4px 5px;
+            padding: 3px 4px;
             cursor: pointer;
             outline: none;
             height: 28px;
         }
 
-        /* Mobile adaptation */
-        @media (max-width: 380px) {
+        @media (max-width: 400px) {
             .volume-slider {
                 display: none;
-            }
-            .ctrl-btn {
-                min-width: 28px;
-                height: 28px;
-                padding: 4px;
-            }
-            .btn-skip {
-                font-size: 10px;
-                padding: 3px 5px;
             }
             .time-display {
                 font-size: 10px;
@@ -359,14 +371,14 @@
     </div>
 
     <div class="video-wrapper" id="video-wrapper">
-        <video id="video" playsinline></video>
+        <video id="video" playsinline webkit-playsinline></video>
         
-        <!-- Action Ripple Overlay -->
+        <!-- Ripple overlay -->
         <div class="overlay-indicator" id="overlay-indicator">▶</div>
 
-        <!-- Controls Bar -->
+        <!-- Controls -->
         <div class="player-controls" id="player-controls">
-            <!-- Timeline Scrubber -->
+            <!-- Timeline -->
             <div class="timeline-container">
                 <div class="progress-bar" id="progress-bar">
                     <div class="progress-filled" id="progress-filled"></div>
@@ -374,9 +386,8 @@
                 <div class="time-display" id="time-display">00:00 / 00:00</div>
             </div>
 
-            <!-- Single Row Responsive Controls -->
+            <!-- Single Row Buttons -->
             <div class="controls-row">
-                <!-- Left Group -->
                 <div class="controls-group">
                     <button class="ctrl-btn" id="btn-play" title="Play/Pause">
                         <svg viewBox="0 0 24 24" id="play-icon"><path d="M8 5v14l11-7z"/></svg>
@@ -398,7 +409,6 @@
                     </div>
                 </div>
 
-                <!-- Right Group -->
                 <div class="controls-group">
                     <select class="speed-select" id="speed-select" title="Speed">
                         <option value="0.5">0.5x</option>
@@ -409,8 +419,14 @@
                         <option value="2">2.0x</option>
                     </select>
 
+                    <!-- Floating Window / PiP Button -->
+                    <button class="ctrl-btn" id="btn-pip" title="Floating Window (PiP)">
+                        <svg viewBox="0 0 24 24"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z"/></svg>
+                    </button>
+
+                    <!-- Fullscreen Button -->
                     <button class="ctrl-btn" id="btn-fullscreen" title="Fullscreen">
-                        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                        <svg viewBox="0 0 24 24" id="fs-icon"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
                     </button>
                 </div>
             </div>
@@ -460,7 +476,9 @@
     const volIcon = document.getElementById('vol-icon');
     const volumeSlider = document.getElementById('volume-slider');
     const speedSelect = document.getElementById('speed-select');
+    const btnPip = document.getElementById('btn-pip');
     const btnFullscreen = document.getElementById('btn-fullscreen');
+    const fsIcon = document.getElementById('fs-icon');
     const progressBar = document.getElementById('progress-bar');
     const progressFilled = document.getElementById('progress-filled');
     const timeDisplay = document.getElementById('time-display');
@@ -548,18 +566,79 @@
         showOverlay(`${e.target.value}x`);
     });
 
+    /* --- Floating Window / Picture-in-Picture (PiP) --- */
+    btnPip.addEventListener('click', async () => {
+        try {
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+                showOverlay('Exit PiP');
+            } else if (document.pictureInPictureEnabled && video.requestPictureInPicture) {
+                await video.requestPictureInPicture();
+                showOverlay('Floating Window');
+            } else if (video.webkitSetPresentationMode) {
+                // iOS Safari support
+                const mode = video.webkitPresentationMode === 'picture-in-picture' ? 'inline' : 'picture-in-picture';
+                video.webkitSetPresentationMode(mode);
+            } else {
+                showOverlay('PiP Not Supported');
+            }
+        } catch (err) {
+            console.error("PiP Error:", err);
+            showOverlay('PiP Error');
+        }
+    });
+
+    /* --- Multi-platform Robust Fullscreen Support --- */
+    function isFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || videoWrapper.classList.contains('pseudo-fullscreen'));
+    }
+
+    function updateFsIcon(full) {
+        if (full) {
+            fsIcon.innerHTML = '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>';
+        } else {
+            fsIcon.innerHTML = '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
+        }
+    }
+
     btnFullscreen.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
+        if (!isFullscreen()) {
+            // Priority 1: Standard Fullscreen on wrapper
             if (videoWrapper.requestFullscreen) {
-                videoWrapper.requestFullscreen();
-            } else if (video.webkitEnterFullscreen) {
-                video.webkitEnterFullscreen();
+                videoWrapper.requestFullscreen().catch(() => tryDirectVideoFullscreen());
+            } else {
+                tryDirectVideoFullscreen();
             }
         } else {
+            // Exit Fullscreen
             if (document.exitFullscreen) {
-                document.exitFullscreen();
+                document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
             }
+            videoWrapper.classList.remove('pseudo-fullscreen');
+            updateFsIcon(false);
         }
+    });
+
+    function tryDirectVideoFullscreen() {
+        // Priority 2: iOS webkitEnterFullscreen directly on video element
+        if (video.webkitEnterFullscreen) {
+            video.webkitEnterFullscreen();
+            updateFsIcon(true);
+        } 
+        // Priority 3: Fallback pseudo-fullscreen (guaranteed in Telegram WebApp webviews)
+        else {
+            videoWrapper.classList.add('pseudo-fullscreen');
+            updateFsIcon(true);
+        }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        updateFsIcon(!!document.fullscreenElement);
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+        updateFsIcon(!!document.webkitFullscreenElement);
     });
 
     video.addEventListener('timeupdate', () => {
