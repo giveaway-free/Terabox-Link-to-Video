@@ -79,7 +79,7 @@
             object-fit: contain;
         }
 
-        /* In-App Floating Mini Player */
+        /* In-App Floating Mini Player Window */
         .video-wrapper.floating-window {
             position: fixed !important;
             bottom: 20px !important;
@@ -130,7 +130,7 @@
             cursor: pointer;
         }
 
-        /* Action Feedback Ripple */
+        /* Action Indicator */
         .overlay-indicator {
             position: absolute;
             top: 50%;
@@ -337,7 +337,7 @@
             display: grid; 
             grid-template-columns: 1fr 1fr; 
             gap: 10px; 
-            margin-bottom: 16px; 
+            margin-bottom: 20px; 
             display: none;
         }
 
@@ -366,40 +366,22 @@
             color: var(--text-main); 
         }
         
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn-action {
+        .btn-download {
             display: none;
             align-items: center;
             justify-content: center;
             gap: 8px;
             width: 100%;
             padding: 14px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            color: #ffffff;
             border: none;
             border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-browser {
-            background: rgba(30, 41, 59, 0.95);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-        }
-        .btn-browser:hover {
-            background: rgba(51, 65, 85, 0.9);
-        }
-
-        .btn-download {
-            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
-            color: #ffffff;
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+            transition: all 0.2s ease;
         }
 
         .no-video {
@@ -433,6 +415,7 @@
     <div class="video-wrapper" id="video-wrapper">
         <video id="video" playsinline webkit-playsinline></video>
         
+        <!-- Floating Window Toolbar (Restore / Close) -->
         <div class="floating-bar" id="floating-bar">
             <button class="floating-btn" id="btn-restore-pip" title="Restore Size">↗ Expand</button>
             <button class="floating-btn" id="btn-close-pip" title="Close Float">✕</button>
@@ -440,6 +423,7 @@
 
         <div class="overlay-indicator" id="overlay-indicator">▶</div>
 
+        <!-- Controls -->
         <div class="player-controls" id="player-controls">
             <div class="timeline-container">
                 <div class="progress-bar" id="progress-bar">
@@ -477,13 +461,15 @@
                         <option value="1" selected>1.0x</option>
                         <option value="1.25">1.25x</option>
                         <option value="1.5">1.5x</option>
-                        <option value="2.0">2.0x</option>
+                        <option value="2">2.0x</option>
                     </select>
 
+                    <!-- Floating Window Button -->
                     <button class="ctrl-btn" id="btn-pip" title="Floating Window">
                         <svg viewBox="0 0 24 24"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z"/></svg>
                     </button>
 
+                    <!-- Fullscreen Button -->
                     <button class="ctrl-btn" id="btn-fullscreen" title="Fullscreen">
                         <svg viewBox="0 0 24 24" id="fs-icon"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
                     </button>
@@ -513,16 +499,9 @@
         </div>
     </div>
 
-    <div class="action-buttons">
-        <!-- Open in Chrome/Browser for Full Phone System PiP -->
-        <button id="browser-pip-btn" class="btn-action btn-browser">
-            🌐 Open in Browser (System PiP)
-        </button>
-
-        <button id="download-btn" class="btn-action btn-download">
-            ⬇️ Direct Download
-        </button>
-    </div>
+    <button id="download-btn" class="btn-download">
+        ⬇️ Direct Download
+    </button>
 </div>
 
 <script>
@@ -551,7 +530,6 @@
     const progressFilled = document.getElementById('progress-filled');
     const timeDisplay = document.getElementById('time-display');
     const overlayIndicator = document.getElementById('overlay-indicator');
-    const browserPipBtn = document.getElementById('browser-pip-btn');
 
     let controlsTimeout = null;
 
@@ -639,12 +617,13 @@
         showOverlay(`${e.target.value}x`);
     });
 
-    /* --- In-App Floating Window --- */
+    /* --- Hybrid Floating Window / In-App PiP System --- */
     function toggleFloatingWindow() {
         if (videoWrapper.classList.contains('floating-window')) {
             videoWrapper.classList.remove('floating-window');
             showOverlay('Window Restored');
         } else {
+            // Exit fullscreen if active
             videoWrapper.classList.remove('pseudo-fullscreen');
             if (document.fullscreenElement && document.exitFullscreen) {
                 document.exitFullscreen().catch(() => {});
@@ -655,6 +634,7 @@
     }
 
     btnPip.addEventListener('click', async () => {
+        // Try OS-level PiP first
         if (document.pictureInPictureEnabled && video.requestPictureInPicture) {
             try {
                 if (document.pictureInPictureElement) {
@@ -665,6 +645,7 @@
                     return;
                 }
             } catch (err) {
+                // Telegram WebApp blocks native PiP -> Instant In-App Floating Fallback
                 toggleFloatingWindow();
             }
         } else if (video.webkitSetPresentationMode) {
@@ -675,6 +656,7 @@
                 toggleFloatingWindow();
             }
         } else {
+            // Direct In-App Floating Window Fallback
             toggleFloatingWindow();
         }
     });
@@ -691,17 +673,6 @@
         updatePlayIcon(false);
     });
 
-    /* --- Open in Chrome / Phone Browser for Full Android System PiP --- */
-    browserPipBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const currentUrl = window.location.href;
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-            window.Telegram.WebApp.openLink(currentUrl);
-        } else {
-            window.open(currentUrl, '_blank');
-        }
-    });
-
     /* --- Robust Fullscreen Support --- */
     function isFullscreen() {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || videoWrapper.classList.contains('pseudo-fullscreen'));
@@ -716,6 +687,7 @@
     }
 
     btnFullscreen.addEventListener('click', () => {
+        // If in floating window, restore first
         if (videoWrapper.classList.contains('floating-window')) {
             videoWrapper.classList.remove('floating-window');
         }
@@ -791,7 +763,6 @@
         document.getElementById('video-title').style.display = 'block';
         document.getElementById('grid-info').style.display = 'grid';
         document.getElementById('download-btn').style.display = 'flex';
-        browserPipBtn.style.display = 'flex';
 
         document.getElementById('video-title').innerText = title;
         document.getElementById('info-size').innerText = size;
