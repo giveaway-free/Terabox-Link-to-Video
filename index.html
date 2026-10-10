@@ -1226,15 +1226,15 @@
         if (userRecord) {
             isVip = userRecord.is_paid === 1;
             const parsedCr = parseInt(userRecord.credits, 10);
-            currentCredits = isNaN(parsedCr) ? 60 : parsedCr;
+            currentCredits = isNaN(parsedCr) ? 5 : parsedCr;
             localStorage.setItem(`credits_${userIdStr || 'guest'}`, currentCredits);
         } else {
-            // New bot user: use localStorage cache or grant default 60 welcome credits
+            // New bot user: use localStorage cache or grant default 5 welcome credits
             const localCredits = localStorage.getItem(`credits_${userIdStr || 'guest'}`);
             if (localCredits !== null) {
-                currentCredits = parseInt(localCredits, 10) || 0;
+                currentCredits = parseInt(localCredits, 10);
             } else {
-                currentCredits = 60;
+                currentCredits = 5;
                 localStorage.setItem(`credits_${userIdStr || 'guest'}`, currentCredits);
             }
         }
