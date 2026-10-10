@@ -1750,5 +1750,13 @@
     "res": "1080p",
     "dur": "02:33",
     "type": "Video"
+  },
+  "18VdaYGa5lc_4ZAm4M2vU1g": {
+    "stream_url": "https://tiny-snowflake-a7a2.lizabo.workers.dev/fast_stream?token=en1VmP5-8u_tqumpA1MThRe5oWYT1kI2ihmMfGum3JS86Rlt2MifqLoID7tuTN7AcXOpg_hb0-4O0NZNI6TH7S90CAzJ35HHAtvFGkeIpVKBPKAZ9FUpwKZEgwjJzqRejQ4kU28tiucjikp3mOb0nIVm2buGYiptEqCkxyt8FN5vMz2zRM-ICxfgxoABI947O6mHEb1xOgqFM4FJ2t8LX4poQM1Qw21jwVqm72nLQDZPrsQhiFqOxFZYKzadg2NCP1rpo8GsyTV4T0L4-5nv9jTNF-vIOCAkYNuBhlmoxnA-EPFfGcpLnm7hE5x74l5sZVVFuRYaJuKpVEwj_eg9oPCVWbVn2LxS6_gLyQ.m3u8",
+    "title": "U3.mp4",
+    "size": "76.0 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "08:00",
+    "type": "Video"
   }
 }
