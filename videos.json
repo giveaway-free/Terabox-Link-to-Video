@@ -886,5 +886,13 @@
     "res": "360p",
     "dur": "13:11",
     "type": "Video"
+  },
+  "1EdmKwtF7UQobI8DGCy7VNw": {
+    "stream_url": "https://iteraplay.tera-api87.workers.dev/fast_stream?token=AmK2nWQwTEii75PrjlcXQupLQOmz6x8UJTQgUIkIBwnfCbKOK2GG855oKEO-LhOh3Je0RaZbv4i17YlOA13VNgakAo92l1Mm77TbDb5yiWaaqnWuUdNQCd5T4ATg2fZWvLLhOG4tTBbuLwVJMj9L_SKP08Qy8W6f-JucvyNNhVF_2dJKERkBqO83nI4ThIDPA0LdtkUmkqi7R08iUj26kLFGY8bawZGSXeaRxKBWAtKNhL5T5K_z9L5u6O-XL_kimQuvvW97o2oG0VkFdmtXjG4N5jZ_Fk0A1Aj-f0C-8EMh0mCARZHAtExRT5wsr0eUsl4N1DEPkAO1Ud8NT5c99SEXbSmUpqXOzbxKun4zBPCKEqY0ds67ndnV9VSt.m3u8",
+    "title": "2025-02-12-01-39-45.mp4",
+    "size": "111.7 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "13:27",
+    "type": "Video"
   }
 }
