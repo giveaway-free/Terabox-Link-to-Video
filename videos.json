@@ -646,5 +646,13 @@
     "res": "360p",
     "dur": "01:21",
     "type": "Video"
+  },
+  "1F4LwKbrcMnFqZ-YBVpcCDg": {
+    "stream_url": "https://iteraplay.tera-api35.workers.dev/fast_stream?token=oxuJzO0thvOLiTmx-4gofGehQv7w37ZaTtXIFUBh1p-gqHF-uaN0W_xwSTOG-XAO0plr6VPoh_CGCCGBQgrQ6bhUAj1-f8Rlro8COwySrxy3WtDp5y18Q9bhlHABonHV85bijdQxiNNLt1TIEXHIuUtcfxnsEzDZ2PlPUpSbc5U0uRjwu_4-UOWCx1RRZA7tow2guM1WDkkH6blEjbaL1LDHxKsLc28AY9hpx6XglHUVRi0zIDnG6ViKIUJDChtaGOCHT9PXtDprWjwIvEJPBU_D21eRxirb7qzE2MufS3w4RitDWNpWgacUGmkb78KKLFE8AXT8Wu49GhiYdiBImmXo_ciAPQaVMz8HoNvNgT-e7FbJ-PMeREQtrLecFB0G.m3u8",
+    "title": "2023-07-23-13-17-23(1).mp4",
+    "size": "7.0 MB",
+    "res": "480p",
+    "dur": "02:55",
+    "type": "Video"
   }
 }
