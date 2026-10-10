@@ -294,5 +294,13 @@
     "res": "720p",
     "dur": "19:00",
     "type": "Video"
+  },
+  "1rNi38cJRSJ0BneWBZ6JX7g": {
+    "stream_url": "https://frosty-moon-7efe.wutecedy.workers.dev/fast_stream?token=9dTE9hi7TcH_gBocnt8Yh0hPg1Vb4uSXWRIjjWJdN2e4uNq5M-ccb0wQnBFp_aYOUKHQLCVRgK4tVUI6l3wF40dhRZcXLBQXuQyoEVuOHgujKOFnCOy2t7OVxMnE93mnLrm_eV6p2YNLfgdGnAyOG6bwz2dLYdR8ReUQamp0KWtQNmOYgbxIsBK7LyJullKuI8bnWz-OlzEl9p5jEwjDlN553ihCNQ2b1CYy-zxkowOHdLhOqBfPrrxkeH8uE5E_cBlOQftGtcyxMYS74VcvYXczkKw1kp0NgjZ9amXw3NOWomISd6ddh2uo1eNivBH6B1s2a45Xzigq13d9HbgxlI4HHL1GKi3fmyx-9tA6kT5FFs-BobcG-0MIzUf510FX.m3u8",
+    "title": "33 - DoodStream(1).mp4",
+    "size": "106.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "11:45",
+    "type": "Video"
   }
 }
