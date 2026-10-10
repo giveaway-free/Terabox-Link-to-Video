@@ -1678,5 +1678,13 @@
     "res": "1080p",
     "dur": "02:19",
     "type": "Video"
+  },
+  "1-HQc2EHlFksCeq0uABHPLA": {
+    "stream_url": "https://iteraplay.tera-api18.workers.dev/fast_stream?token=71tJBgyhzACbTHEW-MqOzLJe0DE2SbALVD8CKXOjaIOHjqn6zeYXU-XWlWlNGJfIkDMCIm0HYxa4VpvqOBm4JPj6uTCLAyGeP_J5_b56djD-z-ufg1I1kc1UFESpNZP_aX96WOuV_7zlVq6d-yKLXJjAAZepdHzV3JGN7_ZZ66gJhMLyg_h2UM5QRbw56yIFCHEN6jGI_7KPR_dBOUNbdGz4u46oaaKCdbgAclXhQAxqbAszTadBrTw0r1Xyk0kiBsYCSfQv-XcWPo6sb5NKQrxaAeKfL9bpUAPRgogl7O_gCdeXatoqWCq8Z4PdRYHgUFKowiApZcXMdr0GmKQGt6Two5c8UOwQGaSN0r1rFUM9fd65LBn3Tc9KZDJBujkWlJBvrl43qy4V3rDKrIcpRrtWnts7pfdDhXu9F1_GQQkARAlrYDScYQ.m3u8",
+    "title": "Telegram - ( sv1 ) ]\u21225_6141050681995299755(1).mp4",
+    "size": "106.2 MB",
+    "res": "480p",
+    "dur": "12:24",
+    "type": "Video"
   }
 }
