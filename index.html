@@ -718,6 +718,7 @@
 
     const BOT_USERNAME = "leadox_bot";
     const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/main/users.json";
+    const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/main/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
 
     let currentStreamUrl = "";
@@ -989,14 +990,44 @@
         document.getElementById('info-res').innerText = res;
         document.getElementById('info-dur').innerText = dur;
 
+        if (window._hlsInstance) {
+            window._hlsInstance.destroy();
+            window._hlsInstance = null;
+        }
+
         if (Hls.isSupported() && (streamUrl.includes('.m3u8') || !streamUrl.includes('.mp4'))) {
-            const hls = new Hls();
+            const hls = new Hls({
+                enableWorker: true,
+                lowLatencyMode: true
+            });
+            window._hlsInstance = hls;
             hls.loadSource(streamUrl);
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
                 video.play().catch(() => {});
                 updatePlayIcon(true);
             });
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            hls.destroy();
+                            video.src = streamUrl;
+                            video.play().catch(() => {});
+                            break;
+                    }
+                }
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = streamUrl;
+            video.play().catch(() => {});
+            updatePlayIcon(true);
         } else {
             video.src = streamUrl;
             video.play().catch(() => {});
@@ -1104,17 +1135,23 @@
             document.getElementById('user-display-name').innerText = tgUser.first_name || tgUser.username || `User #${tgUser.id}`;
         }
 
-        // Check user subscription and credits
+        let videosDb = {};
         try {
-            const resp = await fetch(USERS_DB_URL, { cache: 'no-store' });
-            if (resp.ok) {
-                const usersDb = await resp.json();
-                if (userIdStr && usersDb[userIdStr]) {
-                    userRecord = usersDb[userIdStr];
+            const [usersRes, videosRes] = await Promise.allSettled([
+                fetch(USERS_DB_URL, { cache: 'no-store' }),
+                fetch(VIDEOS_DB_URL, { cache: 'no-store' })
+            ]);
+            if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
+                const uData = await usersRes.value.json();
+                if (userIdStr && uData[userIdStr]) {
+                    userRecord = uData[userIdStr];
                 }
             }
+            if (videosRes.status === 'fulfilled' && videosRes.value.ok) {
+                videosDb = await videosRes.value.json();
+            }
         } catch (e) {
-            console.warn("Could not fetch remote users.json, using fallback balance:", e);
+            console.warn("Could not fetch remote databases, using fallback balance:", e);
         }
 
         const badgeEl = document.getElementById('user-badge');
@@ -1128,19 +1165,26 @@
             return;
         }
 
+        // Check if video is already unlocked/watched (Free replay forever)
+        const localUnlockKey = `unlocked_${userIdStr || 'guest'}_${startParam}`;
+        let alreadyWatched = false;
+        if (localStorage.getItem(localUnlockKey) === "1") {
+            alreadyWatched = true;
+        }
+        if (userRecord && userRecord.watched && Array.isArray(userRecord.watched) && userRecord.watched.includes(startParam)) {
+            alreadyWatched = true;
+        }
+
         if (userRecord) {
             isVip = userRecord.is_paid === 1;
             currentCredits = parseInt(userRecord.credits, 10) || 0;
 
-            // Apply local session deduction if user already consumed a credit this session
-            const localDeductKey = `deducted_${userIdStr}_${startParam}`;
-            if (!isVip && localStorage.getItem(localDeductKey)) {
-                currentCredits = Math.max(0, currentCredits - 1);
-            }
-
             if (isVip) {
                 badgeEl.className = "status-badge badge-vip";
                 badgeEl.innerText = "💎 VIP (Unlimited)";
+            } else if (alreadyWatched) {
+                badgeEl.className = "status-badge badge-vip";
+                badgeEl.innerText = `✅ Unlocked • ${currentCredits} Left`;
             } else if (currentCredits > 0) {
                 badgeEl.className = "status-badge badge-credits";
                 badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
@@ -1150,24 +1194,46 @@
             }
         }
 
-        // Gate: Check if user has no credits
-        if (userRecord && !isVip && currentCredits <= 0) {
+        // Gate: Check if user has no credits AND has not unlocked this video before
+        if (userRecord && !isVip && !alreadyWatched && currentCredits <= 0) {
             document.getElementById('loading-box').style.display = 'none';
             document.getElementById('paywall-box').style.display = 'block';
             return;
         }
 
-        // Deduct 1 credit for free user with balance
-        if (userRecord && !isVip && currentCredits > 0) {
-            const localDeductKey = `deducted_${userIdStr}_${startParam}`;
-            if (!localStorage.getItem(localDeductKey)) {
-                localStorage.setItem(localDeductKey, "1");
-                currentCredits = Math.max(0, currentCredits - 1);
-                badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+        // Deduct 1 credit ONLY on the first play; subsequent views are free
+        if (userRecord && !isVip && !alreadyWatched && currentCredits > 0) {
+            localStorage.setItem(localUnlockKey, "1");
+            currentCredits = Math.max(0, currentCredits - 1);
+            badgeEl.className = "status-badge badge-credits";
+            badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+
+            // Notify bot backend in background to persist watch status & update database
+            if (userIdStr) {
+                try {
+                    fetch(`https://leadox-bot.onrender.com/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}`, { mode: 'no-cors' }).catch(() => {});
+                } catch (_) {}
+            }
+        } else if (alreadyWatched) {
+            localStorage.setItem(localUnlockKey, "1");
+        }
+
+        // Fast Path 1: Instant playback from verified cached video stream in videos.json
+        if (videosDb && videosDb[startParam]) {
+            const cached = videosDb[startParam];
+            if (cached.stream_url) {
+                playVideo(
+                    cached.stream_url,
+                    cached.title || "TeraBox Video",
+                    cached.size || "Unknown",
+                    cached.res || "HD",
+                    cached.dur || "--"
+                );
+                return;
             }
         }
 
-        // Proceed to fetch and play video
+        // Path 2: Fetch and play video via Extractor API
         document.getElementById('loading-title').innerText = "Streaming Video...";
         document.getElementById('loading-desc').innerText = "Fetching fast download link from cloud...";
 
