@@ -1,4 +1,5 @@
 import sys
+import os
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 if hasattr(sys.stderr, 'reconfigure'):
@@ -69,6 +70,20 @@ def init_db():
         CREATE TABLE IF NOT EXISTS ref_links (
             user_id INTEGER PRIMARY KEY,
             invite_link TEXT
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS video_cache (
+            video_id TEXT PRIMARY KEY,
+            terabox_url TEXT,
+            stream_url TEXT,
+            title TEXT,
+            size TEXT,
+            res TEXT,
+            dur TEXT,
+            file_type TEXT,
+            created_at TEXT
         )
     ''')
     
@@ -176,6 +191,10 @@ def register_user(user_id, username, referrer_id=None, lang='bn'):
         ''', (user_id, username, init_credits, referrer_id, lang))
         conn.commit()
     conn.close()
+    try:
+        sync_users_json()
+    except Exception:
+        pass
 
 def update_credits(user_id, amount):
     conn = sqlite3.connect('users.db')
@@ -183,6 +202,10 @@ def update_credits(user_id, amount):
     cursor.execute('UPDATE users SET credits = credits + ? WHERE user_id = ?', (amount, user_id))
     conn.commit()
     conn.close()
+    try:
+        sync_users_json()
+    except Exception:
+        pass
 
 def set_paid_plan(user_id, days):
     expiry_date = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d %H:%M:%S")
@@ -191,6 +214,10 @@ def set_paid_plan(user_id, days):
     cursor.execute('UPDATE users SET is_paid = 1, paid_expiry = ? WHERE user_id = ?', (expiry_date, user_id))
     conn.commit()
     conn.close()
+    try:
+        sync_users_json()
+    except Exception:
+        pass
 
 def check_paid_status(user_id):
     user = get_user(user_id)
@@ -270,42 +297,107 @@ def get_user_channel_invite_link(user_id):
     fallback_link = get_target_group_link()
     return fallback_link if fallback_link and fallback_link != "https://t.me/" else "https://t.me/"
 
-def get_cached_group_info():
-    cached_photo = get_setting("cached_group_photo_file_id")
-    cached_title = get_setting("cached_group_title")
-    if cached_photo and cached_title:
-        return cached_photo, cached_title
+def resolve_group_chat():
+    req_group = get_setting("required_group_id")
+    target_link = get_setting("target_channel_link")
+    
+    candidates = []
+    if target_link and "t.me/" in str(target_link):
+        h = str(target_link).split("t.me/")[-1].replace("/", "").strip()
+        if h and not h.startswith("+"):
+            candidates.append(f"@{h}")
+            candidates.append(h)
+    if req_group:
+        if "t.me/" in str(req_group):
+            h = str(req_group).split("t.me/")[-1].replace("/", "").strip()
+            if h and not h.startswith("+"):
+                candidates.append(f"@{h}")
+                candidates.append(h)
+        elif str(req_group).startswith("@"):
+            candidates.append(str(req_group))
+            candidates.append(str(req_group)[1:])
+        elif str(req_group).startswith("-100") or str(req_group).lstrip("-").isdigit():
+            try:
+                candidates.append(int(req_group))
+            except Exception:
+                pass
+            candidates.append(str(req_group))
 
+    invalid = ["-1001234567890", "@your_channel", "@yourchannel", "your_channel", "yourchannel", ""]
+    seen = set()
+    for c in candidates:
+        if c and str(c) not in invalid and c not in seen:
+            seen.add(c)
+            try:
+                ch = bot.get_chat(c)
+                if ch:
+                    return ch
+            except Exception:
+                continue
+    return None
+
+def get_cached_group_info():
     req_group = get_setting("required_group_id")
     if not req_group or str(req_group) in ["-1001234567890", ""]:
         return None, ""
 
+    cached_photo = get_setting("cached_group_photo_file_id")
+    cached_title = get_setting("cached_group_title")
+    cached_photo_id = get_setting("cached_group_photo_unique_id")
+    cached_group_id = get_setting("cached_for_group_id")
+
     try:
-        chat = bot.get_chat(req_group)
-        title = chat.title or ""
-        set_setting("cached_group_title", title)
-        
-        photo_file_id = cached_photo
-        if not photo_file_id and chat and chat.photo and chat.photo.big_file_id:
-            f = bot.get_file(chat.photo.big_file_id)
-            res = requests.get(f"https://api.telegram.org/file/bot{BOT_TOKEN}/{f.file_path}", timeout=15)
-            if res.status_code == 200:
-                admin_id_raw = get_setting("admin_id") or "553826070"
-                try:
-                    admin_id = int(admin_id_raw)
-                except Exception:
-                    admin_id = 553826070
-                m = bot.send_photo(admin_id, res.content)
-                photo_file_id = m.photo[-1].file_id
-                try:
-                    bot.delete_message(admin_id, m.message_id)
-                except Exception:
-                    pass
-                set_setting("cached_group_photo_file_id", photo_file_id)
-        return photo_file_id, title
-    except Exception as e:
-        print(f"Error caching group info: {e}")
-    return cached_photo or None, cached_title or ""
+        chat = resolve_group_chat()
+        if not chat:
+            return cached_photo or None, cached_title or ""
+
+        current_title = chat.title or ""
+        current_photo_id = ""
+        if chat.photo:
+            current_photo_id = getattr(chat.photo, 'big_file_unique_id', None) or getattr(chat.photo, 'big_file_id', '') or ""
+
+        # Check if everything is identical
+        title_unchanged = (current_title == cached_title)
+        photo_unchanged = (current_photo_id == cached_photo_id)
+        group_unchanged = (str(req_group) == str(cached_group_id))
+
+        # If nothing changed and photo cache is consistent, skip re-fetching/uploading!
+        if title_unchanged and photo_unchanged and group_unchanged and (cached_photo or not current_photo_id):
+            return cached_photo or None, cached_title
+
+        # Something changed! Update title and group id
+        set_setting("cached_group_title", current_title)
+        set_setting("cached_for_group_id", str(req_group))
+
+        # If photo changed or was newly added
+        if not photo_unchanged or (current_photo_id and not cached_photo):
+            if chat.photo and getattr(chat.photo, 'big_file_id', None):
+                f = bot.get_file(chat.photo.big_file_id)
+                res = requests.get(f"https://api.telegram.org/file/bot{BOT_TOKEN}/{f.file_path}", timeout=15)
+                if res.status_code == 200:
+                    admin_id_raw = get_setting("admin_id") or "553826070"
+                    try:
+                        admin_id = int(admin_id_raw)
+                    except Exception:
+                        admin_id = 553826070
+                    m = bot.send_photo(admin_id, res.content)
+                    photo_file_id = m.photo[-1].file_id
+                    try:
+                        bot.delete_message(admin_id, m.message_id)
+                    except Exception:
+                        pass
+                    set_setting("cached_group_photo_file_id", photo_file_id)
+                    set_setting("cached_group_photo_unique_id", current_photo_id)
+                    return photo_file_id, current_title
+            else:
+                # Group photo was removed
+                set_setting("cached_group_photo_file_id", "")
+                set_setting("cached_group_photo_unique_id", "")
+                return None, current_title
+
+        return cached_photo or None, current_title
+    except Exception:
+        return cached_photo or None, cached_title or ""
 
 # --- GENERAL UTILS ---
 def clean_text_for_markdown(text):
@@ -760,6 +852,9 @@ def is_contact_button(text):
 def is_lang_button(text):
     return any(k in text for k in ["Language", "ভাষা", "भाषा"])
 
+def is_user_stats_button(text):
+    return any(k in text for k in ["User List & Stats", "User Stats", "ইউজার লিস্ট"])
+
 def is_menu_navigation(text):
     if not text:
         return False
@@ -773,6 +868,7 @@ def is_menu_navigation(text):
         is_backup_button(t) or
         is_contact_button(t) or
         is_lang_button(t) or
+        is_user_stats_button(t) or
         "Admin Settings" in t
     )
 
@@ -781,6 +877,9 @@ def dispatch_menu_command(message):
     t = (message.text or "").strip()
     if "Admin Settings" in t:
         admin_settings_panel(message)
+    elif is_user_stats_button(t):
+        if is_admin(message.from_user.id):
+            send_admin_user_stats(message.chat.id)
     elif is_account_button(t):
         account_info(message)
     elif is_refer_button(t):
@@ -805,16 +904,20 @@ def main_keyboard(user_id):
         KeyboardButton(get_txt(user_id, "btn_account")),
         KeyboardButton(get_txt(user_id, "btn_refer"))
     )
-    markup.row(
-        KeyboardButton(get_txt(user_id, "btn_buy")),
-        KeyboardButton(get_txt(user_id, "btn_backup"))
-    )
     if is_admin(user_id):
+        markup.row(
+            KeyboardButton("✦ 📊 User List & Stats ✦"),
+            KeyboardButton(get_txt(user_id, "btn_backup"))
+        )
         markup.row(
             KeyboardButton("✦ ⚙️ Admin Settings ✦"),
             KeyboardButton(get_txt(user_id, "btn_lang"))
         )
     else:
+        markup.row(
+            KeyboardButton(get_txt(user_id, "btn_buy")),
+            KeyboardButton(get_txt(user_id, "btn_backup"))
+        )
         markup.row(
             KeyboardButton(get_txt(user_id, "btn_contact")),
             KeyboardButton(get_txt(user_id, "btn_lang"))
@@ -824,7 +927,6 @@ def main_keyboard(user_id):
 def admin_settings_inline():
     markup = InlineKeyboardMarkup(row_width=2)
     markup.add(
-        InlineKeyboardButton("✨ 📊 User List & Stats ✨", callback_data="btn_user_list"),
         InlineKeyboardButton("✦ 1. 📢 Broadcast Post ✦", callback_data="btn_broadcast"),
         InlineKeyboardButton("✦ 2. 🔍 Find ID ✦", callback_data="btn_find_id"),
         InlineKeyboardButton("✦ 3. 👥 Track Group ID ✦", callback_data="set_group_id"),
@@ -1078,12 +1180,161 @@ def change_language_command(message):
     prompt_text = get_txt(user_id, "select_lang_prompt")
     bot.reply_to(message, prompt_text, parse_mode="Markdown", reply_markup=language_selection_markup())
 
+def get_cached_video(vid_id):
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('SELECT stream_url, title, size, res, dur, file_type, terabox_url FROM video_cache WHERE video_id = ?', (vid_id,))
+        row = c.fetchone()
+        conn.close()
+        return row
+    except Exception:
+        return None
+
+def handle_direct_video_watch(message, vid_id):
+    user_id = message.from_user.id
+    username = message.from_user.username or message.from_user.first_name or "User"
+    
+    # 1. Register user if not exists
+    user = get_user(user_id)
+    if not user:
+        register_user(user_id, username)
+        user = get_user(user_id)
+        
+    # 2. Check force-join channel membership
+    if not is_user_in_chat(user_id):
+        invite_link = get_target_group_link()
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton(text="📢 Join Required Channel", url=invite_link))
+        bot_username = get_bot_username()
+        markup.add(InlineKeyboardButton(text="✅ Joined! Watch Video", url=f"https://t.me/{bot_username}?start=v_{vid_id}"))
+        bot.send_message(
+            message.chat.id,
+            "⚠️ **Channel Membership Required!**\n\n"
+            "এই ভিডিওটি ইনবিল্ট মিনি অ্যাপে দেখতে হলে প্রথমে আমাদের চ্যানেলে জয়েন করুন। জয়েন করার পর নিচের **'Joined! Watch Video'** বাটনে চাপ দিন।",
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
+        return
+
+    # 3. Check Subscription & Credits
+    is_paid = check_paid_status(user_id)
+    curr_credits = user[2] if user else 0
+    if not is_paid and curr_credits <= 0:
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton(text="💳 Buy VIP Subscription", callback_data="buy_plan"))
+        markup.add(InlineKeyboardButton(text="🎁 Refer Friends for Credits", callback_data="refer_earn"))
+        bot.send_message(
+            message.chat.id,
+            "⚠️ **আপনার ফ্রি ক্রেডিট শেষ হয়ে গেছে!**\n\n"
+            "ইনবিল্ট মিনি অ্যাপে আনলিমিটেড ভিডিও দেখতে ভিআইপি সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট আর্ন করুন।",
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
+        return
+
+    # 4. Fetch Video Info from Cache or API
+    status_msg = bot.send_message(message.chat.id, "⚡ **Preparing Mini App Video Player...**", parse_mode="Markdown")
+    cached = get_cached_video(vid_id)
+    
+    stream_url = None
+    title = "TeraBox Video"
+    size = "Unknown"
+    resolution = "Auto"
+    duration = "--"
+    file_type = "Video"
+    
+    if cached and cached[0]:
+        stream_url = cached[0]
+        title = cached[1] or title
+        size = cached[2] or size
+        resolution = cached[3] or resolution
+        duration = cached[4] or duration
+        file_type = cached[5] or file_type
+    else:
+        target_url = cached[6] if (cached and cached[6]) else f"https://1024terabox.com/s/{vid_id}"
+        t, dl, sz, res, dur, ft = get_terabox_media(target_url)
+        if dl:
+            stream_url = dl
+            title = t or title
+            size = sz or size
+            resolution = res or resolution
+            duration = dur or duration
+            file_type = ft or file_type
+
+    if not stream_url:
+        bot.edit_message_text(
+            "❌ ভিডিও স্ট্রিম লিংক লোড করা সম্ভব হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
+            chat_id=message.chat.id,
+            message_id=status_msg.message_id
+        )
+        return
+
+    # 5. Deduct credit if not paid
+    if not is_paid:
+        update_credits(user_id, -1)
+        user = get_user(user_id)
+        rem_balance = f"{user[2]} Credits"
+    else:
+        rem_balance = "Unlimited (VIP Active)"
+
+    # 6. Build Mini App Player URL
+    encoded_stream_url = quote(stream_url, safe='')
+    encoded_title = quote(title, safe='')
+    encoded_size = quote(size, safe='')
+    encoded_res = quote(resolution, safe='')
+    encoded_dur = quote(duration, safe='')
+    encoded_type = quote(file_type, safe='')
+    
+    player_url = (
+        f"{MY_PLAYER_URL}?"
+        f"src={encoded_stream_url}&"
+        f"title={encoded_title}&"
+        f"size={encoded_size}&"
+        f"res={encoded_res}&"
+        f"dur={encoded_dur}&"
+        f"type={encoded_type}"
+    )
+
+    markup = InlineKeyboardMarkup()
+    play_btn_app = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_app"), web_app=WebAppInfo(url=player_url))
+    play_btn_web = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_web"), url=player_url)
+    markup.add(play_btn_app)
+    markup.add(play_btn_web)
+
+    clean_t = clean_text_for_markdown(title)
+    clean_s = clean_text_for_markdown(size)
+    clean_r = clean_text_for_markdown(resolution)
+    clean_d = clean_text_for_markdown(duration)
+
+    reply_text = (
+        f"🎬 *Title:* {clean_t}\n"
+        f"📦 *Size:* {clean_s}\n"
+        f"⚡ *Resolution:* {clean_r}\n"
+        f"⏱️ *Duration:* {clean_d}\n"
+        f"💳 *Remaining Balance:* {rem_balance}\n\n"
+        f"{get_txt(user_id, 'stream_play_prompt')}"
+    )
+
+    bot.edit_message_text(
+        reply_text,
+        chat_id=message.chat.id,
+        message_id=status_msg.message_id,
+        reply_markup=markup,
+        parse_mode="Markdown"
+    )
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     user_id = message.from_user.id
     username = message.from_user.username or message.from_user.first_name or "User"
     
     command_args = message.text.split()
+    if len(command_args) > 1 and command_args[1].startswith("v_"):
+        vid_id = command_args[1][2:]
+        handle_direct_video_watch(message, vid_id)
+        return
+
     referrer_id = None
     if len(command_args) > 1 and command_args[1].isdigit():
         referrer_id = int(command_args[1])
@@ -1347,6 +1598,60 @@ def admin_settings_panel(message):
     bot.send_message(message.chat.id, text, parse_mode="Markdown", reply_markup=admin_settings_inline())
     auto_delete_after(message.chat.id, message.message_id, 5)
 
+def send_admin_user_stats(chat_id):
+    users = get_detailed_users()
+    total_users = len(users)
+    
+    paid_users = []
+    free_users = []
+
+    for u in users:
+        uid, uname, credits, is_paid, expiry = u
+        u_is_paid = check_paid_status(uid)
+        display_name = clean_text_for_markdown(uname or "No Name")
+        
+        if u_is_paid:
+            paid_users.append((uid, display_name, credits, expiry))
+        else:
+            free_users.append((uid, display_name, credits))
+
+    full_text = (
+        f"📊 **BOT USER STATISTICS**\n\n"
+        f"👥 **Total Users:** {total_users}\n"
+        f"🔥 **Paid Users:** {len(paid_users)}\n"
+        f"🆓 **Free Users:** {len(free_users)}\n\n"
+        f"🔥 **--- PAID USERS ---**\n"
+        f"{'Kono Paid User nei.' if not paid_users else ''}\n"
+        f"🆓 **--- FREE USERS ---**\n"
+        f"{'Kono Free User nei.' if not free_users else ''}"
+    )
+
+    markup = InlineKeyboardMarkup(row_width=2)
+    
+    idx = 1
+    if paid_users:
+        for uid, name, credits, expiry in paid_users:
+            uname_clean = str(name).replace('@', '').strip()
+            copy_val = f"@{uname_clean} {uid}" if uname_clean and uname_clean != "No Name" else str(uid)
+            info_text = f"👤 {idx}. {name[:12]} | {uid}"
+            info_btn = InlineKeyboardButton(info_text, copy_text=CopyTextButton(text=copy_val))
+            msg_btn = InlineKeyboardButton(f"💬 Msg {idx}", callback_data=f"reply_to_{uid}")
+            markup.add(info_btn, msg_btn)
+            idx += 1
+        
+    if free_users:
+        for uid, name, credits in free_users:
+            uname_clean = str(name).replace('@', '').strip()
+            copy_val = f"@{uname_clean} {uid}" if uname_clean and uname_clean != "No Name" else str(uid)
+            info_text = f"👤 {idx}. {name[:12]} | {uid} | {credits}Cr"
+            info_btn = InlineKeyboardButton(info_text, copy_text=CopyTextButton(text=copy_val))
+            msg_btn = InlineKeyboardButton(f"💬 Msg {idx}", callback_data=f"reply_to_{uid}")
+            markup.add(info_btn, msg_btn)
+            idx += 1
+
+    markup.row(InlineKeyboardButton("❌ Close", callback_data="btn_close_admin_panel"))
+    bot.send_message(chat_id, full_text, parse_mode="Markdown", reply_markup=markup)
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith("set_") or call.data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang"])
 def handle_admin_callbacks(call):
     if not is_admin(call.from_user.id):
@@ -1379,59 +1684,7 @@ def handle_admin_callbacks(call):
         return
 
     if call.data == "btn_user_list":
-        users = get_detailed_users()
-        total_users = len(users)
-        
-        paid_users = []
-        free_users = []
-
-        for u in users:
-            uid, uname, credits, is_paid, expiry = u
-            u_is_paid = check_paid_status(uid)
-            display_name = clean_text_for_markdown(uname or "No Name")
-            
-            if u_is_paid:
-                paid_users.append((uid, display_name, credits, expiry))
-            else:
-                free_users.append((uid, display_name, credits))
-
-        # Shudhu summary rakhbo, user details gulo button-er modhye thakbe
-        full_text = (
-            f"📊 **BOT USER STATISTICS**\n\n"
-            f"👥 **Total Users:** {total_users}\n"
-            f"🔥 **Paid Users:** {len(paid_users)}\n"
-            f"🆓 **Free Users:** {len(free_users)}\n\n"
-            f"🔥 **--- PAID USERS ---**\n"
-            f"{'Kono Paid User nei.' if not paid_users else ''}\n"
-            f"🆓 **--- FREE USERS ---**\n"
-            f"{'Kono Free User nei.' if not free_users else ''}"
-        )
-
-        markup = InlineKeyboardMarkup(row_width=2)
-        
-        idx = 1
-        if paid_users:
-            for uid, name, credits, expiry in paid_users:
-                uname_clean = str(name).replace('@', '').strip()
-                copy_val = f"@{uname_clean} {uid}" if uname_clean and uname_clean != "No Name" else str(uid)
-                info_text = f"👤 {idx}. {name[:12]} | {uid}"
-                info_btn = InlineKeyboardButton(info_text, copy_text=CopyTextButton(text=copy_val))
-                msg_btn = InlineKeyboardButton(f"💬 Msg {idx}", callback_data=f"reply_to_{uid}")
-                markup.add(info_btn, msg_btn)
-                idx += 1
-            
-        if free_users:
-            for uid, name, credits in free_users:
-                uname_clean = str(name).replace('@', '').strip()
-                copy_val = f"@{uname_clean} {uid}" if uname_clean and uname_clean != "No Name" else str(uid)
-                info_text = f"👤 {idx}. {name[:12]} | {uid} | {credits}Cr"
-                info_btn = InlineKeyboardButton(info_text, copy_text=CopyTextButton(text=copy_val))
-                msg_btn = InlineKeyboardButton(f"💬 Msg {idx}", callback_data=f"reply_to_{uid}")
-                markup.add(info_btn, msg_btn)
-                idx += 1
-
-        markup.row(InlineKeyboardButton("❌ Close", callback_data="btn_close_admin_panel"))
-        bot.send_message(call.message.chat.id, full_text, parse_mode="Markdown", reply_markup=markup)
+        send_admin_user_stats(call.message.chat.id)
         return
     
     if call.data.startswith("no_action_"):
@@ -1733,6 +1986,12 @@ def contact_admin_prompt(message):
     )
     bot.register_next_step_handler(msg, process_user_contact_msg)
 
+@bot.message_handler(func=lambda msg: bool(msg.text and is_user_stats_button(msg.text)))
+def user_stats_menu_prompt(message):
+    if not is_admin(message.from_user.id):
+        return
+    send_admin_user_stats(message.chat.id)
+
 @bot.message_handler(func=lambda msg: bool(msg.text and is_lang_button(msg.text)))
 def language_menu_prompt(message):
     user_id = message.from_user.id
@@ -1746,7 +2005,7 @@ def handle_message(message):
     
     if raw_content and (is_account_button(raw_content) or is_refer_button(raw_content) or is_buy_button(raw_content) or 
         is_backup_button(raw_content) or is_contact_button(raw_content) or is_lang_button(raw_content) or 
-        "Admin Settings" in raw_content):
+        is_user_stats_button(raw_content) or "Admin Settings" in raw_content):
         return
 
     user = get_user(user_id)
@@ -1947,6 +2206,79 @@ def handle_message(message):
             else:
                 auto_delete_after(message.chat.id, status_msg.message_id, 5)
 
+def sync_users_json():
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry FROM users').fetchall()
+        conn.close()
+        data = {str(r[0]): {'username': r[1], 'credits': r[2], 'is_paid': r[3], 'paid_expiry': r[4]} for r in rows}
+        with open('users.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error syncing users.json: {e}")
+
+def start_render_health_server():
+    import http.server
+    from urllib.parse import urlparse, parse_qs
+    port = int(os.environ.get("PORT", 8080))
+    class HealthHandler(http.server.BaseHTTPRequestHandler):
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "*")
+            self.end_headers()
+
+        def do_GET(self):
+            parsed = urlparse(self.path)
+            if parsed.path in ["/users.json", "/api/users"]:
+                sync_users_json()
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                if os.path.exists("users.json"):
+                    with open("users.json", "rb") as f:
+                        self.wfile.write(f.read())
+                else:
+                    self.wfile.write(b"{}")
+                return
+
+            if parsed.path == "/api/user_status":
+                qs = parse_qs(parsed.query)
+                uid = qs.get("user_id", [None])[0]
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                if uid:
+                    u = get_user(uid)
+                    is_p = check_paid_status(uid)
+                    cr = u[2] if u else 0
+                    self.wfile.write(json.dumps({"ok": True, "exists": u is not None, "is_paid": 1 if is_p else 0, "credits": cr}).encode("utf-8"))
+                else:
+                    self.wfile.write(b'{"ok": false, "error": "missing_user_id"}')
+                return
+
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(b"OK")
+
+        def log_message(self, format, *args):
+            pass
+    try:
+        server = http.server.HTTPServer(("0.0.0.0", port), HealthHandler)
+        server.serve_forever()
+    except Exception as e:
+        print(f"Health server error: {e}")
+
 if __name__ == '__main__':
+    if os.environ.get("PORT"):
+        t = threading.Thread(target=start_render_health_server, daemon=True)
+        t.start()
+        print(f"Render health server listening on port {os.environ.get('PORT')}")
     print("Bot is running...")
     bot.infinity_polling(allowed_updates=["message", "edited_message", "channel_post", "edited_channel_post", "inline_query", "chosen_inline_result", "callback_query", "shipping_query", "pre_checkout_query", "poll", "poll_answer", "my_chat_member", "chat_member", "chat_join_request"])
