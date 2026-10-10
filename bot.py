@@ -191,6 +191,10 @@ def register_user(user_id, username, referrer_id=None, lang='bn'):
         ''', (user_id, username, init_credits, referrer_id, lang))
         conn.commit()
     conn.close()
+    try:
+        sync_users_json()
+    except Exception:
+        pass
 
 def update_credits(user_id, amount):
     conn = sqlite3.connect('users.db')
@@ -198,6 +202,10 @@ def update_credits(user_id, amount):
     cursor.execute('UPDATE users SET credits = credits + ? WHERE user_id = ?', (amount, user_id))
     conn.commit()
     conn.close()
+    try:
+        sync_users_json()
+    except Exception:
+        pass
 
 def set_paid_plan(user_id, days):
     expiry_date = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d %H:%M:%S")
@@ -206,6 +214,10 @@ def set_paid_plan(user_id, days):
     cursor.execute('UPDATE users SET is_paid = 1, paid_expiry = ? WHERE user_id = ?', (expiry_date, user_id))
     conn.commit()
     conn.close()
+    try:
+        sync_users_json()
+    except Exception:
+        pass
 
 def check_paid_status(user_id):
     user = get_user(user_id)
@@ -2194,15 +2206,67 @@ def handle_message(message):
             else:
                 auto_delete_after(message.chat.id, status_msg.message_id, 5)
 
+def sync_users_json():
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry FROM users').fetchall()
+        conn.close()
+        data = {str(r[0]): {'username': r[1], 'credits': r[2], 'is_paid': r[3], 'paid_expiry': r[4]} for r in rows}
+        with open('users.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error syncing users.json: {e}")
+
 def start_render_health_server():
     import http.server
+    from urllib.parse import urlparse, parse_qs
     port = int(os.environ.get("PORT", 8080))
     class HealthHandler(http.server.BaseHTTPRequestHandler):
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "*")
+            self.end_headers()
+
         def do_GET(self):
+            parsed = urlparse(self.path)
+            if parsed.path in ["/users.json", "/api/users"]:
+                sync_users_json()
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                if os.path.exists("users.json"):
+                    with open("users.json", "rb") as f:
+                        self.wfile.write(f.read())
+                else:
+                    self.wfile.write(b"{}")
+                return
+
+            if parsed.path == "/api/user_status":
+                qs = parse_qs(parsed.query)
+                uid = qs.get("user_id", [None])[0]
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                if uid:
+                    u = get_user(uid)
+                    is_p = check_paid_status(uid)
+                    cr = u[2] if u else 0
+                    self.wfile.write(json.dumps({"ok": True, "exists": u is not None, "is_paid": 1 if is_p else 0, "credits": cr}).encode("utf-8"))
+                else:
+                    self.wfile.write(b'{"ok": false, "error": "missing_user_id"}')
+                return
+
             self.send_response(200)
             self.send_header("Content-type", "text/plain")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(b"OK")
+
         def log_message(self, format, *args):
             pass
     try:
