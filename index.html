@@ -16,6 +16,9 @@
             --text-muted: #94a3b8;
             --border-color: #334155;
             --control-hover: rgba(255, 255, 255, 0.15);
+            --gold: #f59e0b;
+            --green: #10b981;
+            --red: #ef4444;
         }
 
         * { 
@@ -40,6 +43,139 @@
             margin: 0 auto; 
         }
 
+        /* Top User Profile & Status Bar */
+        .user-status-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-vip {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+        }
+
+        .badge-credits {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+        }
+
+        .badge-exhausted {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        /* Notice & Paywall Cards */
+        .card-notice {
+            display: none;
+            text-align: center;
+            padding: 30px 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-notice h3 {
+            font-size: 19px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .card-notice p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .action-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-vip-upgrade {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Loading Spinner Box */
+        .loading-box {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 16px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Video Container */
         .video-wrapper { 
             position: relative;
@@ -52,6 +188,24 @@
             border: 1px solid var(--border-color);
             display: none;
             transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Fallback Embed Iframe */
+        .iframe-wrapper {
+            display: none;
+            width: 100%;
+            height: 380px;
+            background: #000;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         /* Guaranteed Fullscreen Fallback */
@@ -278,6 +432,7 @@
             align-items: center;
             gap: 4px;
         }
+
         .volume-slider {
             width: 45px;
             height: 4px;
@@ -390,7 +545,7 @@
             background: var(--card-bg);
             border-radius: 16px;
             border: 1px solid var(--border-color);
-            margin-top: 40px;
+            margin-top: 20px;
         }
 
         .no-video h3 {
@@ -407,11 +562,61 @@
 <body oncontextmenu="return false;">
 
 <div class="container">
-    <div id="no-video-box" class="no-video">
-        <h3>🎬 No Video Selected</h3>
-        <p>Please send a TeraBox link in Telegram Bot and click "Open Player".</p>
+    <!-- Top User Badge & Status Bar -->
+    <div id="user-status-bar" class="user-status-bar">
+        <div class="user-info">
+            <span>👤</span>
+            <span id="user-display-name">User</span>
+        </div>
+        <div id="user-badge" class="status-badge badge-credits">
+            ⚡ Checking...
+        </div>
     </div>
 
+    <!-- Loading Card -->
+    <div id="loading-box" class="loading-box">
+        <div class="spinner"></div>
+        <h3 id="loading-title">Verifying Membership...</h3>
+        <p id="loading-desc" style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">Checking credits and preparing video player</p>
+    </div>
+
+    <!-- Unregistered User Card (Join Bot Prompt) -->
+    <div id="join-bot-box" class="card-notice">
+        <h3>🔒 Membership Required</h3>
+        <p>ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।</p>
+        <div class="action-btn-group">
+            <button class="btn-action btn-vip-upgrade" id="btn-open-bot">
+                🚀 Open @leadox_bot & Get Free Credits
+            </button>
+        </div>
+    </div>
+
+    <!-- Paywall Card (Credits Finished) -->
+    <div id="paywall-box" class="card-notice">
+        <h3>⚡ Credits Exhausted!</h3>
+        <p>আপনার অ্যাকাউন্টের ফ্রি ক্রেডিট শেষ হয়ে গেছে। আনলিমিটেড ভিডিও দেখতে VIP সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট পান।</p>
+        <div class="action-btn-group">
+            <button class="btn-action btn-vip-upgrade" id="btn-buy-vip">
+                💎 Upgrade to VIP (50 / 150 BDT)
+            </button>
+            <button class="btn-action btn-secondary" id="btn-refer-earn">
+                👥 Invite Friends (+2 Credits Free)
+            </button>
+        </div>
+    </div>
+
+    <!-- Default Empty Box -->
+    <div id="no-video-box" class="no-video">
+        <h3>🎬 TeraStream Mini Player</h3>
+        <p>Please open a video link from the channel button to stream.</p>
+    </div>
+
+    <!-- Fallback Embed Player Iframe -->
+    <div id="iframe-wrapper" class="iframe-wrapper">
+        <iframe id="embed-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+
+    <!-- Native Video Player -->
     <div class="video-wrapper" id="video-wrapper">
         <video id="video" playsinline webkit-playsinline></video>
         
@@ -505,14 +710,21 @@
 </div>
 
 <script>
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    if (tg) {
+        tg.ready();
+        tg.expand();
     }
+
+    const BOT_USERNAME = "leadox_bot";
+    const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/main/users.json";
+    const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
 
     let currentStreamUrl = "";
     const video = document.getElementById('video');
     const videoWrapper = document.getElementById('video-wrapper');
+    const iframeWrapper = document.getElementById('iframe-wrapper');
+    const embedIframe = document.getElementById('embed-iframe');
     const btnPlay = document.getElementById('btn-play');
     const playIcon = document.getElementById('play-icon');
     const btnRewind = document.getElementById('btn-rewind');
@@ -532,6 +744,37 @@
     const overlayIndicator = document.getElementById('overlay-indicator');
 
     let controlsTimeout = null;
+
+    function formatSize(bytes) {
+        if (!bytes || isNaN(bytes)) return "Unknown";
+        let b = parseFloat(bytes);
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let idx = 0;
+        while (b >= 1024 && idx < units.length - 1) {
+            b /= 1024;
+            idx++;
+        }
+        return b.toFixed(2) + " " + units[idx];
+    }
+
+    function formatDuration(sec) {
+        if (!sec || isNaN(sec)) return "--";
+        let seconds = parseInt(sec, 10);
+        let m = Math.floor(seconds / 60);
+        let s = seconds % 60;
+        let h = Math.floor(m / 60);
+        let remM = m % 60;
+        if (h > 0) {
+            return `${String(h).padStart(2, '0')}:${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+        return `${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function extractResFromTitle(title) {
+        if (!title) return "Auto";
+        const match = title.match(/(\d{3,4}p)/i);
+        return match ? match[1] : "Auto";
+    }
 
     function formatTime(seconds) {
         if (isNaN(seconds) || seconds < 0) return "00:00";
@@ -598,15 +841,15 @@
         if (video.muted) {
             volumeSlider.value = 0;
         } else {
-            volumeSlider.value = video.volume > 0 ? video.volume : 1;
-            video.volume = volumeSlider.value;
+            video.volume = 1;
+            volumeSlider.value = 1;
         }
         updateVolumeIcon();
     });
 
     function updateVolumeIcon() {
         if (video.muted || video.volume === 0) {
-            volIcon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.73 4.73H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+            volIcon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
         } else {
             volIcon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
         }
@@ -617,84 +860,56 @@
         showOverlay(`${e.target.value}x`);
     });
 
-    /* --- Hybrid Floating Window / In-App PiP System --- */
-    function toggleFloatingWindow() {
-        if (videoWrapper.classList.contains('floating-window')) {
-            videoWrapper.classList.remove('floating-window');
-            showOverlay('Window Restored');
-        } else {
-            // Exit fullscreen if active
-            videoWrapper.classList.remove('pseudo-fullscreen');
-            if (document.fullscreenElement && document.exitFullscreen) {
-                document.exitFullscreen().catch(() => {});
-            }
-            videoWrapper.classList.add('floating-window');
-            showOverlay('Floating Mode');
-        }
-    }
-
     btnPip.addEventListener('click', async () => {
-        // Try OS-level PiP first
-        if (document.pictureInPictureEnabled && video.requestPictureInPicture) {
+        if (document.pictureInPictureElement) {
+            document.exitPictureInPicture().catch(() => {});
+        } else if (video.requestPictureInPicture) {
             try {
-                if (document.pictureInPictureElement) {
-                    await document.exitPictureInPicture();
-                    return;
-                } else {
-                    await video.requestPictureInPicture();
-                    return;
-                }
+                await video.requestPictureInPicture();
             } catch (err) {
-                // Telegram WebApp blocks native PiP -> Instant In-App Floating Fallback
-                toggleFloatingWindow();
-            }
-        } else if (video.webkitSetPresentationMode) {
-            try {
-                const mode = video.webkitPresentationMode === 'picture-in-picture' ? 'inline' : 'picture-in-picture';
-                video.webkitSetPresentationMode(mode);
-            } catch(e) {
                 toggleFloatingWindow();
             }
         } else {
-            // Direct In-App Floating Window Fallback
             toggleFloatingWindow();
         }
     });
 
-    btnRestorePip.addEventListener('click', (e) => {
-        e.stopPropagation();
+    function toggleFloatingWindow() {
+        videoWrapper.classList.toggle('floating-window');
+    }
+
+    btnRestorePip.addEventListener('click', () => {
         videoWrapper.classList.remove('floating-window');
     });
 
-    btnClosePip.addEventListener('click', (e) => {
-        e.stopPropagation();
+    btnClosePip.addEventListener('click', () => {
         videoWrapper.classList.remove('floating-window');
         video.pause();
         updatePlayIcon(false);
     });
 
-    /* --- Robust Fullscreen Support --- */
-    function isFullscreen() {
-        return !!(document.fullscreenElement || document.webkitFullscreenElement || videoWrapper.classList.contains('pseudo-fullscreen'));
-    }
-
-    function updateFsIcon(full) {
-        if (full) {
-            fsIcon.innerHTML = '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>';
+    function updateFsIcon(isFs) {
+        if (isFs) {
+            fsIcon.innerHTML = '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-14v3h3v2h-5V5h2z"/>';
         } else {
             fsIcon.innerHTML = '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
         }
     }
 
     btnFullscreen.addEventListener('click', () => {
-        // If in floating window, restore first
-        if (videoWrapper.classList.contains('floating-window')) {
-            videoWrapper.classList.remove('floating-window');
-        }
+        const isCurrentlyFs = !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            videoWrapper.classList.contains('pseudo-fullscreen')
+        );
 
-        if (!isFullscreen()) {
+        if (!isCurrentlyFs) {
             if (videoWrapper.requestFullscreen) {
-                videoWrapper.requestFullscreen().catch(() => tryDirectVideoFullscreen());
+                videoWrapper.requestFullscreen().catch(() => {
+                    tryDirectVideoFullscreen();
+                });
+            } else if (videoWrapper.webkitRequestFullscreen) {
+                videoWrapper.webkitRequestFullscreen();
             } else {
                 tryDirectVideoFullscreen();
             }
@@ -759,6 +974,11 @@
         currentStreamUrl = streamUrl;
 
         document.getElementById('no-video-box').style.display = 'none';
+        document.getElementById('loading-box').style.display = 'none';
+        document.getElementById('paywall-box').style.display = 'none';
+        document.getElementById('join-bot-box').style.display = 'none';
+        iframeWrapper.style.display = 'none';
+
         videoWrapper.style.display = 'block';
         document.getElementById('video-title').style.display = 'block';
         document.getElementById('grid-info').style.display = 'grid';
@@ -784,22 +1004,212 @@
         }
     }
 
+    function playEmbedVideo(surl, title = "TeraBox Video") {
+        document.getElementById('no-video-box').style.display = 'none';
+        document.getElementById('loading-box').style.display = 'none';
+        document.getElementById('paywall-box').style.display = 'none';
+        document.getElementById('join-bot-box').style.display = 'none';
+        videoWrapper.style.display = 'none';
+
+        iframeWrapper.style.display = 'block';
+        embedIframe.src = `https://www.terabox.app/sharing/embed?surl=${surl}`;
+        document.getElementById('video-title').style.display = 'block';
+        document.getElementById('video-title').innerText = title;
+        document.getElementById('grid-info').style.display = 'grid';
+        document.getElementById('info-res').innerText = 'HD Embed';
+        document.getElementById('info-type').innerText = 'Cloud Stream';
+    }
+
     document.getElementById('download-btn').addEventListener('click', function(e) {
         e.preventDefault();
         if (currentStreamUrl) {
-            window.open(currentStreamUrl, '_blank');
+            if (tg && tg.openLink) {
+                tg.openLink(currentStreamUrl);
+            } else {
+                window.open(currentStreamUrl, '_blank');
+            }
         }
     });
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const directSrc = urlParams.get('src');
-    if (directSrc) {
-        const title = urlParams.get('title') || 'TeraBox Video';
-        const size = urlParams.get('size') || 'Unknown';
-        const res = urlParams.get('res') || 'Auto';
-        const dur = urlParams.get('dur') || '--';
-        playVideo(directSrc, title, size, res, dur);
+    document.getElementById('btn-open-bot').addEventListener('click', () => {
+        const link = `https://t.me/${BOT_USERNAME}?start=new_user`;
+        if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
+        else window.open(link, '_blank');
+    });
+
+    document.getElementById('btn-buy-vip').addEventListener('click', () => {
+        const link = `https://t.me/${BOT_USERNAME}?start=buy_vip`;
+        if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
+        else window.open(link, '_blank');
+    });
+
+    document.getElementById('btn-refer-earn').addEventListener('click', () => {
+        const link = `https://t.me/${BOT_USERNAME}?start=refer`;
+        if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
+        else window.open(link, '_blank');
+    });
+
+    // Helper: Extract Start Param across Telegram Desktop / Mobile WebApp
+    function getTelegramStartParam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let p = null;
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+            p = tg.initDataUnsafe.start_param;
+        } else if (urlParams.get('startapp')) {
+            p = urlParams.get('startapp');
+        } else if (urlParams.get('tgWebAppStartParam')) {
+            p = urlParams.get('tgWebAppStartParam');
+        } else if (window.location.hash.includes('tgWebAppStartParam=')) {
+            const m = window.location.hash.match(/tgWebAppStartParam=([^&]+)/);
+            if (m) p = decodeURIComponent(m[1]);
+        }
+        return p ? p.replace(/^v_/, '') : null;
     }
+
+    // Main Dispatcher Logic
+    async function initMiniApp() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const directSrc = urlParams.get('src');
+
+        // Mode 1: Direct stream URL in query params
+        if (directSrc) {
+            const title = urlParams.get('title') || 'TeraBox Video';
+            const size = urlParams.get('size') || 'Unknown';
+            const res = urlParams.get('res') || 'Auto';
+            const dur = urlParams.get('dur') || '--';
+            playVideo(directSrc, title, size, res, dur);
+            return;
+        }
+
+        const startParam = getTelegramStartParam();
+        const tgUser = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+
+        // If no video parameter at all, display empty state
+        if (!startParam) {
+            document.getElementById('no-video-box').style.display = 'block';
+            return;
+        }
+
+        // Show Loading State
+        document.getElementById('no-video-box').style.display = 'none';
+        document.getElementById('loading-box').style.display = 'block';
+
+        let userRecord = null;
+        let isVip = false;
+        let currentCredits = 0;
+        const userIdStr = tgUser && tgUser.id ? String(tgUser.id) : null;
+
+        if (tgUser) {
+            document.getElementById('user-status-bar').style.display = 'flex';
+            document.getElementById('user-display-name').innerText = tgUser.first_name || tgUser.username || `User #${tgUser.id}`;
+        }
+
+        // Check user subscription and credits
+        try {
+            const resp = await fetch(USERS_DB_URL, { cache: 'no-store' });
+            if (resp.ok) {
+                const usersDb = await resp.json();
+                if (userIdStr && usersDb[userIdStr]) {
+                    userRecord = usersDb[userIdStr];
+                }
+            }
+        } catch (e) {
+            console.warn("Could not fetch remote users.json, using fallback balance:", e);
+        }
+
+        const badgeEl = document.getElementById('user-badge');
+
+        if (userIdStr && !userRecord) {
+            // User never opened or joined the bot
+            document.getElementById('loading-box').style.display = 'none';
+            document.getElementById('join-bot-box').style.display = 'block';
+            badgeEl.className = "status-badge badge-exhausted";
+            badgeEl.innerText = "🔒 Not Registered";
+            return;
+        }
+
+        if (userRecord) {
+            isVip = userRecord.is_paid === 1;
+            currentCredits = parseInt(userRecord.credits, 10) || 0;
+
+            // Apply local session deduction if user already consumed a credit this session
+            const localDeductKey = `deducted_${userIdStr}_${startParam}`;
+            if (!isVip && localStorage.getItem(localDeductKey)) {
+                currentCredits = Math.max(0, currentCredits - 1);
+            }
+
+            if (isVip) {
+                badgeEl.className = "status-badge badge-vip";
+                badgeEl.innerText = "💎 VIP (Unlimited)";
+            } else if (currentCredits > 0) {
+                badgeEl.className = "status-badge badge-credits";
+                badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+            } else {
+                badgeEl.className = "status-badge badge-exhausted";
+                badgeEl.innerText = "⚠️ 0 Credits";
+            }
+        }
+
+        // Gate: Check if user has no credits
+        if (userRecord && !isVip && currentCredits <= 0) {
+            document.getElementById('loading-box').style.display = 'none';
+            document.getElementById('paywall-box').style.display = 'block';
+            return;
+        }
+
+        // Deduct 1 credit for free user with balance
+        if (userRecord && !isVip && currentCredits > 0) {
+            const localDeductKey = `deducted_${userIdStr}_${startParam}`;
+            if (!localStorage.getItem(localDeductKey)) {
+                localStorage.setItem(localDeductKey, "1");
+                currentCredits = Math.max(0, currentCredits - 1);
+                badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+            }
+        }
+
+        // Proceed to fetch and play video
+        document.getElementById('loading-title').innerText = "Streaming Video...";
+        document.getElementById('loading-desc').innerText = "Fetching fast download link from cloud...";
+
+        const abortCtrl = new AbortController();
+        const timeoutId = setTimeout(() => abortCtrl.abort(), 7500);
+
+        try {
+            const targetTbUrl = `https://1024terabox.com/s/${startParam}`;
+            const apiRes = await fetch(EXTRACTOR_API, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: targetTbUrl, password: "" }),
+                signal: abortCtrl.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (apiRes.ok) {
+                const data = await apiRes.json();
+                if (data && (data.download_url || data.stream_url || (data.list && data.list.length > 0))) {
+                    let item = (data.list && data.list.length > 0) ? data.list[0] : data;
+                    let title = item.server_filename || item.title || data.title || "TeraBox Video";
+                    let streamUrl = item.dlink || item.fast_download_url || data.download_url || data.stream_url;
+                    let size = item.size || data.size ? formatSize(item.size || data.size) : "Unknown";
+                    let duration = item.duration || data.duration ? formatDuration(item.duration || data.duration) : "--";
+                    let resolution = extractResFromTitle(title);
+
+                    playVideo(streamUrl, title, size, resolution, duration);
+                    return;
+                }
+            }
+        } catch (err) {
+            console.warn("Fast stream backend timeout/notice, loading in-app embed player:", err);
+        }
+
+        // Fallback: Embed player
+        playEmbedVideo(startParam);
+    }
+
+    initMiniApp();
 </script>
 
 </body>
