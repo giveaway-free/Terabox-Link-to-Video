@@ -582,5 +582,13 @@
     "res": "Auto (Adaptive)",
     "dur": "02:51",
     "type": "Video"
+  },
+  "1w8rHLMgYB3KbG2ywfuLqKg": {
+    "stream_url": "https://odd-pond-47f9.xodyzaju.workers.dev/fast_stream?token=VNbhHPR1y6kGfITqkCdrxpltenh7LlqSBep2204EJ93aMGlHslaOnFXLaWB0ie7z3-Xip0sxaHNum6YvNHaytFpSQZKRi9yo0O2m0rSatCBDAV0hJgeIxECND8VQovRFUKSxjjmq_dCEIyMvc6PsfzHmIeJyvcr1S-VDJjFyRvoJfsWlmhrDmqvKeGuY1mrczRGwb1cKGgFEWA9YgjlK3XuxFQQ2O2DnEL94O4CbhsuCVzBnqD1ewRV3sKjS9_3K5UcPDdL5ceJLhVsw9hIulsN2bkc0sYu_OrBjiWLETNGkZ6H29O3A-w3uzyvfcRTJg1U95A4fjcssGohH2_RP8cCBDYtns6KFSOdUsCslTPPa8nZ41XxNgrSwrYkZ.m3u8",
+    "title": "2026-08-05-03-23-44.mp4",
+    "size": "10.3 MB",
+    "res": "1080p",
+    "dur": "00:56",
+    "type": "Video"
   }
 }
