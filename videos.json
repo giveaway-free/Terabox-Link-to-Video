@@ -1086,5 +1086,13 @@
     "res": "Auto (Adaptive)",
     "dur": "00:36",
     "type": "Video"
+  },
+  "1bRgqpltwlTsJLW8iC0npGw": {
+    "stream_url": "https://dry-pond-7310.pysywi.workers.dev/fast_stream?token=vKmDiy9auh8CDIzzA0_0wpku_sMh7fFHw1oG0wGJpCpkgXAVHHfHajaehy4F0fuqb2Of2ZFdKcEbhfSxgPV97dt_I_TdzbpLD8Ioxvpv8nxBXltrRcuqHjkdpwcUn9fRyrPAKc8q2mZWMZDIU-J34ityfwCOK1yGDkeZmm3PBrCQ4ahA9ALRG7vROMnA8xKGtaEGBGxL_l-kJfsxA2ZwQgw1EOzlAFgmNOV0rNeh14OVrMPEzczf5Tn3ZYwdbHICQkzCJgAUZHMGy8BS9kOYbDXVhtitLZsyvu9L3UArXJde_v7rspQ4Z9rP9neRWjA0RjFKYbSnrwGZVC-7QJaW9pmfPQkhSFDFqesaLsh9SLFgvq62ZQ13FIslqiItYQ.m3u8",
+    "title": "VID_20230818_225035_502.mp4",
+    "size": "8.2 MB",
+    "res": "360p",
+    "dur": "03:12",
+    "type": "Video"
   }
 }
