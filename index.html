@@ -718,7 +718,7 @@
 
     const BOT_USERNAME = "leadox_bot";
     const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/main/users.json";
-    const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/main/videos.json";
+    const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
 
     let currentStreamUrl = "";
@@ -1138,8 +1138,8 @@
         let videosDb = {};
         try {
             const [usersRes, videosRes] = await Promise.allSettled([
-                fetch(USERS_DB_URL, { cache: 'no-store' }),
-                fetch(VIDEOS_DB_URL, { cache: 'no-store' })
+                fetch(`${USERS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' }),
+                fetch(`${VIDEOS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' })
             ]);
             if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
                 const uData = await usersRes.value.json();
@@ -1223,23 +1223,45 @@
         }
 
         // Fast Path 1: Instant playback from verified cached video stream in videos.json
-        if (videosDb && videosDb[startParam]) {
+        if (videosDb && videosDb[startParam] && videosDb[startParam].stream_url) {
             const cached = videosDb[startParam];
-            if (cached.stream_url) {
-                playVideo(
-                    cached.stream_url,
-                    cached.title || "TeraBox Video",
-                    cached.size || "Unknown",
-                    cached.res || "HD",
-                    cached.dur || "--"
-                );
-                return;
-            }
+            playVideo(
+                cached.stream_url,
+                cached.title || "TeraBox Video",
+                cached.size || "Unknown",
+                cached.res || "HD",
+                cached.dur || "--"
+            );
+            return;
+        }
+
+        // Fast Path 1B: Auto-retry loop in case post was just created and stream cache is finalizing
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            document.getElementById('loading-title').innerText = "Streaming Video...";
+            document.getElementById('loading-desc').innerText = `Connecting to high-speed stream (${attempt}/3)...`;
+            await new Promise(r => setTimeout(r, 1500));
+            try {
+                const retryRes = await fetch(`${VIDEOS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                if (retryRes.ok) {
+                    const freshDb = await retryRes.json();
+                    if (freshDb && freshDb[startParam] && freshDb[startParam].stream_url) {
+                        const cached = freshDb[startParam];
+                        playVideo(
+                            cached.stream_url,
+                            cached.title || "TeraBox Video",
+                            cached.size || "Unknown",
+                            cached.res || "HD",
+                            cached.dur || "--"
+                        );
+                        return;
+                    }
+                }
+            } catch (retryErr) {}
         }
 
         // Path 2: Fetch and play video via Extractor API
         document.getElementById('loading-title').innerText = "Streaming Video...";
-        document.getElementById('loading-desc').innerText = "Fetching fast download link from cloud...";
+        document.getElementById('loading-desc').innerText = "Generating fast stream link from cloud...";
 
         const abortCtrl = new AbortController();
         const timeoutId = setTimeout(() => abortCtrl.abort(), 7500);
@@ -1272,11 +1294,17 @@
                 }
             }
         } catch (err) {
-            console.warn("Fast stream backend timeout/notice, loading in-app embed player:", err);
+            console.warn("Fast stream backend notice:", err);
         }
 
-        // Fallback: Embed player
-        playEmbedVideo(startParam);
+        // Clean UI fallback if video is still extracting
+        document.getElementById('loading-title').innerText = "Video Ready";
+        document.getElementById('loading-desc').innerHTML = `
+            <div style="font-size:14px;color:#94a3b8;margin-bottom:12px;">ভিডিও লিঙ্ক প্রস্তুত হচ্ছে, দেখতে প্লে বাটনে চাপুন:</div>
+            <button onclick="location.reload()" style="padding:10px 24px;border-radius:10px;background:linear-gradient(135deg, #6366f1, #4f46e5);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:15px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
+                ▶ Play Video
+            </button>
+        `;
     }
 
     initMiniApp();
