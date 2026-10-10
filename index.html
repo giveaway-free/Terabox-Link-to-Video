@@ -1156,15 +1156,6 @@
 
         const badgeEl = document.getElementById('user-badge');
 
-        if (userIdStr && !userRecord) {
-            // User never opened or joined the bot
-            document.getElementById('loading-box').style.display = 'none';
-            document.getElementById('join-bot-box').style.display = 'block';
-            badgeEl.className = "status-badge badge-exhausted";
-            badgeEl.innerText = "🔒 Not Registered";
-            return;
-        }
-
         // Check if video is already unlocked/watched (Free replay forever)
         const localUnlockKey = `unlocked_${userIdStr || 'guest'}_${startParam}`;
         let alreadyWatched = false;
@@ -1175,36 +1166,49 @@
             alreadyWatched = true;
         }
 
+        // Determine user subscription and credits
         if (userRecord) {
             isVip = userRecord.is_paid === 1;
-            currentCredits = parseInt(userRecord.credits, 10) || 0;
-
-            if (isVip) {
-                badgeEl.className = "status-badge badge-vip";
-                badgeEl.innerText = "💎 VIP (Unlimited)";
-            } else if (alreadyWatched) {
-                badgeEl.className = "status-badge badge-vip";
-                badgeEl.innerText = `✅ Unlocked • ${currentCredits} Left`;
-            } else if (currentCredits > 0) {
-                badgeEl.className = "status-badge badge-credits";
-                badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+            const parsedCr = parseInt(userRecord.credits, 10);
+            currentCredits = isNaN(parsedCr) ? 60 : parsedCr;
+            localStorage.setItem(`credits_${userIdStr || 'guest'}`, currentCredits);
+        } else {
+            // New bot user: use localStorage cache or grant default 60 welcome credits
+            const localCredits = localStorage.getItem(`credits_${userIdStr || 'guest'}`);
+            if (localCredits !== null) {
+                currentCredits = parseInt(localCredits, 10) || 0;
             } else {
-                badgeEl.className = "status-badge badge-exhausted";
-                badgeEl.innerText = "⚠️ 0 Credits";
+                currentCredits = 60;
+                localStorage.setItem(`credits_${userIdStr || 'guest'}`, currentCredits);
             }
         }
 
+        if (isVip) {
+            badgeEl.className = "status-badge badge-vip";
+            badgeEl.innerText = "💎 VIP (Unlimited)";
+        } else if (alreadyWatched) {
+            badgeEl.className = "status-badge badge-vip";
+            badgeEl.innerText = `✅ Unlocked • ${currentCredits} Left`;
+        } else if (currentCredits > 0) {
+            badgeEl.className = "status-badge badge-credits";
+            badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+        } else {
+            badgeEl.className = "status-badge badge-exhausted";
+            badgeEl.innerText = "⚠️ 0 Credits";
+        }
+
         // Gate: Check if user has no credits AND has not unlocked this video before
-        if (userRecord && !isVip && !alreadyWatched && currentCredits <= 0) {
+        if (!isVip && !alreadyWatched && currentCredits <= 0) {
             document.getElementById('loading-box').style.display = 'none';
             document.getElementById('paywall-box').style.display = 'block';
             return;
         }
 
         // Deduct 1 credit ONLY on the first play; subsequent views are free
-        if (userRecord && !isVip && !alreadyWatched && currentCredits > 0) {
+        if (!isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
             currentCredits = Math.max(0, currentCredits - 1);
+            localStorage.setItem(`credits_${userIdStr || 'guest'}`, currentCredits);
             badgeEl.className = "status-badge badge-credits";
             badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
 
