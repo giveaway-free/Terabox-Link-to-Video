@@ -1590,5 +1590,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:22",
     "type": "Video"
+  },
+  "1gRDBIIRL8EDX4lThi55ZjQ": {
+    "stream_url": "https://iteraplay.tera-api23.workers.dev/fast_stream?token=kVchMd93pkticGa4fcNRUmihnpl38ZXw_D735H1uwl3TZX70OrB79hnyYLeyIKgdZnbqhlpdnR6XPwAwIdjkmwZJ82DifwLhPg3ODUQYokiAvH9Zp-HHCmxNFZgk--hLjI8Jazea82Ug1UsmHbIHjYSiSezsr_snoY5JaqBRvI5WmWxs3B_p5-exxt4qN_WiMT4Baf6E0DsfpeF8NW8UPbm-R01n3L5Bn5V7Dc0v0vzp6ENWDsBXLB1Eerg8GrM9XDcoykgvXJRLOKnf58n4Pdc7Ypjupml18Bqxpd_Lf01cUCrBJjCFjRV9vbmdyuRMnaHI7RFyokEY48wIZoLAzqaLiQfCOAvp0Sfqr3o24LRAPy9ftJhEeAwhOOKD.m3u8",
+    "title": "2026-08-05-03-23-44.mp4",
+    "size": "10.3 MB",
+    "res": "1080p",
+    "dur": "00:56",
+    "type": "Video"
   }
 }
