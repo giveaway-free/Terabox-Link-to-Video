@@ -1134,5 +1134,13 @@
     "res": "480p",
     "dur": "04:53",
     "type": "Video"
+  },
+  "1kK-WrdrAhyn_zhCsSOAECg": {
+    "stream_url": "https://square-river-d2d0.zylebyja.workers.dev/fast_stream?token=93iWKDPlbZF-_IiAVmw3IHUah5twx9r_-sNvylDpJ_n1rxmPntE7LN_jXhP-BiZxbRYwWxvfK4dDFlJIC8AskBYV3J31x9H513bft7DnMVJlXCJDu-9gnUIfFZwPsnMRZCuKsffTE18CPAQtgM3cLAq3LV_5W_sWIkaFDwFx15btR2lqTV9TjIvIaJKzfz0TCfXmCdlSTwTftACP94iE4Bzo8DRQ95PAIBJyV9FoS3BiN-O_HuXwd2wvttt38YoJSBIMp-x4SPDLinsSTq6bbaRUKsUaQH4vuvVX6jRcVzsbafKnXQzIe0iDQ46bVElMz92qjTYUXpRwEEh4CpQJWjFNCJCsV4H_bx-wFmC-kxeeKS4GkTqqyksNqpIpPWXjGg.m3u8",
+    "title": "2025-10-21-15-55-05(13).mp4",
+    "size": "16.0 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:00",
+    "type": "Video"
   }
 }
