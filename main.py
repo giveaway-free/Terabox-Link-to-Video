@@ -86,6 +86,14 @@ def init_db():
             created_at TEXT
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS watched_videos (
+            user_id INTEGER,
+            video_id TEXT,
+            created_at TEXT,
+            PRIMARY KEY (user_id, video_id)
+        )
+    ''')
     
     default_settings = {
         "admin_id": "553826070",
@@ -235,6 +243,31 @@ def check_paid_status(user_id):
             conn.close()
             return False
     return False
+
+def has_watched_video(user_id, vid_id):
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('SELECT 1 FROM watched_videos WHERE user_id = ? AND video_id = ?', (user_id, vid_id))
+        row = c.fetchone()
+        conn.close()
+        return row is not None
+    except Exception:
+        return False
+
+def mark_watched_video(user_id, vid_id):
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('INSERT OR IGNORE INTO watched_videos (user_id, video_id, created_at) VALUES (?, ?, datetime("now"))', (user_id, vid_id))
+        conn.commit()
+        conn.close()
+        try:
+            sync_users_json()
+        except Exception:
+            pass
+    except Exception:
+        pass
 
 def is_user_in_chat(user_id):
     req_group = get_setting("required_group_id")
@@ -1270,12 +1303,19 @@ def handle_direct_video_watch(message, vid_id):
         )
         return
 
-    # 5. Deduct credit if not paid
+    # 5. Check if already watched (prevent duplicate deduction)
+    already_unlocked = has_watched_video(user_id, vid_id)
     if not is_paid:
-        update_credits(user_id, -1)
-        user = get_user(user_id)
-        rem_balance = f"{user[2]} Credits"
+        if already_unlocked:
+            user = get_user(user_id)
+            rem_balance = f"{user[2]} Credits (Already Unlocked)"
+        else:
+            update_credits(user_id, -1)
+            mark_watched_video(user_id, vid_id)
+            user = get_user(user_id)
+            rem_balance = f"{user[2]} Credits"
     else:
+        mark_watched_video(user_id, vid_id)
         rem_balance = "Unlimited (VIP Active)"
 
     # 6. Build Mini App Player URL
@@ -1298,9 +1338,7 @@ def handle_direct_video_watch(message, vid_id):
 
     markup = InlineKeyboardMarkup()
     play_btn_app = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_app"), web_app=WebAppInfo(url=player_url))
-    play_btn_web = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_web"), url=player_url)
     markup.add(play_btn_app)
-    markup.add(play_btn_web)
 
     clean_t = clean_text_for_markdown(title)
     clean_s = clean_text_for_markdown(size)
@@ -2143,8 +2181,15 @@ def handle_message(message):
                 )
             except Exception:
                 pass
+            m_code = re.search(r"/s/([a-zA-Z0-9_-]+)", target_url)
+            v_id_extracted = m_code.group(1) if m_code else hashlib.md5(target_url.encode()).hexdigest()[:10]
+            already_unlocked = has_watched_video(user_id, v_id_extracted)
             if not is_paid:
-                update_credits(user_id, -1)
+                if not already_unlocked:
+                    update_credits(user_id, -1)
+                    mark_watched_video(user_id, v_id_extracted)
+            else:
+                mark_watched_video(user_id, v_id_extracted)
 
             encoded_stream_url = quote(download_link, safe='')
             encoded_title = quote(title, safe='')
@@ -2165,9 +2210,7 @@ def handle_message(message):
             
             markup = InlineKeyboardMarkup()
             play_btn_app = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_app"), web_app=WebAppInfo(url=player_url))
-            play_btn_web = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_web"), url=player_url)
             markup.add(play_btn_app)
-            markup.add(play_btn_web)
             
             clean_t = clean_text_for_markdown(title)
             clean_s = clean_text_for_markdown(size)
@@ -2211,8 +2254,23 @@ def sync_users_json():
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
         rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry FROM users').fetchall()
+        try:
+            watched_rows = c.execute('SELECT user_id, video_id FROM watched_videos').fetchall()
+        except Exception:
+            watched_rows = []
         conn.close()
-        data = {str(r[0]): {'username': r[1], 'credits': r[2], 'is_paid': r[3], 'paid_expiry': r[4]} for r in rows}
+        watched_map = {}
+        for uid, vid in watched_rows:
+            watched_map.setdefault(str(uid), []).append(vid)
+        data = {
+            str(r[0]): {
+                'username': r[1],
+                'credits': r[2],
+                'is_paid': r[3],
+                'paid_expiry': r[4],
+                'watched': watched_map.get(str(r[0]), [])
+            } for r in rows
+        }
         with open('users.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
     except Exception as e:
@@ -2223,6 +2281,13 @@ def start_render_health_server():
     from urllib.parse import urlparse, parse_qs
     port = int(os.environ.get("PORT", 8080))
     class HealthHandler(http.server.BaseHTTPRequestHandler):
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "*")
+            self.end_headers()
+
         def do_OPTIONS(self):
             self.send_response(200)
             self.send_header("Access-Control-Allow-Origin", "*")
@@ -2259,6 +2324,32 @@ def start_render_health_server():
                     self.wfile.write(json.dumps({"ok": True, "exists": u is not None, "is_paid": 1 if is_p else 0, "credits": cr}).encode("utf-8"))
                 else:
                     self.wfile.write(b'{"ok": false, "error": "missing_user_id"}')
+                return
+
+            if parsed.path == "/api/watch":
+                qs = parse_qs(parsed.query)
+                uid = qs.get("user_id", [None])[0]
+                vid = qs.get("video_id", [None])[0]
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                if uid and vid:
+                    try:
+                        uid_int = int(uid)
+                        is_p = check_paid_status(uid_int)
+                        already = has_watched_video(uid_int, vid)
+                        if not already:
+                            mark_watched_video(uid_int, vid)
+                            if not is_p:
+                                update_credits(uid_int, -1)
+                        u = get_user(uid_int)
+                        cr = u[2] if u else 0
+                        self.wfile.write(json.dumps({"ok": True, "already_watched": already, "credits": cr, "is_paid": 1 if is_p else 0}).encode("utf-8"))
+                    except Exception as err:
+                        self.wfile.write(json.dumps({"ok": False, "error": str(err)}).encode("utf-8"))
+                else:
+                    self.wfile.write(b'{"ok": false, "error": "missing_params"}')
                 return
 
             self.send_response(200)
