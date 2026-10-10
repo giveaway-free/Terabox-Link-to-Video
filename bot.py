@@ -72,6 +72,20 @@ def init_db():
             invite_link TEXT
         )
     ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS video_cache (
+            video_id TEXT PRIMARY KEY,
+            terabox_url TEXT,
+            stream_url TEXT,
+            title TEXT,
+            size TEXT,
+            res TEXT,
+            dur TEXT,
+            file_type TEXT,
+            created_at TEXT
+        )
+    ''')
     
     default_settings = {
         "admin_id": "553826070",
@@ -271,6 +285,45 @@ def get_user_channel_invite_link(user_id):
     fallback_link = get_target_group_link()
     return fallback_link if fallback_link and fallback_link != "https://t.me/" else "https://t.me/"
 
+def resolve_group_chat():
+    req_group = get_setting("required_group_id")
+    target_link = get_setting("target_channel_link")
+    
+    candidates = []
+    if target_link and "t.me/" in str(target_link):
+        h = str(target_link).split("t.me/")[-1].replace("/", "").strip()
+        if h and not h.startswith("+"):
+            candidates.append(f"@{h}")
+            candidates.append(h)
+    if req_group:
+        if "t.me/" in str(req_group):
+            h = str(req_group).split("t.me/")[-1].replace("/", "").strip()
+            if h and not h.startswith("+"):
+                candidates.append(f"@{h}")
+                candidates.append(h)
+        elif str(req_group).startswith("@"):
+            candidates.append(str(req_group))
+            candidates.append(str(req_group)[1:])
+        elif str(req_group).startswith("-100") or str(req_group).lstrip("-").isdigit():
+            try:
+                candidates.append(int(req_group))
+            except Exception:
+                pass
+            candidates.append(str(req_group))
+
+    invalid = ["-1001234567890", "@your_channel", "@yourchannel", "your_channel", "yourchannel", ""]
+    seen = set()
+    for c in candidates:
+        if c and str(c) not in invalid and c not in seen:
+            seen.add(c)
+            try:
+                ch = bot.get_chat(c)
+                if ch:
+                    return ch
+            except Exception:
+                continue
+    return None
+
 def get_cached_group_info():
     req_group = get_setting("required_group_id")
     if not req_group or str(req_group) in ["-1001234567890", ""]:
@@ -282,7 +335,10 @@ def get_cached_group_info():
     cached_group_id = get_setting("cached_for_group_id")
 
     try:
-        chat = bot.get_chat(req_group)
+        chat = resolve_group_chat()
+        if not chat:
+            return cached_photo or None, cached_title or ""
+
         current_title = chat.title or ""
         current_photo_id = ""
         if chat.photo:
@@ -328,8 +384,7 @@ def get_cached_group_info():
                 return None, current_title
 
         return cached_photo or None, current_title
-    except Exception as e:
-        print(f"Error checking live group info: {e}")
+    except Exception:
         return cached_photo or None, cached_title or ""
 
 # --- GENERAL UTILS ---
@@ -1113,12 +1168,161 @@ def change_language_command(message):
     prompt_text = get_txt(user_id, "select_lang_prompt")
     bot.reply_to(message, prompt_text, parse_mode="Markdown", reply_markup=language_selection_markup())
 
+def get_cached_video(vid_id):
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('SELECT stream_url, title, size, res, dur, file_type, terabox_url FROM video_cache WHERE video_id = ?', (vid_id,))
+        row = c.fetchone()
+        conn.close()
+        return row
+    except Exception:
+        return None
+
+def handle_direct_video_watch(message, vid_id):
+    user_id = message.from_user.id
+    username = message.from_user.username or message.from_user.first_name or "User"
+    
+    # 1. Register user if not exists
+    user = get_user(user_id)
+    if not user:
+        register_user(user_id, username)
+        user = get_user(user_id)
+        
+    # 2. Check force-join channel membership
+    if not is_user_in_chat(user_id):
+        invite_link = get_target_group_link()
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton(text="📢 Join Required Channel", url=invite_link))
+        bot_username = get_bot_username()
+        markup.add(InlineKeyboardButton(text="✅ Joined! Watch Video", url=f"https://t.me/{bot_username}?start=v_{vid_id}"))
+        bot.send_message(
+            message.chat.id,
+            "⚠️ **Channel Membership Required!**\n\n"
+            "এই ভিডিওটি ইনবিল্ট মিনি অ্যাপে দেখতে হলে প্রথমে আমাদের চ্যানেলে জয়েন করুন। জয়েন করার পর নিচের **'Joined! Watch Video'** বাটনে চাপ দিন।",
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
+        return
+
+    # 3. Check Subscription & Credits
+    is_paid = check_paid_status(user_id)
+    curr_credits = user[2] if user else 0
+    if not is_paid and curr_credits <= 0:
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton(text="💳 Buy VIP Subscription", callback_data="buy_plan"))
+        markup.add(InlineKeyboardButton(text="🎁 Refer Friends for Credits", callback_data="refer_earn"))
+        bot.send_message(
+            message.chat.id,
+            "⚠️ **আপনার ফ্রি ক্রেডিট শেষ হয়ে গেছে!**\n\n"
+            "ইনবিল্ট মিনি অ্যাপে আনলিমিটেড ভিডিও দেখতে ভিআইপি সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট আর্ন করুন।",
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
+        return
+
+    # 4. Fetch Video Info from Cache or API
+    status_msg = bot.send_message(message.chat.id, "⚡ **Preparing Mini App Video Player...**", parse_mode="Markdown")
+    cached = get_cached_video(vid_id)
+    
+    stream_url = None
+    title = "TeraBox Video"
+    size = "Unknown"
+    resolution = "Auto"
+    duration = "--"
+    file_type = "Video"
+    
+    if cached and cached[0]:
+        stream_url = cached[0]
+        title = cached[1] or title
+        size = cached[2] or size
+        resolution = cached[3] or resolution
+        duration = cached[4] or duration
+        file_type = cached[5] or file_type
+    else:
+        target_url = cached[6] if (cached and cached[6]) else f"https://1024terabox.com/s/{vid_id}"
+        t, dl, sz, res, dur, ft = get_terabox_media(target_url)
+        if dl:
+            stream_url = dl
+            title = t or title
+            size = sz or size
+            resolution = res or resolution
+            duration = dur or duration
+            file_type = ft or file_type
+
+    if not stream_url:
+        bot.edit_message_text(
+            "❌ ভিডিও স্ট্রিম লিংক লোড করা সম্ভব হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
+            chat_id=message.chat.id,
+            message_id=status_msg.message_id
+        )
+        return
+
+    # 5. Deduct credit if not paid
+    if not is_paid:
+        update_credits(user_id, -1)
+        user = get_user(user_id)
+        rem_balance = f"{user[2]} Credits"
+    else:
+        rem_balance = "Unlimited (VIP Active)"
+
+    # 6. Build Mini App Player URL
+    encoded_stream_url = quote(stream_url, safe='')
+    encoded_title = quote(title, safe='')
+    encoded_size = quote(size, safe='')
+    encoded_res = quote(resolution, safe='')
+    encoded_dur = quote(duration, safe='')
+    encoded_type = quote(file_type, safe='')
+    
+    player_url = (
+        f"{MY_PLAYER_URL}?"
+        f"src={encoded_stream_url}&"
+        f"title={encoded_title}&"
+        f"size={encoded_size}&"
+        f"res={encoded_res}&"
+        f"dur={encoded_dur}&"
+        f"type={encoded_type}"
+    )
+
+    markup = InlineKeyboardMarkup()
+    play_btn_app = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_app"), web_app=WebAppInfo(url=player_url))
+    play_btn_web = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_web"), url=player_url)
+    markup.add(play_btn_app)
+    markup.add(play_btn_web)
+
+    clean_t = clean_text_for_markdown(title)
+    clean_s = clean_text_for_markdown(size)
+    clean_r = clean_text_for_markdown(resolution)
+    clean_d = clean_text_for_markdown(duration)
+
+    reply_text = (
+        f"🎬 *Title:* {clean_t}\n"
+        f"📦 *Size:* {clean_s}\n"
+        f"⚡ *Resolution:* {clean_r}\n"
+        f"⏱️ *Duration:* {clean_d}\n"
+        f"💳 *Remaining Balance:* {rem_balance}\n\n"
+        f"{get_txt(user_id, 'stream_play_prompt')}"
+    )
+
+    bot.edit_message_text(
+        reply_text,
+        chat_id=message.chat.id,
+        message_id=status_msg.message_id,
+        reply_markup=markup,
+        parse_mode="Markdown"
+    )
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     user_id = message.from_user.id
     username = message.from_user.username or message.from_user.first_name or "User"
     
     command_args = message.text.split()
+    if len(command_args) > 1 and command_args[1].startswith("v_"):
+        vid_id = command_args[1][2:]
+        handle_direct_video_watch(message, vid_id)
+        return
+
     referrer_id = None
     if len(command_args) > 1 and command_args[1].isdigit():
         referrer_id = int(command_args[1])
