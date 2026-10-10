@@ -1622,5 +1622,13 @@
     "res": "Auto (Adaptive)",
     "dur": "02:19",
     "type": "Video"
+  },
+  "1P9Y3M0M7GUWu5j6NnBm2TA": {
+    "stream_url": "https://iteraplay.tera-api73.workers.dev/fast_stream?token=a_g_yuE39Z7nHFok-wdTYZUCJNP9lzQ_KCMtpjiNaLDUKj-R5YddLxG2sKVI6fsZjV0BVZuyca7gJyvj_cw9mRUxlZl5ULbGzJiJmyC2c1lrDW-D7flJzm1MotTRQ87nLGQTViwpHF-a7PuUnNc_O5Om81QGMOCpb2bvelVu_gn8Z9FBlMWsL76newT-yRHwyZldvXXwYHJbP4ocYrmnJOCp7NjIX4zk6y53MxbKvacD2iiJJDBV0K0HaVC9P5f5BKUyute2Y_CQzq6wxfi4ouG7-E1zwRgazBL1Z1yyFUV3oD8YF0Q0aZYUSqlSU_URXjhyng5S8lEyKdk92HdS7BF0Gbv77AyHIJzj9klI.m3u8",
+    "title": "IndianC.mp4",
+    "size": "19.5 MB",
+    "res": "480p",
+    "dur": "02:51",
+    "type": "Video"
   }
 }
