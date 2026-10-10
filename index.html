@@ -208,11 +208,13 @@
             border: none;
         }
 
-        /* Guaranteed Fullscreen Fallback */
+        /* Fullscreen Fallback & Centering */
         .video-wrapper.pseudo-fullscreen {
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
             max-height: 100vh !important;
@@ -221,8 +223,9 @@
             border: none !important;
             margin: 0 !important;
             display: flex !important;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
             background: #000 !important;
         }
 
@@ -230,7 +233,16 @@
             max-height: 100vh !important;
             height: 100% !important;
             width: 100% !important;
-            object-fit: contain;
+            object-fit: contain !important;
+            flex: 1 !important;
+        }
+
+        /* Fill Screen Mode (Zero blank space) */
+        .video-wrapper.fill-screen video,
+        .video-wrapper.pseudo-fullscreen.fill-screen video {
+            object-fit: cover !important;
+            height: 100% !important;
+            min-height: 100% !important;
         }
 
         /* In-App Floating Mini Player Window */
@@ -674,6 +686,11 @@
                         <svg viewBox="0 0 24 24"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z"/></svg>
                     </button>
 
+                    <!-- Aspect / Zoom to Fill Button -->
+                    <button class="ctrl-btn" id="btn-aspect" title="Fill Screen / Fit">
+                        <svg viewBox="0 0 24 24"><path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z"/></svg>
+                    </button>
+
                     <!-- Fullscreen Button -->
                     <button class="ctrl-btn" id="btn-fullscreen" title="Fullscreen">
                         <svg viewBox="0 0 24 24" id="fs-icon"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
@@ -897,43 +914,82 @@
         }
     }
 
-    btnFullscreen.addEventListener('click', () => {
+    const btnAspect = document.getElementById('btn-aspect');
+    if (btnAspect) {
+        btnAspect.addEventListener('click', () => {
+            videoWrapper.classList.toggle('fill-screen');
+            const isFilled = videoWrapper.classList.contains('fill-screen');
+            showOverlay(isFilled ? '⛶ Zoom to Fill' : '⛶ Original Fit');
+        });
+    }
+
+    btnFullscreen.addEventListener('click', async () => {
+        if (tg) {
+            try {
+                if (tg.expand) tg.expand();
+                if (tg.requestFullscreen && !tg.isFullscreen) tg.requestFullscreen();
+            } catch (_) {}
+        }
+
         const isCurrentlyFs = !!(
             document.fullscreenElement ||
             document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
             videoWrapper.classList.contains('pseudo-fullscreen')
         );
 
         if (!isCurrentlyFs) {
-            if (videoWrapper.requestFullscreen) {
-                videoWrapper.requestFullscreen().catch(() => {
-                    tryDirectVideoFullscreen();
-                });
-            } else if (videoWrapper.webkitRequestFullscreen) {
-                videoWrapper.webkitRequestFullscreen();
-            } else {
-                tryDirectVideoFullscreen();
+            let directSuccess = false;
+            // Native video fullscreen first (fills entire monitor screen)
+            try {
+                if (video.requestFullscreen) {
+                    await video.requestFullscreen();
+                    directSuccess = true;
+                } else if (video.webkitRequestFullscreen) {
+                    await video.webkitRequestFullscreen();
+                    directSuccess = true;
+                } else if (video.webkitEnterFullscreen) {
+                    video.webkitEnterFullscreen();
+                    directSuccess = true;
+                }
+            } catch (err) {
+                console.warn("video.requestFullscreen failed:", err);
             }
+
+            if (!directSuccess) {
+                try {
+                    if (videoWrapper.requestFullscreen) {
+                        await videoWrapper.requestFullscreen();
+                        directSuccess = true;
+                    } else if (videoWrapper.webkitRequestFullscreen) {
+                        await videoWrapper.webkitRequestFullscreen();
+                        directSuccess = true;
+                    }
+                } catch (wErr) {
+                    console.warn("videoWrapper.requestFullscreen failed:", wErr);
+                }
+            }
+
+            if (!directSuccess) {
+                videoWrapper.classList.add('pseudo-fullscreen');
+            }
+            updateFsIcon(true);
         } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen().catch(() => {});
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
+            try {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    await document.webkitExitFullscreen();
+                }
+            } catch (_) {}
+            if (tg && tg.exitFullscreen && tg.isFullscreen) {
+                try { tg.exitFullscreen(); } catch (_) {}
             }
             videoWrapper.classList.remove('pseudo-fullscreen');
             updateFsIcon(false);
         }
     });
-
-    function tryDirectVideoFullscreen() {
-        if (video.webkitEnterFullscreen) {
-            video.webkitEnterFullscreen();
-            updateFsIcon(true);
-        } else {
-            videoWrapper.classList.add('pseudo-fullscreen');
-            updateFsIcon(true);
-        }
-    }
 
     document.addEventListener('fullscreenchange', () => {
         updateFsIcon(!!document.fullscreenElement);
