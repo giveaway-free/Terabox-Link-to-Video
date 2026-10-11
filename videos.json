@@ -7382,5 +7382,13 @@
     "res": "Auto (Adaptive)",
     "dur": "05:01",
     "type": "Video"
+  },
+  "104dDT4JAymcb2y6kQxpQXA": {
+    "stream_url": "https://iteraplay.tera-api37.workers.dev/fast_stream?token=gl4w65GiNqo5AIE_Ot-NykwgFKB6tHVlmayYsM_INBpOuutvoPQN_9H_2dFktF0aUXZp6DuLJZ8LNncT0gAH1sIMSD27oDh5HeYMtLTXs3QusAL-DIWApCP6pjNwYYNP1ZUXn7F71rOH2lb0753IYn-Lmxzz7cTUjmI5rgT0r9W5rohPnKgyg7BmgEDuXVjCdtKBVeKgh7A3_Krb3fKHpsli0jIcY4mnw6bjEAhQFkruyo07sOLCZEKe9_DwKsiys9lAhSlR6BcxYqidfwNoVDAahLN85U79ZGdN-S_vvi17kHW6zN4CE3k_Mv2asATtIjbQv0GeVNciJh8qQmT9ufTNEJj-bVnrbF_FaYpNTeFoqwMqAuEIM725O9LD.m3u8",
+    "title": "2023-11-08-02-27-04(1).mp4",
+    "size": "1.4 MB",
+    "res": "480p",
+    "dur": "00:38",
+    "type": "Video"
   }
 }
