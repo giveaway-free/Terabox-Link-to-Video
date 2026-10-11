@@ -4,14 +4,11 @@
     "credits": 0,
     "is_paid": 1,
     "paid_expiry": "2026-10-16 04:38:04",
-    "watched": [
-      "1_7bvP3qftWkHKvUB3RRoUA",
-      "1n6651uihulnXy09JMKzR2Q"
-    ]
+    "watched": []
   },
   "5452302287": {
     "username": "Whitedevilbdteam",
-    "credits": 10,
+    "credits": 60,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
@@ -39,7 +36,14 @@
   },
   "6525538939": {
     "username": "Mohitdff",
-    "credits": 10,
+    "credits": 55,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "watched": []
+  },
+  "7177953110": {
+    "username": "Tony787777",
+    "credits": 60,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
