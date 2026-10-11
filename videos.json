@@ -9086,5 +9086,13 @@
     "res": "480p",
     "dur": "09:05",
     "type": "Video"
+  },
+  "1Ql7FrCOQZyVwmvrmK1j91g": {
+    "stream_url": "https://iteraplay.tera-api32.workers.dev/fast_stream?token=fJc75rJEGNmK2ayjpVJ0EL2VOBf41w5rVTlSB1i_rBp6MetXZNtiajH4GHZX7YRO85TxSmisYwjeY_6WpWDbLEGCEe2Ii0BVRw1JVNfkWDCIxebG8PWOc-MKG5E30Bu7FpCwAu95rQ-dNt3gUayaHHAEWjvME_RSLkdje31vNLIa--4iP-r3psajoYsnUGSGIRwkjVOClGANRLbCBNiniJnkftqAOLsWPKNY1fL0j43GPxZB1FsGoerLomyYyaQhlVVp1Hi_syml6--MX5QK82Ic3u6rjwB8FM5P3KVE_IFljWc85IQhhMy_8-AcIXbPi2Sb-GDXNhEk5W6FvrtEieHXtO199DWgPtT15OyT-DMLqS3tQZX9Rxllk_6ChpQk7Dgf4YJsODd0RWg6vIL1-cOgOfLqfNIlkDOXJmXbNOvF29Si7hL6k6v1ybY-tutSX9BKnFTV73GL9UPBcBxC4vyGE9tbChmBiZc.m3u8",
+    "title": "\u09b8\u09be\u09ae\u09bf\u09af\u09bc\u09be\u09ad\u09be\u09ac\u09c0.mp4",
+    "size": "9.6 MB",
+    "res": "480p",
+    "dur": "03:06",
+    "type": "Video"
   }
 }
