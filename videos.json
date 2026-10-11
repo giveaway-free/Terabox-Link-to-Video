@@ -11878,5 +11878,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:20",
     "type": "Video"
+  },
+  "1B2k8pBxSwnDyxftjJF1ISg": {
+    "stream_url": "https://red-sea-c512.patiho.workers.dev/fast_stream?token=tAj5gdaaGjDobdUcsNOSfFIM4AjIxG12jBdeJC5c5naRpO_jxzP16knv4pmo6G8dPoMVyW6NcDvlqvFZ48RNzR5dj_t9RF_BtwXbULCPTiBiHHfhjUVcOIPjyC-gfywf6vY7l0TsShDkamzN_WR7MbyB82-sF9FbUjrCCHKLNns48_WcOxj1GmSABLtwjbzLI2jRjtajiB8RqEgpXtX_LQ1tW-_ZIHTIysDtOmzSnZ8jGeJznBp-2-uKr9-ur9xgbIBDOWp6N50l8HGmF9NqwhfrSFMmqGThjA8Y_7FmdrCqM2z1OGucLWtXSZZI9JwhOFhlfogCQWS21uzw7g9Ij0LBNRyX6x40HEBWhOPFj3TvaM11wKX-8ktg0ldQ.m3u8",
+    "title": "2026-08-24-15-49-52.mp4",
+    "size": "13.7 MB",
+    "res": "480p",
+    "dur": "04:59",
+    "type": "Video"
   }
 }
