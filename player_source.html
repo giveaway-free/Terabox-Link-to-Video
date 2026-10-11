@@ -1197,13 +1197,15 @@
         const BOT_BACKEND_URL = "https://terabox-link-to-video-1.onrender.com";
         let liveStatusFetched = false;
         let baseCredits = 10;
+        let serverAlreadyWatched = false;
 
-        // Step 1: Live balance from Render backend (Instant SQLite lookup, 0ms cache delay)
+        // Step 1: Live balance and watched state from Render backend (Instant SQLite lookup, 0ms cache delay)
         if (userIdStr) {
             try {
                 const liveCtrl = new AbortController();
                 const liveTimeout = setTimeout(() => liveCtrl.abort(), 2000);
-                const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}`, {
+                const queryVid = startParam ? `&video_id=${encodeURIComponent(startParam)}` : '';
+                const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}${queryVid}`, {
                     signal: liveCtrl.signal
                 });
                 clearTimeout(liveTimeout);
@@ -1214,6 +1216,9 @@
                         if (typeof liveData.credits === 'number') {
                             baseCredits = liveData.credits;
                             liveStatusFetched = true;
+                        }
+                        if (liveData.already_watched) {
+                            serverAlreadyWatched = true;
                         }
                     }
                 }
@@ -1258,11 +1263,14 @@
         // Check if video is already unlocked/watched (Free replay forever)
         const localUnlockKey = `unlocked_${userIdStr || 'guest'}_${startParam}`;
         let alreadyWatched = false;
-        if (localStorage.getItem(localUnlockKey) === "1") {
+        if (serverAlreadyWatched) {
             alreadyWatched = true;
-        }
-        if (userRecord && userRecord.watched && Array.isArray(userRecord.watched) && userRecord.watched.includes(startParam)) {
+            localStorage.setItem(localUnlockKey, "1");
+        } else if (localStorage.getItem(localUnlockKey) === "1") {
             alreadyWatched = true;
+        } else if (userRecord && userRecord.watched && Array.isArray(userRecord.watched) && userRecord.watched.includes(startParam)) {
+            alreadyWatched = true;
+            localStorage.setItem(localUnlockKey, "1");
         }
 
         currentCredits = Math.max(0, baseCredits);
@@ -1288,7 +1296,7 @@
             return;
         }
 
-        // Deduct 1 credit for new video watch and sync with bot database
+        // Deduct 1 credit ONLY if this is genuinely a new video watch
         if (!isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
             currentCredits = Math.max(0, currentCredits - 1);
@@ -1308,17 +1316,11 @@
                     .catch(() => {});
             }
         } else if (alreadyWatched) {
+            // Already unlocked replay - NEVER deduct credit!
             localStorage.setItem(localUnlockKey, "1");
-            // On replay, also verify live credits in background to keep display 100% accurate
-            if (userIdStr) {
-                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}`)
-                    .then(r => r.json())
-                    .then(d => {
-                        if (d && d.ok && typeof d.credits === 'number') {
-                            currentCredits = d.credits;
-                            badgeEl.innerText = `✅ Unlocked • ${currentCredits} Left`;
-                        }
-                    })
+            if (userIdStr && !serverAlreadyWatched) {
+                // If server didn't have this record yet, sync it with replay=1 so server never deducts
+                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}&replay=1`)
                     .catch(() => {});
             }
         }
