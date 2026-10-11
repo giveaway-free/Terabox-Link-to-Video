@@ -7470,5 +7470,13 @@
     "res": "1080p",
     "dur": "03:14",
     "type": "Video"
+  },
+  "1nCPjBC4XlvJMIK773PH2Tg": {
+    "stream_url": "https://winter-smoke-ec98.tukylese.workers.dev/fast_stream?token=mphzeg5EtFwnHULHPugoteeemDMK9IKfMmfEk5SWUQvUmAdxe40D618I4dKOfyiJ4q7hJ8K1Gy5xSqVUzcN8rP-sK1wL9xfCrvgwTmUZ206vmHIfRd4zDhBNwwDDsvrUtfJ_q-XnEneQ7rZwL00bOfrx-4BVqIAHrwWD8K-HLe4C4mvi9vyEUnxiMyb0B35LyUkN49bkmOZNltZJ8MsK70x-D9r_3704PyVuTJd12N_NV9Akgu0_8rhBn4X9RKWn9lUBV8gkTMMDt7d6m7vaN_6GvJwgi10TnmvuEfvzQSLSV35_HIq9BLYGX628Af0Kk7-9NbXLjGqykLBit2SBZndNJb15Xq1OnJnb-eAvVK62mpU67ArPy-kw3DB5.m3u8",
+    "title": "2023-03-12-14-10-18.mp4",
+    "size": "15.0 MB",
+    "res": "3704p",
+    "dur": "01:38",
+    "type": "Video"
   }
 }
