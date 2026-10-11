@@ -6614,5 +6614,13 @@
     "res": "1080p",
     "dur": "02:25",
     "type": "Video"
+  },
+  "1MOiDbGvBwoj6hjHRszGqSQ": {
+    "stream_url": "https://steep-smoke-576b.ryreveco.workers.dev/fast_stream?token=F85AuXdfDgeMlfysrIuV1gxGRpt_OK0-vh2vT-UyWTKAfLghQLqDFkF_Pd_f6z6aq7DGBCSBmtW8QiPMjGudk3Jz7obOjWplEeWpnTREA9uFgzOjCXCQPDcdyuw5ZBh4U0vdxiUn93E4zcZJoNOk2SpkW2jQkacYAmKSU5PnpK01vGzYULRDIxXrRZTRsDGZnifjZihAYwoU2RNt8A04Z9xjM9_djmdfYt1fafhJPvLKUuK8WwnrSfkzuHlE-tc3sAkPp2Dl6qeRqdEM_41IkEABj4iUaq3UPV770Y9FykqlAh9t8mJy8KBKbXZBVvQIJblW9BmJpcifbbYsfgb2luFPb_c7Fc1t28oEtEOuCkZ8gihDFrqZhi0Y1hq7.m3u8",
+    "title": "2025-05-13-20-15-09.mp4",
+    "size": "5.6 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:46",
+    "type": "Video"
   }
 }
