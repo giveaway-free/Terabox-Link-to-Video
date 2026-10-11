@@ -1430,6 +1430,20 @@ def send_welcome(message):
         handle_direct_video_watch(message, vid_id)
         return
 
+    # Direct button routing for Upgrade VIP and Invite
+    if len(command_args) > 1:
+        deep_cmd = command_args[1].lower()
+        if deep_cmd in ["buy_vip", "plan", "vip", "buy", "upgrade", "update_plan", "plans"]:
+            if not get_user(user_id):
+                register_user(user_id, username)
+            buy_info(message)
+            return
+        if deep_cmd in ["refer", "invite", "ref", "invite_friends"]:
+            if not get_user(user_id):
+                register_user(user_id, username)
+            refer_info(message)
+            return
+
     referrer_id = None
     if len(command_args) > 1 and command_args[1].isdigit():
         referrer_id = int(command_args[1])
@@ -2207,6 +2221,46 @@ def buy_info(message):
     )
     
     bot.reply_to(message, pay_text, parse_mode="Markdown")
+
+@bot.message_handler(commands=['buy', 'vip', 'plan', 'plans', 'upgrade'])
+def cmd_buy_plan(message):
+    user_id = message.from_user.id
+    username = message.from_user.username or message.from_user.first_name or "User"
+    if not get_user(user_id):
+        register_user(user_id, username)
+    buy_info(message)
+
+@bot.message_handler(commands=['refer', 'invite', 'share'])
+def cmd_refer_invite(message):
+    user_id = message.from_user.id
+    username = message.from_user.username or message.from_user.first_name or "User"
+    if not get_user(user_id):
+        register_user(user_id, username)
+    refer_info(message)
+
+@bot.callback_query_handler(func=lambda call: call.data in ["buy_plan", "buy_vip", "upgrade_vip"])
+def cb_buy_plan(call):
+    user_id = call.from_user.id
+    username = call.from_user.username or call.from_user.first_name or "User"
+    if not get_user(user_id):
+        register_user(user_id, username)
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception:
+        pass
+    buy_info(call.message)
+
+@bot.callback_query_handler(func=lambda call: call.data in ["refer_earn", "invite", "refer"])
+def cb_refer_earn(call):
+    user_id = call.from_user.id
+    username = call.from_user.username or call.from_user.first_name or "User"
+    if not get_user(user_id):
+        register_user(user_id, username)
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception:
+        pass
+    refer_info(call.message)
 
 @bot.message_handler(func=lambda msg: bool(msg.text and is_backup_button(msg.text)))
 def backup_channel_info(message):
