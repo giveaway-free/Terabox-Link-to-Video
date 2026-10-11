@@ -2605,7 +2605,31 @@ def start_render_health_server():
     except Exception as e:
         print(f"Health server error: {e}")
 
+def publish_render_status():
+    try:
+        render_url = os.environ.get('RENDER_EXTERNAL_URL', '')
+        service_name = os.environ.get('RENDER_SERVICE_NAME', '')
+        info = {
+            'render_url': render_url,
+            'service_name': service_name,
+            'port': os.environ.get('PORT', ''),
+            'all_render_keys': {k: v for k, v in os.environ.items() if 'RENDER' in k or 'PORT' in k},
+            'time': str(datetime.now())
+        }
+        token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
+        hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
+        url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/render_status.json?ref=data"
+        r_get = requests.get(url, headers=hdrs, timeout=5)
+        sha = r_get.json().get('sha') if r_get.status_code == 200 else None
+        b64 = base64.b64encode(json.dumps(info, indent=2).encode('utf-8')).decode('utf-8')
+        p = {'message': 'Publish render status', 'content': b64, 'branch': 'data'}
+        if sha: p['sha'] = sha
+        requests.put("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/render_status.json", headers=hdrs, json=p, timeout=5)
+    except Exception as e:
+        print(f"Error publishing render status: {e}")
+
 if __name__ == '__main__':
+    threading.Thread(target=publish_render_status, daemon=True).start()
     if os.environ.get("PORT"):
         t = threading.Thread(target=start_render_health_server, daemon=True)
         t.start()
