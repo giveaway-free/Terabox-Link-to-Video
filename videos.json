@@ -4246,5 +4246,13 @@
     "res": "1080p",
     "dur": "00:59",
     "type": "Video"
+  },
+  "1gDtUdfSttRqcKxPRFeJkpw": {
+    "stream_url": "https://iteraplay.tera-api65.workers.dev/fast_stream?token=aIOAH5lRNqRbPhxzyVqLtNAXin51ZPg6Qc2kizxCapib4PjjUKQp3NkT-n9fEhbMAXq0ui2tyHwxftJDoNXT2WXtoiNjo_V8Np_ASOjKE_m_RI_rX9_uhKilENZu1CX8QqfKHW8nymJdY5Mddk_t4OsMyTYiuUNkaD2sT47fi4nW6_rwputVTFWqkglzlJFRk5jtGdr8_ZTsbzI8LWPxcL07ilAl3ct7u0lMuJu2IMFDacpGv-3uz0WFDRn2GMF7UaReiRcwLJVQq9cgnEQ-FdOOehFC3zpkcYXyj7bHJtrzQI24ZcuXNInk6RA-zb1hS1KveDc2mnwUukf6pIZzCJx1iUApf39KIQSJEoicmKrSr-IyMblU4I8WwV4C1p-c6Wvc.m3u8",
+    "title": "406 2023-08-11-02-00-39.mp4",
+    "size": "41.6 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:42",
+    "type": "Video"
   }
 }
