@@ -14054,5 +14054,13 @@
     "res": "480p",
     "dur": "01:13",
     "type": "Video"
+  },
+  "1SNQKBwi-cwM2UFmQVNhGew": {
+    "stream_url": "https://iteraplay.tera-api89.workers.dev/fast_stream?token=w8z62oyQyuv0PTpLCsy6JyYj7FBWa5EUad77sSrYhUJBiY0CB1StLrI4N7V30n3buQqnkFJ2nL59kD-RbHGSpF-jPuqQYMd7vJxsnfB8RYLrDYoQYzhqyprfB2AQt45tY1Sl8QoLcUuxOssrRxKWuNafJDVXhtIogFWvRepuWWp56Q4DhY1v_tx5ex_dvdVTxk8lahumbOgTyYFVKSfFkbuUs5I7vYIodQWGMhFRMr5LDua_BJH1x7ISIRORpaBcObofGAHkYB_G0GAorQeTdL-PgmJYjucMleZv68FTA-mMG9yT0W9DmxzVZ2dYhEe-mzLbJpq_ncsLj_IkeOuTO8Ijh6zvmQvH3bBq1IQsQrn7zUwH-5jvkkKDbBu1SQ.m3u8",
+    "title": "apon mamike choda.ts",
+    "size": "3.5 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:30",
+    "type": "Video"
   }
 }
