@@ -7318,5 +7318,13 @@
     "res": "1080p",
     "dur": "09:40",
     "type": "Video"
+  },
+  "1Dbct-LAlV9ahx4WZn1etNw": {
+    "stream_url": "https://spring-bread-d44a.rilitu.workers.dev/fast_stream?token=0dF7-FXHaF2XrR68f3SbE6VAyK_IP0KfcXnpeSWjRCgy5XGXSDgyn7etnSj3Y3B92BMVPopkejP_4N_VWUEjtTwFJqVg5GaapDxfpa6pfZbN4XS4VX9xQ857wK-ty5zGJAWyEJvQ_Z7HYQNtfJHmdBNO9Gm8YQ-GGaaPU0_bFvRd8X-XbNczJ9hOFU1iURhfgMq-c0AYq81iuKwKLEvZZryd-B-NqL2R8WtzQrLc5aiPvTjqp0cGwpsmNQlkpdZ_bXak5IFdWwsMIW_kFGMzm5gtvOm_4yueZcMJwOKWS0_LOTKA2FY-XgCO8J1lRX4IEfs5NoXmU_P6zB3TpcmxrrIhALKARwYnZJJh2cIXi8K-1E69-SkCTsvtLKfp.m3u8",
+    "title": "2026-02-15-17-05-36(8).mp4",
+    "size": "14.4 MB",
+    "res": "480p",
+    "dur": "01:10",
+    "type": "Video"
   }
 }
