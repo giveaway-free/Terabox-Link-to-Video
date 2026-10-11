@@ -5662,5 +5662,13 @@
     "res": "480p",
     "dur": "01:53",
     "type": "Video"
+  },
+  "1KuvFT80xCG1x6Y5eAzi7rA": {
+    "stream_url": "https://noisy-frost-45f6.vezuqeku.workers.dev/fast_stream?token=o1phopiHop84qnNftYotr8vKqGoOkTNPyW_gOfYQPjqOETv2qcmiLqbXwqfURPTxnvmJKBq_7qnzvOFuv-LPnuRQ7gKStKJC4ndT0YZh1RHChgmTY4hUBE8hl4OMsxbR_KEgnl1gJ-FfGzbKHCUi4WZNmW1limOZVKXzGIgPUVAcv8i-j0Am89oDQ_z9RBRovr2lAVpgkTNKB-rKl8PXKIZcg97JeXKwXq79LXV9EYxlxz_Ys2Dp3tuexh1nAKqH7nnIjBsEBZXZjJmbwY7_ZsbaPkSHV8tRKV-CC6zYoOXBcTKO2QzWxVQKkx8Pu_AQPnK70bN8Cu5oJnga8OO6GlYWIFiyy3D96TLChIfbyMjceTnfWKBNJv5UXaHw.m3u8",
+    "title": "2026-09-23-22-53-58.mp4",
+    "size": "19.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:45",
+    "type": "Video"
   }
 }
