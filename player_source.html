@@ -1194,34 +1194,66 @@
             document.getElementById('user-display-name').innerText = tgUser.first_name || tgUser.username || `User #${tgUser.id}`;
         }
 
-        try {
-            // Priority 1: GitHub Contents REST API for 100% instant realtime users.json
+        const BOT_BACKEND_URL = "https://terabox-link-to-video-1.onrender.com";
+        let liveStatusFetched = false;
+        let baseCredits = 10;
+
+        // Step 1: Live balance from Render backend (Instant SQLite lookup, 0ms cache delay)
+        if (userIdStr) {
             try {
-                const apiRes = await fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
-                    headers: { 'Accept': 'application/vnd.github.v3+json' }
+                const liveCtrl = new AbortController();
+                const liveTimeout = setTimeout(() => liveCtrl.abort(), 2000);
+                const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}`, {
+                    signal: liveCtrl.signal
                 });
-                if (apiRes.ok) {
-                    const j = await apiRes.json();
-                    if (j && j.content) {
-                        uData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                clearTimeout(liveTimeout);
+                if (liveRes.ok) {
+                    const liveData = await liveRes.json();
+                    if (liveData && liveData.ok) {
+                        isVip = liveData.is_paid === 1;
+                        if (typeof liveData.credits === 'number') {
+                            baseCredits = liveData.credits;
+                            liveStatusFetched = true;
+                        }
                     }
                 }
             } catch (_) {}
+        }
 
-            if (!uData) {
-                const usersRes = await fetch(`${USERS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
-                if (usersRes.ok) uData = await usersRes.json();
-            }
+        // Step 2: Fallback to GitHub users.json if backend was unreachable
+        if (!liveStatusFetched) {
+            try {
+                try {
+                    const apiRes = await fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
+                        headers: { 'Accept': 'application/vnd.github.v3+json' }
+                    });
+                    if (apiRes.ok) {
+                        const j = await apiRes.json();
+                        if (j && j.content) {
+                            uData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                        }
+                    }
+                } catch (_) {}
 
-            if (uData && userIdStr && uData[userIdStr]) {
-                userRecord = uData[userIdStr];
+                if (!uData) {
+                    const usersRes = await fetch(`${USERS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                    if (usersRes.ok) uData = await usersRes.json();
+                }
+
+                if (uData && userIdStr && uData[userIdStr]) {
+                    userRecord = uData[userIdStr];
+                    isVip = userRecord.is_paid === 1;
+                    const parsedCr = parseInt(userRecord.credits, 10);
+                    if (!isNaN(parsedCr)) baseCredits = parsedCr;
+                } else if (uData && uData._settings && uData._settings.initial_credits) {
+                    baseCredits = parseInt(uData._settings.initial_credits, 10) || 10;
+                }
+            } catch (e) {
+                console.warn("Could not fetch remote databases, using fallback balance:", e);
             }
-        } catch (e) {
-            console.warn("Could not fetch remote databases, using fallback balance:", e);
         }
 
         const badgeEl = document.getElementById('user-badge');
-        const BOT_BACKEND_URL = "https://terabox-link-to-video-1.onrender.com";
 
         // Check if video is already unlocked/watched (Free replay forever)
         const localUnlockKey = `unlocked_${userIdStr || 'guest'}_${startParam}`;
@@ -1231,17 +1263,6 @@
         }
         if (userRecord && userRecord.watched && Array.isArray(userRecord.watched) && userRecord.watched.includes(startParam)) {
             alreadyWatched = true;
-        }
-
-        // Determine user subscription and credits directly from live bot balance
-        let baseCredits = 10;
-        if (uData && uData._settings && uData._settings.initial_credits) {
-            baseCredits = parseInt(uData._settings.initial_credits, 10) || 10;
-        }
-        if (userRecord) {
-            isVip = userRecord.is_paid === 1;
-            const parsedCr = parseInt(userRecord.credits, 10);
-            if (!isNaN(parsedCr)) baseCredits = parsedCr;
         }
 
         currentCredits = Math.max(0, baseCredits);
@@ -1288,6 +1309,18 @@
             }
         } else if (alreadyWatched) {
             localStorage.setItem(localUnlockKey, "1");
+            // On replay, also verify live credits in background to keep display 100% accurate
+            if (userIdStr) {
+                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}`)
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d && d.ok && typeof d.credits === 'number') {
+                            currentCredits = d.credits;
+                            badgeEl.innerText = `✅ Unlocked • ${currentCredits} Left`;
+                        }
+                    })
+                    .catch(() => {});
+            }
         }
 
         // Fast Path 0: Instant realtime GitHub REST API lookup (Bypasses Fastly CDN 100%, 0ms cache delay!)
