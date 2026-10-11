@@ -14270,5 +14270,13 @@
     "res": "480p",
     "dur": "00:07",
     "type": "Video"
+  },
+  "1yfELfv9vhbhiX71EE3Wrjw": {
+    "stream_url": "https://iteraplay.tera-api47.workers.dev/fast_stream?token=aqgFRXFjUKCtDmsVR7Jgk_ttFjUlR63Y3qMFPUXArJlwKgiMXE21ey3zC3UjzoBpOoKNL2lVxxip4A-zzfF6S2OU6MLesK41CMMQlwr5cFXxRjT2lGfU-j52pc6kWVK785pboSTVHcxUvfn6pKo4BSdHiY-JMDNsVoV02-ZkcuO0dR2_-XRnR2SwPSolnLjPNiHBbetd-sgW0LQspmfa92npDUC9ac2x8ZXH11YNalXB6W3u3jv_LFvwoFXN4NGbGynV03fLqOc-7erJwbS3w-VfMZGbocENwyRJaAgxF86-wQGt_izjD3k7FzSCm5gzHVPlL1KO0SroH3XY2yjgWgEx1xEKVcz0ivRF7oaTlL7ZYca7-A39zYe4.m3u8",
+    "title": "3Zz-qedrba-AqgDc.mp4",
+    "size": "4.4 MB",
+    "res": "785p",
+    "dur": "01:01",
+    "type": "Video"
   }
 }
