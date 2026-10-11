@@ -2502,5 +2502,13 @@
     "res": "360p",
     "dur": "13:54",
     "type": "Video"
+  },
+  "1XGA5S6On8HzayjPBVew6hg": {
+    "stream_url": "https://restless-river-f4d3.lanaxuji.workers.dev/fast_stream?token=pZIOyv64frVf3R87MxbIjcjIq2qJsnziCPHAFCnljfkhVB7D6tEtndvPqW9K1N7Ilz6ncQqOTzKCJ_DOnRxxeEfYyxrQy_VnH8COoq31A93a8cuFHx-xTtm_KwPMqjQArL8rtrhjG0t-8XlxFUARPNZemrF1oc_oIHZuO5yw7uSW45T7nmPGzvIIFWwAW2v82EuDUNjBomm70qF5VYW5xc2u-Z0kXE4KwcL3pRVE3VE_SsdqPAGlarXJZi-F4fOvr66lgNMxm7UsgQJBJukMsQBhxkf5SW3Gmvtzv9FVbi9h_mxyYUZrBVosxnarM_19tB393EF9r7Tk_advEEANF1fzhunYJOsMp79Ae6q5tOxYFyPu.m3u8",
+    "title": "teacher(1).mp4",
+    "size": "56.1 MB",
+    "res": "480p",
+    "dur": "13:30",
+    "type": "Video"
   }
 }
