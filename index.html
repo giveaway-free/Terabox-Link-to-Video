@@ -1238,7 +1238,10 @@
         }
 
         // Determine user subscription and credits directly from live bot balance
-        let baseCredits = 60;
+        let baseCredits = 10;
+        if (uData && uData._settings && uData._settings.initial_credits) {
+            baseCredits = parseInt(uData._settings.initial_credits, 10) || 10;
+        }
         if (userRecord) {
             isVip = userRecord.is_paid === 1;
             const parsedCr = parseInt(userRecord.credits, 10);
@@ -1268,19 +1271,9 @@
             return;
         }
 
-        // Deduct 1 credit ONLY on the first play; subsequent views are free
+        // Mark unlocked so replay is forever free
         if (!isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
-            currentCredits = Math.max(0, currentCredits - 1);
-            badgeEl.className = "status-badge badge-credits";
-            badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
-
-            // Notify bot backend in background to persist watch status & update database
-            if (userIdStr) {
-                try {
-                    fetch(`https://leadox-bot.onrender.com/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}`, { mode: 'no-cors' }).catch(() => {});
-                } catch (_) {}
-            }
         } else if (alreadyWatched) {
             localStorage.setItem(localUnlockKey, "1");
         }
