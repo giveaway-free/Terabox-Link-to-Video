@@ -4998,5 +4998,13 @@
     "res": "480p",
     "dur": "00:56",
     "type": "Video"
+  },
+  "1JSAfkE-Jj56lwOV6j8yiBQ": {
+    "stream_url": "https://weathered-field-1e1c.giliwysi.workers.dev/fast_stream?token=oJAcBDGbqKiftw20fBg5h2e6XO1wO3rvcREKzpnihWAxI9g80m0pbYBrG2QZzFAE896-HVDaXY7iySryUb1pB81MUYFGl7kH40utB_QeqBVx5C-4nY8Fk3IMtSRTcVzlcSFywsINR6F20v04Thfm1aAoj20r_V23n1GCh6qmKZOnFJrX6LLWRwDJpIuV_0fY222jSjYBTfP6lBq4cvrIGtbNEBFWmItUTsFNluDSzzNlLNFAt3tqwhuVMVQ5vMPOSdIGLo8ckhbci2Qse0r2EeM-ZOrP79FPcvzrXYi6iJTKi4DfrMmia8i_8ntDfH8RKk1A61nOe6dbIoURU-bsKY2Oyz8_q0uLqa1zTJkF5lhmsj41mUZ2dP8sNTmbbpX_ge9h.m3u8",
+    "title": "tammu - DoodStream(1).mp4",
+    "size": "37.6 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "10:11",
+    "type": "Video"
   }
 }
