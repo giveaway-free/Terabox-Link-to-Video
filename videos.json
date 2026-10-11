@@ -8374,5 +8374,13 @@
     "res": "360p",
     "dur": "05:34",
     "type": "Video"
+  },
+  "1PrtiViXDWuTxGgV_vOL9IQ": {
+    "stream_url": "https://iteraplay.tera-api67.workers.dev/fast_stream?token=Bec2RjWWr3HCm-nXTiAOtxTqfnLQ_yF2wXcncJpaZyX7PVVvcMksR62p5jnuJ36eH6Wk1lfqxJ7H6z01S0YjgCIG0Gioiwg0yiLDCoBDZ5DbrDPwL7wqE3hVnrMRd3_HooK7IkwW3wZn3frDmQbae7Pnusq-DojE9zmF9cCdpHiOYzh-p4ngdumRokv73ROdhtzCVOSv1lzE7aOFlJom67kbtdfrj_DGHQg78SsMyiYagGY28n8W1E5mXggDBhBMqnUkKdkEe3RXrKULQrgOf5q1iGDCALDiBk5FTqAs2CTtPKwzxD_f_cGt9SR_WR0-q9Mx8SzpXILidE2mrzgz1GDhPyGwJmV-CR_VTd7TOERSlUoVEtSyCoyv.m3u8",
+    "title": "2025-06-02-20-03-12.mp4",
+    "size": "80.1 MB",
+    "res": "1080p",
+    "dur": "04:22",
+    "type": "Video"
   }
 }
