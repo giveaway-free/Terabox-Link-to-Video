@@ -5214,5 +5214,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:42",
     "type": "Video"
+  },
+  "1GwqoQmjiaxtXDY9wIvipxg": {
+    "stream_url": "https://iteraplay.tera-api73.workers.dev/fast_stream?token=583s9FiOylLQI3u4ulGrXGSIuEGloA-Vr9Y3_zNgB1jVPNu73RhLxSy_y0poZd-oZ4Zw1lSwe92t40NvIP7iwAmqwBVcUruGDnUv7E7RdGbTgkGR39goV1ekbgwFYVTtHj0XZ2Tkt6__oLxYDXpEFoMJDZK574v41BGXx2t8KTWiPfTjQdj9LoqjzvQtZO0GIqs3ZBVD1P-ufKRCyZXN6pr8gqDzJZvQtInLp-zk5j1yLzcgH-CQwg0lIQoitifRCj_-PVJydZFTpHoe7hsU3Xy2Sb-d4KFS-soo8oVHxpFxHHFGchOdvN9YcDPvV6YpoD95Pp8BTmnQfa1HYFdXwOp3BALWoBd58ISlw_ahfGctrEWHwr8QwdMq.m3u8",
+    "title": "VID-20260818-WA0026.mp4",
+    "size": "13.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:10",
+    "type": "Video"
   }
 }
