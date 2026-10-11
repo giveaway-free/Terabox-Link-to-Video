@@ -4006,5 +4006,13 @@
     "res": "Auto (Adaptive)",
     "dur": "04:27",
     "type": "Video"
+  },
+  "1U_2-FnwWFrYyWJEZMSHC9g": {
+    "stream_url": "https://weathered-field-1e1c.giliwysi.workers.dev/fast_stream?token=f4OGKG9gYxWRkGXYVNvt2_AzmENTjtrjEK4ywItP100iCcrgc2Dl938D9B8ZRrZ2EybVrlATp0VM7y5AtwlknJl0UD-1QqzLHBSXTdKWJAG5vGOMsv2TgB347JVVcmLtwHZO7qhNQ0oOKzSZN_3-75FH9XqH0xsuUcofVYg7Z_H2nUIvI5u22FP68gY5QxHA2eR9acGBONLlydGWS4qCWUjR8zLGh3WoNyH3YJAxj0-x089DGZYBFXwEkXcW8DFiMpkxpD_U1l0IQUKig6BZ112pAS_aXeoc4UHgEgGlmJoDNfHgo9Y9N7NjKB63OojPYMvtUzvRkcDrMR058zSTRk-Oi9XjWIsZLn2QRs5JLltZXDnjS_gh8asUmA.m3u8",
+    "title": "VN20241215_121927.mp4",
+    "size": "19.9 MB",
+    "res": "1080p",
+    "dur": "00:51",
+    "type": "Video"
   }
 }
