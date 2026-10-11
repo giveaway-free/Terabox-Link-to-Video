@@ -5502,5 +5502,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:42",
     "type": "Video"
+  },
+  "1fsyZgqmuDqCgvXTQJXylhQ": {
+    "stream_url": "https://iteraplay.tera-api51.workers.dev/fast_stream?token=XxDAQOTBOf_DoUfLsFrnDGjU52EgGoyLp8bLhpoL4Pqog-Suo3ku3rcnjB_1cx9WV67gtWJEPzcmqgfddgevGLSqBDZo_l6rj6jfEaWMOb1g1LUdWtDWGtZ4AP2KvQF50M_FKEGTuuzD2iVA5s_nZh9ccCf3_Czmz_26r6ayVZ_ZRNKOITgh8DyLpNTw2RVnTtW8iqiO8DQY7JcM9phZJx4rsKnyGte_NU8vFtDNA-RztG_-465wNcDWHhUt-A1dm4DdvzT8hiCMJ1lgcEAR3ilR0UGsDKl3nYG5iPy3IQOsmMHlDICmtiUVsnyE4zkYvJJ6Z4ppWGqdVtkmOedtjMM6l5Iy7_DLlujVaCERJXMQEgrAdBYDT7wtQ9ud.m3u8",
+    "title": "2023-10-23-04-57-01(5).mp4",
+    "size": "3.5 MB",
+    "res": "1080p",
+    "dur": "00:45",
+    "type": "Video"
   }
 }
