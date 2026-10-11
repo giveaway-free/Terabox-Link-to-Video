@@ -10382,5 +10382,13 @@
     "res": "360p",
     "dur": "13:27",
     "type": "Video"
+  },
+  "1K0LKhFTcOqNJetrzj4Wmiw": {
+    "stream_url": "https://iteraplay.tera-api98.workers.dev/fast_stream?token=qy80Cup7qJA2Zgim6EUp-zPMSEhJ50r5ApI9S7ZpC5oKwdSAGjuBYAaRy50PrfjtZRUVupGinlGvt22qH4vShih_tdYccuEIiTZrBP-EDnFGftZuxNWoIYG_mmucA07XefaicwjxvtaaTFcCPC4gkI-2WZdEnjGXKiNPEvLIyIqHP83AseVk0RH9_38Fdrk6nRv6QqXG0QRmzKWSpl-osKUWYTPpnMF_PRUWSiEEQJyAdlMoziUhoYtWB8fdrm7ccxjSE1dk5Bj_VSM-L5uJU-lciC6wTQ0_pOkKE6uNDbSDeWI-gp0PPskCIYvQ0L21TDlHHkXzcWrO4dUqTRTKqytogdv_v0ZzUgz4MpY5.m3u8",
+    "title": "c728.mp4",
+    "size": "60.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "05:13",
+    "type": "Video"
   }
 }
