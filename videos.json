@@ -11342,5 +11342,13 @@
     "res": "Auto (Adaptive)",
     "dur": "02:20",
     "type": "Video"
+  },
+  "1zGdbg-HyfuQiETTwDkogGQ": {
+    "stream_url": "https://patient-morning-72a7.itp2.workers.dev/fast_stream?token=LXTXeg8dvliozy3g2nOYJSLbGF-_XEMmBCeCUEo0yJNPQKGcqAgqYHU4VQnisNJvUZceI7TAhBuVh7y25Iel6LOmhIt6bu46wwJ6s88LGnfkE73O0s3_0QsYmEf5muieURF2oV-T19ROxQECVMHRmgJoukJJKuM0oWrqWAjKf6Y9u6UX1wf5Y-KwNlUDP2A9vVec1rlnH01Q5I6D6OR4KmYVK2iJU7Q4X0krJZIPdOB-bDRDQVTfxlahj15noQ8uz8pC71D1-nNYMA5-o5R6t0n7EO2XfLkLS1bQqBnMqeovaanTzCs2W2k98j4WLrHdl7DLhd3hlAEA-j5KRGp7o9nGP1AheS0KxExi3TLI1ZeLBA4UzodHNvJUmsnPLUiejW91tkFT.m3u8",
+    "title": "video_watermark1680260595346.mp4",
+    "size": "67.3 MB",
+    "res": "480p",
+    "dur": "05:52",
+    "type": "Video"
   }
 }
