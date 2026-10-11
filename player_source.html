@@ -1221,6 +1221,7 @@
         }
 
         const badgeEl = document.getElementById('user-badge');
+        const BOT_BACKEND_URL = "https://terabox-link-to-video-1.onrender.com";
 
         // Check if video is already unlocked/watched (Free replay forever)
         const localUnlockKey = `unlocked_${userIdStr || 'guest'}_${startParam}`;
@@ -1266,9 +1267,25 @@
             return;
         }
 
-        // Mark unlocked so replay is forever free
+        // Deduct 1 credit for new video watch and sync with bot database
         if (!isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
+            currentCredits = Math.max(0, currentCredits - 1);
+            badgeEl.className = "status-badge badge-credits";
+            badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+
+            // Realtime deduction on bot backend server
+            if (userIdStr) {
+                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}`)
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d && d.ok && typeof d.credits === 'number') {
+                            currentCredits = d.credits;
+                            badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+                        }
+                    })
+                    .catch(() => {});
+            }
         } else if (alreadyWatched) {
             localStorage.setItem(localUnlockKey, "1");
         }
