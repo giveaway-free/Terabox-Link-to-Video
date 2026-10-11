@@ -7710,5 +7710,13 @@
     "res": "Auto (Adaptive)",
     "dur": "02:26",
     "type": "Video"
+  },
+  "1r3tUdNYsmJuN8n0yPPYoKA": {
+    "stream_url": "https://frosty-moon-7efe.wutecedy.workers.dev/fast_stream?token=1CtvJFi9zNvChnoYy4nm4QuSwaEa7BvND4RNFKwScqOPOSa4baPN_R5Ub0Jb9zNlyxcRandFKYXm3F55zyqyMcwHIpeBXW35rDGncV0r8bH7QvN7X7fL6h5sF46oXVBe5bkL3YFb84nr_xzNYtqbRqC_25IXVEKTBZk3dWI6_-Nph2TEIHyVKcwP5k5FOxoGs4UoX6F7AXSgph2Jrt4zubXHbeuWQ3cYwYyK_wGrBpYfdFrt9LgtiyZobOKws8aNCNyHCI12MQqIPYSKLYuxxpymYt-Ij8e3sOL6Nujc_7txOkrag3D6264_OxIohHl1TtFQLeuygXDpeb-TSM5p8x8cSNdZuyksiyjdLhjUY8Gwzj4rELy4Gw.m3u8",
+    "title": "fblite_video-8.mp4",
+    "size": "6.5 MB",
+    "res": "360p",
+    "dur": "03:01",
+    "type": "Video"
   }
 }
