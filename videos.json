@@ -7606,5 +7606,13 @@
     "res": "480p",
     "dur": "04:26",
     "type": "Video"
+  },
+  "1bgAmXPUMauW_PyUGqf6tqQ": {
+    "stream_url": "https://quiet-cherry-e12e.tacetaju.workers.dev/fast_stream?token=_aZj3wuIK1oG19yTCHgQb5wCM59XrcImfQ8kiBHZrFm_dReFXWA-OSY8DMWlZwjCsnnH0aWTaFpI06VDG8qAoxxY2j1odB9-SBTSJkyjg7xzKZWj5N5PEZGwwjYx6K1vE0mnkY9l1_Z281SbkFK3IbUPBDZSuLQqYM3IFY__hvLHeE7zvGisOz1AuXjFywqXHN-xok9l1Qx4kiOMnm6FG2tCBRQ-0O5lfQvPrYQQDxG-hEHLAK1mnXDu4zuxmqXRmkdDqdvf0YURzbK5RYStbT9orRYebxpJLm8E0V_yunUNR8XZq_H4hjSotBeGrgzWTfIRWxXjiKNbzZihraaXji9YBr2tJgmVTSkpRs6wwusLvwsvWiIv_8Fu.m3u8",
+    "title": "2023-10-01-12-19-31.mp4",
+    "size": "8.8 MB",
+    "res": "1080p",
+    "dur": "00:55",
+    "type": "Video"
   }
 }
