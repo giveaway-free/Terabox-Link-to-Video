@@ -9446,5 +9446,13 @@
     "res": "1080p",
     "dur": "00:50",
     "type": "Video"
+  },
+  "1T5y3KubaWhBVpJThfSPEmQ": {
+    "stream_url": "https://delicate-field-a4f6.fanebowa.workers.dev/fast_stream?token=gDI1Ll0VJgxdWYbdsj2Yje4mOn3aWkIClIfJckxC6qwSV6o1sspiFEXP5FkqOL8IbEA-oKnzp13_VyQXFBpStrJveWptfwnmb8z_GQkRqoUNBYwnpEVQtXk_EX71fF_UqyPLRU-aFiagdRKMm7L7TJkkav7voPiKx27AzKFfHJNKcOprerEBFJjs4grz93p26f869fnRSIYslQYJQF-NH7ZVQidkSrEMw7LlOjJ13yOCHH0DsrL5ikhXWO3DC9zdm4iARRguAwemQokx-yYvhlPx9uUEnoOg-VHSenOJHkG4q3OwHUIA3EyfPkWEFXk8DJKx5jTab-dhfy-HoNLbte7I9oUOPJYmUzfasZhSZTAcMuqNpdCmjIGCVdZn.m3u8",
+    "title": "2023-06-11-19-10-53.mp4",
+    "size": "2.7 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:20",
+    "type": "Video"
   }
 }
