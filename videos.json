@@ -3550,5 +3550,13 @@
     "res": "Auto (Adaptive)",
     "dur": "20:01",
     "type": "Video"
+  },
+  "1KsLBaQOL9kRU4j9bacQREg": {
+    "stream_url": "https://iteraplay.tera-api100.workers.dev/fast_stream?token=hNbVeZTthE5zoaxPdoRMIkDP1EaZG14JSBM49nkRufbTxyEDlyq-PvCxcvKnK8wZR4HGXLkRfjgGeiaLyYzgTdLJzvAKXJxLDJgPWrOiYLta6afT1EbWQw5M22nqCzJtchkjdJcIkqGaqclItA__CWSCbI2VuiIs8FPPrOE4p8qlSe5NDXUJEYea1PbRiS2oU77xetT1eHYWRvObmgzqmYXkOB9HfNu9rRJMhCeqprVXTERLHarGpXz3RiKCKVdvonGhVRWr6mFxjAkBkEzIqji8mMD2-jxaFId5IhRU-Ld_yJC_Ef7bT3glr5lt7SohgrPaHVgKviAz7yegwdr_u2ibHGFqpSzUYe1VirBLc85Mx1leWB4X8Aljux-ALzt60Gn2.m3u8",
+    "title": "tammu - DoodStream(1).mp4",
+    "size": "37.6 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "10:11",
+    "type": "Video"
   }
 }
