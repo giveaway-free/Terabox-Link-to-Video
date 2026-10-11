@@ -8670,5 +8670,13 @@
     "res": "480p",
     "dur": "01:25",
     "type": "Video"
+  },
+  "1RI0Vu0ex3cEyR1oyILMZcw": {
+    "stream_url": "https://iteraplay.tera-api17.workers.dev/fast_stream?token=FqQEXxnOTqXbahT9sLoeCsEeVwp0XBi0pviFx73GeWOChE5F0tkbpWNm-88vcSP5l-g0U01_Qb0JLnSKZixo3tujriTYM1jiWXauWLve4FRgu2SF3QRuCY7LD-hAS3UY7dWydgCCEp1RRJeZAve1NmjiBc0-1OyJ7AvzQW97-0_E4RxUmvUwG-O72WIXIYDL1mRffzBvofs9MMItUhPLsLmexWuY17JxzOsq1k4hGBROsyEIFuNwD2MqXAmQSK3OJCL9cWzofnsdrXswqlVfs9t-mOs-4g1_CQSzVoeL6BTyGGeOqMT5YN9Ccp_tril8ZDZnCVXoZg1EhXKCLT7z-r-7p_X73znJyVsEmzZfyfvdaPIlG6U5IneXdf8_.m3u8",
+    "title": "JUSTaFiLetwmkephulp.mp4",
+    "size": "226.8 MB",
+    "res": "1080p",
+    "dur": "11:45",
+    "type": "Video"
   }
 }
