@@ -10894,5 +10894,13 @@
     "res": "480p",
     "dur": "20:39",
     "type": "Video"
+  },
+  "1Btq9RZZyPoVIw9k8FDYgPg": {
+    "stream_url": "https://orange-voice-1e53.wyvaweda.workers.dev/fast_stream?token=UKfbH4Oqv-SS1Pi8UZgSMAWUOB0DbOlPg-U04k0Az5CL0rvBV_aQ8o6nHY3qcIhx0GbctVx65A32pqlS3QyCBKQHu4pq13mgmAYa1nmUCPMfcTM0yC1W_gBLYw1DbJuhcVFZwjqBWlgO5Hs051JTMzM1S5EFvNb-obN8SA9SN-kxenEuijLsGTuymQqeM5-yNghq71pKC8as1Ny6ZAz0ICVSHxpZjGnsMYZ7DStUpv9Cey9-jxVVgp_V1pSBPGKtcILNAhukabBluRUjvfkviPIzctc68ftQm81dm9yfna8lfpKCdZEzZFSMyGzQxep_MQWAAda0kpsiWavTggVQDqsCH60pWozus3EuH4jQxxgEwl_rumdYqv2dUi4i.m3u8",
+    "title": "2025-09-16-23-14-45.mp4",
+    "size": "26.9 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "02:58",
+    "type": "Video"
   }
 }
