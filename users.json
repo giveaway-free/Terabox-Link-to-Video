@@ -46,7 +46,9 @@
     "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
-    "watched": []
+    "watched": [
+      "test_vid_123"
+    ]
   },
   "7488289885": {
     "username": "Dark_secrect",
@@ -54,9 +56,5 @@
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
-  },
-  "_settings": {
-    "initial_credits": 10,
-    "credits": 10
   }
 }
