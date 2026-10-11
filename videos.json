@@ -12606,5 +12606,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:14",
     "type": "Video"
+  },
+  "1U5VzOhSydDQhcbfxNLEG7w": {
+    "stream_url": "https://iteraplay.tera-api21.workers.dev/fast_stream?token=dlTo7CqLXy2T-aE2DVpzVl8RlusfZ8W7QgUexVgNywyEW1L3Kh74Ql8BKUZMcPvpskw8kuVoRgZYZROwY3Eo3Xc6CNW3LSgVZwicUsam9TqUHYTRTaLo14dFmFpcAPfrkGz-akC5qYKjGVJh4YAf-rmEjo2Z1b7v479GMM4Y2wBkt-EPy3PGzEftrijmR4T6Mre3m-9cUPiExR3Grcx8vpEaqxd8ne7WQS0EvYx9RqBY3BjbUCLhghx9WuX-i_hIovKXaqcICYmbtTt18rbruKvkvq5eEtK3i3Tc8xeMRcLTiPWkPrBneNx0Hbaq2SwF_7LwxakWhxYAPxIxPxcpSB-v37NcwHKWiJBbWXctQHqJ.m3u8",
+    "title": "clip366.mp4",
+    "size": "3.4 MB",
+    "res": "1080p",
+    "dur": "00:17",
+    "type": "Video"
   }
 }
