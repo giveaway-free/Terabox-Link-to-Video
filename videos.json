@@ -7518,5 +7518,13 @@
     "res": "480p",
     "dur": "16:26",
     "type": "Video"
+  },
+  "1YVb8v9GZk1qSrVuv8ZmyYw": {
+    "stream_url": "https://iteraplay.tera-api45.workers.dev/fast_stream?token=0dgoj8OMeo0ffmH7wKz2C-cTXgoEsIoSc-R4Qeg3bNd_JcrwQuhB3AkAh36rCKqkfOBnNYPXq2i83g1AFHESpxt1jhG81HSq1z99jRzFOsxvnwuITQdaLz0S8u6LXzOuTL8URi-PcdEax7yIeksginTNsZg3Zkutcvo0H4K4RpfBIPPzTYmq4tsSpVdoc6Pb5v8cTCZFk0JQxsDl7awOq8q3F7qAWt3tpswz2ZHHHN_UzjfqK9CmoIzbk8XqBaW46FCTOsp0MaBUr0p-C47w9zT0duzbqsR-rklhC2s7_aJx5NLl1fSTQC6aklozr3EztrMNkl8s0-2oUpno6tvp-IhVOOQdsT3-HAHPA_XbiEN51JIzdZASDsslZijpsw.m3u8",
+    "title": "Bahu_Ki_Raasleela_E2.mp4",
+    "size": "319.9 MB",
+    "res": "1080p",
+    "dur": "21:11",
+    "type": "Video"
   }
 }
