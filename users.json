@@ -36,7 +36,7 @@
   },
   "6525538939": {
     "username": "Mohitdff",
-    "credits": 55,
+    "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
@@ -54,5 +54,8 @@
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
+  },
+  "_settings": {
+    "initial_credits": 10
   }
 }
