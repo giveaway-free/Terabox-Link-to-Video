@@ -3286,5 +3286,13 @@
     "res": "480p",
     "dur": "01:03",
     "type": "Video"
+  },
+  "1JAVvRBFEe9ad_O5gnOvO7w": {
+    "stream_url": "https://rapid-block-bb7c.qaneqo.workers.dev/fast_stream?token=1hop68igRDQm6TzM8bT-0n0G5GTLmCQMvlhfzzs7vAvLzjbaGl6g77yCR6f5mkGj6CPgYUc0z0FIjdUit7tkrazic_ROmkPMpzOH-6SawyeE26JSvHj2qAn59kycXiYHTzt0-2cMZ3DSdQB-F3TaHw82BfnewCgC885jDS5ZMLUNAEKTh_ETcpDOaBUlX472IFGOCXr-CciHjOb9H-hKThyTtK2mguZq5SsqbSonKZ8qmhJxKbA8KggquUaxICxO8ZO-i71PZs1_az_wSEcbqE05oRgVqtll5-2hBl80XRORkTjdnjPmSCK-vRxuk7Dv5JOWzd2VvjJR_fB8Et1XsuxWcpShnePWilOrCzQMgXT9-oAR9q66hLAyPTPS.m3u8",
+    "title": "VID-20230105-WA0472.mp4",
+    "size": "20.4 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:24",
+    "type": "Video"
   }
 }
