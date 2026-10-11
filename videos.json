@@ -2974,5 +2974,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:05",
     "type": "Video"
+  },
+  "1WczZIvCM4FhJWdfCNjwB1g": {
+    "stream_url": "https://solitary-cake-052a.xapi2.workers.dev/fast_stream?token=lmi7ykFOh_9M9nopyy8Jbh1ZOiAJJO1T80J6C00j4ZsZu8HrT3njFNQlc4d0Q-uUFvQBshKVVc1e9Sbx48G28TrHBGWloMPbj5vnCFcdprua-vHN_Hq-qpOWXkUrFVeTa_FhvWz6wFDR_LtgKxWUS4qb--J_PZhoGfY5b4bkhbGQcRXxc5-hiNlqJuNQ6yuLZxNg5m6F0lwt9d7zx-DFZW5h7IjmAmJsPClsnz4fzWrjz6uDytNFl4fJaRnh9gLJPUTTzFZ7JJT-vv_CE1XJgzWRYKikqB3nGt8VFqdgIwlm4mEUmFuOz6ioqJHw1fti2oc0VVdOqBHfkBp2ws_coqQqHrb_hEa4MUGki0O4mA.m3u8",
+    "title": "VID_8.mp4",
+    "size": "22.7 MB",
+    "res": "360p",
+    "dur": "07:17",
+    "type": "Video"
   }
 }
