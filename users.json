@@ -8,28 +8,28 @@
   },
   "5452302287": {
     "username": "Whitedevilbdteam",
-    "credits": 60,
+    "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
   },
   "5811612194": {
     "username": "Glitch8880",
-    "credits": 60,
+    "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
   },
   "5932658058": {
     "username": "MahtimMunna",
-    "credits": 60,
+    "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
   },
   "6087739585": {
     "username": "Sg_Darkness",
-    "credits": 60,
+    "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
@@ -43,19 +43,20 @@
   },
   "7177953110": {
     "username": "Tony787777",
-    "credits": 60,
+    "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
   },
   "7488289885": {
     "username": "Dark_secrect",
-    "credits": 60,
+    "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": []
   },
   "_settings": {
-    "initial_credits": 10
+    "initial_credits": 10,
+    "credits": 10
   }
 }
