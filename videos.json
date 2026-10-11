@@ -7342,5 +7342,13 @@
     "res": "480p",
     "dur": "00:31",
     "type": "Video"
+  },
+  "1ZYwNQHHzgZUcELVSLzwOUQ": {
+    "stream_url": "https://cold-moon-49f0.cygecuco.workers.dev/fast_stream?token=hvuK-Afg7GRRptuwG3LhqOyOo-AGhG0KfK1M5ZpKWItj6StfL3X23iheMcRxX2Hdri2Q1awXONFV6l93qp6jLWjz62sdTaCrZ5bkVjqZQKuGBlA0cJz6GfzLWFK5JFdCzmNbxwWUPVWWnwuLXSKCDAJ80ctIDnyTsazReeAirTwVag2LY-JrKBZxw5uyu9YWobwGpc4wI-qMDFlOfp3u8LxBz5kPQphwcbVrLr2wyn9GKhvlKSepBHoAZke1bMMCLx_qx2KVOzgL7IgAwpwAa94aqPLWboAjahQLTVrDHMKR9FEkk2hxgwMAwl7Kh4FU411GpvVNdywqV3gyGj9MP2CInifB1AsraOGQwR9ZUw9sPtRGU38mm4NkTesMNg.m3u8",
+    "title": "Post 1872 video 1.mp4",
+    "size": "133.0 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "06:13",
+    "type": "Video"
   }
 }
