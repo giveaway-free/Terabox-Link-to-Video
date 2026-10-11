@@ -8750,5 +8750,13 @@
     "res": "Auto (Adaptive)",
     "dur": "15:55",
     "type": "Video"
+  },
+  "11bngPYuOa62VWoYcGEehkQ": {
+    "stream_url": "https://mute-snowflake-aa97.lorapyqu.workers.dev/fast_stream?token=5-fygzDl54YA3r1uhV53J1TnLRQtWVl_bbxJgzwdIOUF3IEpGUqbSuxtlctr2aXk3KO7aSSVG0_81sWtaiPEOef-M2Zc9fEv6RhT-qKMMgnXYaUemvRA9PK0ozNvZU2J3E5qQEE7BbyIVGvYxV9GXSsU1rFmpX7KiL2A6mxEmdDw0I051ayvhmE4pbw1LBHUUKOHGcVwtrEICbwnzaiioSmZ6kESm_zyMb8nRAiVzGPbsdsuMTmgNXMF8GLQla0zh4s67xwnPubwOPXwlUxTiCh-YrWT-IzKiyfZbRWAY7YdvwB8wmvhAdKPqqcMwuCXNEZwhd3puhQOeM7IcxN8xUPrd3Nms_RvgD6np8L2blIPyw.m3u8",
+    "title": "no1_0(1).mp4",
+    "size": "73.8 MB",
+    "res": "1080p",
+    "dur": "08:10",
+    "type": "Video"
   }
 }
