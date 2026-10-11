@@ -734,8 +734,9 @@
     }
 
     const BOT_USERNAME = "leadox_bot";
-    const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/main/users.json";
-    const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/data/videos.json";
+    const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/main/users.json";
+    const SINGLE_VIDEO_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/data/v/";
+    const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
 
     let currentStreamUrl = "";
@@ -1226,15 +1227,15 @@
         if (userRecord) {
             isVip = userRecord.is_paid === 1;
             const parsedCr = parseInt(userRecord.credits, 10);
-            currentCredits = isNaN(parsedCr) ? 5 : parsedCr;
+            currentCredits = isNaN(parsedCr) ? 60 : parsedCr;
             localStorage.setItem(`credits_${userIdStr || 'guest'}`, currentCredits);
         } else {
-            // New bot user: use localStorage cache or grant default 5 welcome credits
+            // New bot user: use localStorage cache or grant default 60 welcome credits
             const localCredits = localStorage.getItem(`credits_${userIdStr || 'guest'}`);
             if (localCredits !== null) {
-                currentCredits = parseInt(localCredits, 10);
+                currentCredits = parseInt(localCredits, 10) || 0;
             } else {
-                currentCredits = 5;
+                currentCredits = 60;
                 localStorage.setItem(`credits_${userIdStr || 'guest'}`, currentCredits);
             }
         }
@@ -1278,7 +1279,25 @@
             localStorage.setItem(localUnlockKey, "1");
         }
 
-        // Fast Path 1: Instant playback from verified cached video stream in videos.json
+        // Fast Path 0: Instant lightweight single video file lookup (150 bytes, ~30ms load)
+        try {
+            const singleRes = await fetch(`${SINGLE_VIDEO_URL}${startParam}.json?t=${Date.now()}`, { cache: 'no-store' });
+            if (singleRes.ok) {
+                const sVid = await singleRes.json();
+                if (sVid && sVid.stream_url) {
+                    playVideo(
+                        sVid.stream_url,
+                        sVid.title || "TeraBox Video",
+                        sVid.size || "Unknown",
+                        sVid.res || "HD",
+                        sVid.dur || "--"
+                    );
+                    return;
+                }
+            }
+        } catch (_) {}
+
+        // Fast Path 1: Check cached video stream in full videos.json
         if (videosDb && videosDb[startParam] && videosDb[startParam].stream_url) {
             const cached = videosDb[startParam];
             playVideo(
@@ -1291,12 +1310,29 @@
             return;
         }
 
-        // Fast Path 1B: Auto-retry loop in case post was just created and stream cache is finalizing
-        for (let attempt = 1; attempt <= 3; attempt++) {
+        // Fast Path 1B: Auto-retry loop checking for freshly committed stream
+        for (let attempt = 1; attempt <= 6; attempt++) {
             document.getElementById('loading-title').innerText = "Streaming Video...";
-            document.getElementById('loading-desc').innerText = `Connecting to high-speed stream (${attempt}/3)...`;
-            await new Promise(r => setTimeout(r, 1500));
+            document.getElementById('loading-desc').innerText = `Connecting to high-speed stream (${attempt}/6)...`;
+            await new Promise(r => setTimeout(r, 1000));
             try {
+                // Try fast single video endpoint first
+                const retrySingle = await fetch(`${SINGLE_VIDEO_URL}${startParam}.json?t=${Date.now()}`, { cache: 'no-store' });
+                if (retrySingle.ok) {
+                    const sVid = await retrySingle.json();
+                    if (sVid && sVid.stream_url) {
+                        playVideo(
+                            sVid.stream_url,
+                            sVid.title || "TeraBox Video",
+                            sVid.size || "Unknown",
+                            sVid.res || "HD",
+                            sVid.dur || "--"
+                        );
+                        return;
+                    }
+                }
+
+                // Fallback to full videos.json
                 const retryRes = await fetch(`${VIDEOS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
                 if (retryRes.ok) {
                     const freshDb = await retryRes.json();
