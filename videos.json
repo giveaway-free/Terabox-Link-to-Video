@@ -6254,5 +6254,13 @@
     "res": "480p",
     "dur": "02:20",
     "type": "Video"
+  },
+  "1rtWFJbaZa75psSceNl5lBQ": {
+    "stream_url": "https://fragrant-feather-2252.fuboma.workers.dev/fast_stream?token=XNmhsug3gxWt3d7Cbsv0XBZ6ms4J93bvAi2EHvTK7yDODJ2NNLyffH6RkV6_A3BRqXfZfRyyoPB-4bMM60O7kHEwqOxSNSqNvH6bRcEwar5kxz9Exl4I3QjjaEtQqHcamsMfdXupHAAwENDS8jpxdZW5E5rhwZ4DfSJLZ0mXxK-Dm-BNBtaCyU-Rncirt2SR9NfwiPcz31uBZ5jJ02_S5JWtlOheOim9Kr1nXWJR-bcOg-FyaVxLV2FTG9uOufnoPeyCSfpvW1cdiZVC8UKR47Cj5IWG9wJI5GspDAp4kV4TRLdXBPgdqUFz-KAqbooFwXFDMe_rYDjhXkwxLPbfvG3LXvG-29ZYrfxPztSeoLM-esQ_yNtqMXbf.m3u8",
+    "title": "VID-20251025-WA0012.mp4",
+    "size": "11.7 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:42",
+    "type": "Video"
   }
 }
