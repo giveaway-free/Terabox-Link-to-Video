@@ -3742,5 +3742,13 @@
     "res": "480p",
     "dur": "00:39",
     "type": "Video"
+  },
+  "1DgxlPdWPqIwo-dWBYog23w": {
+    "stream_url": "https://iteraplay.tera-api43.workers.dev/fast_stream?token=U_yRXI08mgNo5IC2zTrhmW3Kw-JodLpvI-hXcjOYlvN9uPJYmbNhxgOJzyFnw-v-KOYAb6mLMIlthTekgtnPX3-tI2X8nT82Mlvx7HNWEKObzyjatQFsq2yXqTVYdM1oodWY34zbQc8WtmpEJELYL5zeBjWt3PRxTgwhohZF9634fc4S2W1pkO2AO6gvY_f-WiIEWqOS6EMPztWjGtI2HD089YQ3TTb9HNG3_VygOZRwUOBuZ1Oms-4FiC9i-UyX3cSXRVEN1fJoHJMjhfq7u1fQM6ilrfPPmhI0QZ5Skf-leJXXZVgRzNvPeWLtTpbF39X9_XTXUQFC8XTHBVmrld9FFB9pY_lfv0zE.m3u8",
+    "title": "c618.mp4",
+    "size": "1.6 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:23",
+    "type": "Video"
   }
 }
