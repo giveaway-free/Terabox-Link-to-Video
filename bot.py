@@ -2552,15 +2552,29 @@ def start_render_health_server():
             if parsed.path == "/api/user_status":
                 qs = parse_qs(parsed.query)
                 uid = qs.get("user_id", [None])[0]
+                vid = qs.get("video_id", [None])[0]
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 if uid:
-                    u = get_user(uid)
-                    is_p = check_paid_status(uid)
-                    cr = u[2] if u else 0
-                    self.wfile.write(json.dumps({"ok": True, "exists": u is not None, "is_paid": 1 if is_p else 0, "credits": cr}).encode("utf-8"))
+                    try:
+                        uid_int = int(uid)
+                        u = get_user(uid_int)
+                        is_p = check_paid_status(uid_int)
+                        cr = u[2] if u else 0
+                        already = False
+                        if vid:
+                            already = has_watched_video(uid_int, vid)
+                        self.wfile.write(json.dumps({
+                            "ok": True,
+                            "exists": u is not None,
+                            "is_paid": 1 if is_p else 0,
+                            "credits": cr,
+                            "already_watched": already
+                        }).encode("utf-8"))
+                    except Exception as err:
+                        self.wfile.write(json.dumps({"ok": False, "error": str(err)}).encode("utf-8"))
                 else:
                     self.wfile.write(b'{"ok": false, "error": "missing_user_id"}')
                 return
@@ -2569,6 +2583,7 @@ def start_render_health_server():
                 qs = parse_qs(parsed.query)
                 uid = qs.get("user_id", [None])[0]
                 vid = qs.get("video_id", [None])[0]
+                replay = qs.get("replay", ["0"])[0] in ["1", "true"]
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
@@ -2578,17 +2593,45 @@ def start_render_health_server():
                         uid_int = int(uid)
                         is_p = check_paid_status(uid_int)
                         already = has_watched_video(uid_int, vid)
-                        if not already:
+                        if not already and not replay:
                             mark_watched_video(uid_int, vid)
                             if not is_p:
                                 update_credits(uid_int, -1)
+                        elif replay and not already:
+                            mark_watched_video(uid_int, vid)
                         u = get_user(uid_int)
                         cr = u[2] if u else 0
-                        self.wfile.write(json.dumps({"ok": True, "already_watched": already, "credits": cr, "is_paid": 1 if is_p else 0}).encode("utf-8"))
+                        self.wfile.write(json.dumps({
+                            "ok": True,
+                            "already_watched": already or replay,
+                            "credits": cr,
+                            "is_paid": 1 if is_p else 0
+                        }).encode("utf-8"))
                     except Exception as err:
                         self.wfile.write(json.dumps({"ok": False, "error": str(err)}).encode("utf-8"))
                 else:
                     self.wfile.write(b'{"ok": false, "error": "missing_params"}')
+                return
+
+            if parsed.path == "/api/set_credits":
+                qs = parse_qs(parsed.query)
+                uid = qs.get("user_id", [None])[0]
+                credits_val = qs.get("credits", [None])[0]
+                secret = qs.get("secret", [None])[0]
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                if uid and credits_val and secret == "spinach_admin_sync":
+                    try:
+                        uid_int = int(uid)
+                        c_val = int(credits_val)
+                        set_user_credits(uid_int, c_val)
+                        self.wfile.write(json.dumps({"ok": True, "user_id": uid_int, "credits": c_val}).encode("utf-8"))
+                    except Exception as err:
+                        self.wfile.write(json.dumps({"ok": False, "error": str(err)}).encode("utf-8"))
+                else:
+                    self.wfile.write(b'{"ok": false, "error": "unauthorized_or_missing"}')
                 return
 
             self.send_response(200)
