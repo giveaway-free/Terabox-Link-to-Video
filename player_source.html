@@ -1185,6 +1185,8 @@
         let userRecord = null;
         let isVip = false;
         let currentCredits = 0;
+        let uData = null;
+        let videosDb = {};
         const userIdStr = tgUser && tgUser.id ? String(tgUser.id) : null;
 
         if (tgUser) {
@@ -1192,10 +1194,8 @@
             document.getElementById('user-display-name').innerText = tgUser.first_name || tgUser.username || `User #${tgUser.id}`;
         }
 
-        let videosDb = {};
         try {
             // Priority 1: GitHub Contents REST API for 100% instant realtime users.json
-            let uData = null;
             try {
                 const apiRes = await fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
                     headers: { 'Accept': 'application/vnd.github.v3+json' }
@@ -1215,11 +1215,6 @@
 
             if (uData && userIdStr && uData[userIdStr]) {
                 userRecord = uData[userIdStr];
-            }
-
-            const videosRes = await fetch(`${VIDEOS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
-            if (videosRes.ok) {
-                videosDb = await videosRes.json();
             }
         } catch (e) {
             console.warn("Could not fetch remote databases, using fallback balance:", e);
