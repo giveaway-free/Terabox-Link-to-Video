@@ -102,5 +102,13 @@
     "res": "Auto (Adaptive)",
     "dur": "10:32",
     "type": "Video"
+  },
+  "1CkhiaAB3paDNFA03MUZp6Q": {
+    "stream_url": "https://iteraplay.tera-api86.workers.dev/fast_stream?token=uzZL24tbM-CgRvs5dUyholG8VkgJ7d82Abwz3JNb_KBVKuZLtByl43a_hhxj9OwlP6lpQgRmcPpVprSaPW2aHYItw-yF22Sqdk9b7y2Dr-olCnEZmbpT3Ovhzp4qzbWDFTDFyPkHXXMq9tDcrfCGz1n-tl1yuOvAClTV_vQR9mYIDTyeh6dTVaJeqtBZrxAjXyEYPlfCkqckXmFrU_NnDqJYsMC-mak6D1LN8bKqzzDLO5aCmVqbQ12syFvQVhmvNcVAY9dYnQJi4Q3AjaVeGqlzuFGFtHMaIKYAhHjFU0QxhmGSSBWmkW6rpUvf0Q3j9bmcHRCpY_w0LznB9j1aaJvMLPUu6bc--Nl5-KWZ3t-Wt8zx5TLxLcOV-FjR.m3u8",
+    "title": "2025-08-11-23-27-31.mp4",
+    "size": "9.1 MB",
+    "res": "360p",
+    "dur": "00:44",
+    "type": "Video"
   }
 }
