@@ -3022,5 +3022,13 @@
     "res": "480p",
     "dur": "01:57",
     "type": "Video"
+  },
+  "1mzgojku8a9FBJ8UZun3vBQ": {
+    "stream_url": "https://iteraplay.tera-api32.workers.dev/fast_stream?token=EhcqX3hgqKFY48q6jwiZj0bA9eFjSriEVWg6KtaEgGk0Kp8WQYgEhoOvSxQzi70SGIPjgqIRaYtW2WwD1Y0HFKwPHhRG16XJI94GLEB4-La6vOPHvD_4VWvVZ6CZGm7cD9jHtPIP6ethhj9oC00BsVyVv50mSCaePjJUOKfev9LdyI6RMBIV-FHX8DJzYKDeeV8oVBW39aIce2wOlYBdFUGf4doDa6EUkLJ5UK74YJGLkiyr0AuVk0W6UzISXK2jCTA1QGYvYQVS5bd6SN-9Iedlm7VagEtqqa7LaXk4jfKLawLfQglPrDq3RdF-jBrOHFGjHjQvJ3cEksf8EpTy5eJ06vn4uSNQfZOZlZAwokoks538JozqdDBRj4HQYFIxX59_.m3u8",
+    "title": "33 - DoodStream(1)(1)(1).mp4",
+    "size": "106.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "11:45",
+    "type": "Video"
   }
 }
