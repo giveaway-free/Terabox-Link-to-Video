@@ -3686,5 +3686,13 @@
     "res": "1080p",
     "dur": "01:36",
     "type": "Video"
+  },
+  "10r3GbtNSc4nh4JimO5nVLw": {
+    "stream_url": "https://cold-smoke-4608.tykyqeri.workers.dev/fast_stream?token=XpMBlhARxlZILud9UvMeczOksSBvszewGuvwLmDKbtHdx8ZGQY5hPN8aAgOo7zvxIogw3IhdOReNRfdacRvT5XvV-R0PlEriFcI1BtBbhZ1wh6QNgPx21AN16lbci-c61_ke8hDAXWtqa5o9HlZgk-bf6iEy2PYzJWfzy-pQZPboonzF6YC2HYEmjfx_E9kxbeDZdp0s2usYPe5p1B5z6HQPYrhbxWb0XA7pZtFOA6BtU9sIOy5IRfh4mhj4RALx7JGIiBUqcvRTrrpmRQp6asYo0QekOiRTaDt6BCm-aYFm0w5l5h62C5lhRvEenryvWyh0wXCedb_4OKehT1e4z5J9W8-Upw_PdReTq76GaUz_VTRKHbsU33BeRm9S.m3u8",
+    "title": "2023-06-23-03-33-38.mp4",
+    "size": "5.3 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:42",
+    "type": "Video"
   }
 }
