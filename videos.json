@@ -3094,5 +3094,13 @@
     "res": "480p",
     "dur": "01:03",
     "type": "Video"
+  },
+  "1vRIdItPxLJClnq8l5k4-Rg": {
+    "stream_url": "https://broken-salad-1fbf.tunipune.workers.dev/fast_stream?token=BH0xEWOKNJgkUs1lbT4r9AjeuqYmvYOTMU9kqXSgQxiRaZQppzQ4S65KCloTV551ir09anWmHcILBCmvZxbjHkb7ZJvxeR5oGT_g56NcHnvPMA9zp8a-vYFDmLw87qrCCU2RYF7RAyp4RPBS78XpjnZguEAcNLoA0tws1w5MkVkBmt912Cd4B0cf4SZDn8fa-erL58CZLTDTNuzd_79oH-XpDsVME1hPmxvocm2vnqF989GesoVrFcxumq8GPeijLooO20mYMD1wnRAYbpU4G2cKnAQ5D-8L4MIzPjOMKynlOu7tItLEkj-e3lbDT9M2m5881l-A3iUF4g_JDaLvI2JUbZibg5BUHQcn9pMGDeo6.m3u8",
+    "title": "ANAM_1_.mp4",
+    "size": "9.3 MB",
+    "res": "1080p",
+    "dur": "01:03",
+    "type": "Video"
   }
 }
