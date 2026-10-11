@@ -10494,5 +10494,13 @@
     "res": "1080p",
     "dur": "05:42",
     "type": "Video"
+  },
+  "1kiSDZgdmZLLuJTci3cV0ug": {
+    "stream_url": "https://iteraplay.tera-api65.workers.dev/fast_stream?token=qVR8bXLOIzeCC_1KNjP02-KB5an-4IASia3110mqx3NCRL73LllM4jV_ZHT3Xo-QGKPq24vJymzGaR8mhdtXigUyP_MqdM-cOzZfdMgRUfRpja7OyuuXZNuDQChUfkdW0fhpckAbcHszb5280Y6Iefpe7gO57llHAwcHyl9p189Krr_Jl5m44fhmVJ3ORVy3zm5yrx74aLo64C2dYSNtSQGJt8minHXJRSDWsVpF8SErWHaWORYGoNfP-GA1IpEuMOvWLaWcZV1EXSzaT2tKN_KR6mANoUKQs6I4wm1ygbF3dbp7IM-46pzHOQAAJPyIsLP_odZyJ-h1KqQuowz57rmYwr9e5wj6OAFi2xG8NhKgfNrv13v6igeOgyBRedN6n4dmvlKmDvz9UgXdVvCKCgXFpFE.m3u8",
+    "title": "vid_0000 (TG-Bhat kanda official)(1).mp4",
+    "size": "42.5 MB",
+    "res": "480p",
+    "dur": "07:43",
+    "type": "Video"
   }
 }
