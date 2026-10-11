@@ -11566,5 +11566,13 @@
     "res": "1080p",
     "dur": "12:10",
     "type": "Video"
+  },
+  "1cCGyP7Q5cQVLuR-AGN-PlA": {
+    "stream_url": "https://iteraplay.tera-api16.workers.dev/fast_stream?token=c6cCPIUGBU3DbMhXHBpOj-nSe8j3MHZsgPFgFhKRICqvfNsjNFCgsiNTPHlRvZCk_JnC1VGTtIn3rBdTtBsbyRnFSAYhhtFfBsfTkVjTftwV_5xKk4ksD7D2vNo3HJild0OICRRcxcmZAA8-OzPaaVcXcmd1XeRbR34wKGRrZ-LPVNo-U2jOSUcaaJya_6lBO_WaVscu0_5EUqeQZ6xsD-jPvsKGm_pR6MYSiRqq59ejjLXqh7FgcgVmvGpnZmSEjQuBgVCCm3LmQiULIUqQJGvepEZOLGYfr7fVsqdMFPOsXoiimXTl9OFksaTFBL9gTyyYxziFZSihVds16yr-avID4RegR7zIp7Gx2SA_7GPyydGsvuKdKy9-RQ.m3u8",
+    "title": "video dud khay.ts",
+    "size": "3.2 MB",
+    "res": "480p",
+    "dur": "01:36",
+    "type": "Video"
   }
 }
