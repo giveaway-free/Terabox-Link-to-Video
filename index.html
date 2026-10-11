@@ -734,7 +734,7 @@
     }
 
     const BOT_USERNAME = "leadox_bot";
-    const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/main/users.json";
+    const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/users.json";
     const SINGLE_VIDEO_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/data/v/";
     const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
@@ -1194,18 +1194,32 @@
 
         let videosDb = {};
         try {
-            const [usersRes, videosRes] = await Promise.allSettled([
-                fetch(`${USERS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' }),
-                fetch(`${VIDEOS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' })
-            ]);
-            if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
-                const uData = await usersRes.value.json();
-                if (userIdStr && uData[userIdStr]) {
-                    userRecord = uData[userIdStr];
+            // Priority 1: GitHub Contents REST API for 100% instant realtime users.json
+            let uData = null;
+            try {
+                const apiRes = await fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
+                    headers: { 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (apiRes.ok) {
+                    const j = await apiRes.json();
+                    if (j && j.content) {
+                        uData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                    }
                 }
+            } catch (_) {}
+
+            if (!uData) {
+                const usersRes = await fetch(`${USERS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                if (usersRes.ok) uData = await usersRes.json();
             }
-            if (videosRes.status === 'fulfilled' && videosRes.value.ok) {
-                videosDb = await videosRes.value.json();
+
+            if (uData && userIdStr && uData[userIdStr]) {
+                userRecord = uData[userIdStr];
+            }
+
+            const videosRes = await fetch(`${VIDEOS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
+            if (videosRes.ok) {
+                videosDb = await videosRes.json();
             }
         } catch (e) {
             console.warn("Could not fetch remote databases, using fallback balance:", e);
@@ -1223,17 +1237,15 @@
             alreadyWatched = true;
         }
 
-        // Determine user subscription and credits
-        let spentCredits = parseInt(localStorage.getItem(`spent_${userIdStr || 'guest'}`), 10) || 0;
+        // Determine user subscription and credits directly from live bot balance
         let baseCredits = 60;
-
         if (userRecord) {
             isVip = userRecord.is_paid === 1;
             const parsedCr = parseInt(userRecord.credits, 10);
             if (!isNaN(parsedCr)) baseCredits = parsedCr;
         }
 
-        currentCredits = Math.max(0, baseCredits - spentCredits);
+        currentCredits = Math.max(0, baseCredits);
 
         if (isVip) {
             badgeEl.className = "status-badge badge-vip";
@@ -1259,9 +1271,7 @@
         // Deduct 1 credit ONLY on the first play; subsequent views are free
         if (!isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
-            spentCredits += 1;
-            localStorage.setItem(`spent_${userIdStr || 'guest'}`, spentCredits);
-            currentCredits = Math.max(0, baseCredits - spentCredits);
+            currentCredits = Math.max(0, currentCredits - 1);
             badgeEl.className = "status-badge badge-credits";
             badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
 
@@ -1275,7 +1285,31 @@
             localStorage.setItem(localUnlockKey, "1");
         }
 
-        // Fast Path 0: Instant lightweight single video file lookup (150 bytes, ~30ms load)
+        // Fast Path 0: Instant realtime GitHub REST API lookup (Bypasses Fastly CDN 100%, 0ms cache delay!)
+        try {
+            const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(startParam)}.json?ref=data`;
+            const ghVidRes = await fetch(ghVidUrl, {
+                headers: { 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (ghVidRes.ok) {
+                const jData = await ghVidRes.json();
+                if (jData && jData.content) {
+                    const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
+                    if (sVid && sVid.stream_url) {
+                        playVideo(
+                            sVid.stream_url,
+                            sVid.title || "TeraBox Video",
+                            sVid.size || "Unknown",
+                            sVid.res || "HD",
+                            sVid.dur || "--"
+                        );
+                        return;
+                    }
+                }
+            }
+        } catch (_) {}
+
+        // Fast Path 0B: Lightweight single video file lookup via raw CDN fallback
         try {
             const singleRes = await fetch(`${SINGLE_VIDEO_URL}${startParam}.json?t=${Date.now()}`, { cache: 'no-store' });
             if (singleRes.ok) {
@@ -1306,46 +1340,25 @@
             return;
         }
 
-        // Fast Path 1B: Auto-retry loop checking for freshly committed stream
-        for (let attempt = 1; attempt <= 6; attempt++) {
-            document.getElementById('loading-title').innerText = "Streaming Video...";
-            document.getElementById('loading-desc').innerText = `Connecting to high-speed stream (${attempt}/6)...`;
-            await new Promise(r => setTimeout(r, 1000));
-            try {
-                // Try fast single video endpoint first
-                const retrySingle = await fetch(`${SINGLE_VIDEO_URL}${startParam}.json?t=${Date.now()}`, { cache: 'no-store' });
-                if (retrySingle.ok) {
-                    const sVid = await retrySingle.json();
+        // Fast Path 1B: Quick 1-second retry for freshly committed stream before cloud extractor
+        document.getElementById('loading-title').innerText = "Streaming Video...";
+        document.getElementById('loading-desc').innerText = "Connecting to high-speed stream...";
+        await new Promise(r => setTimeout(r, 800));
+        try {
+            const retrySingle = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(startParam)}.json?ref=data`, {
+                headers: { 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (retrySingle.ok) {
+                const jData = await retrySingle.json();
+                if (jData && jData.content) {
+                    const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
                     if (sVid && sVid.stream_url) {
-                        playVideo(
-                            sVid.stream_url,
-                            sVid.title || "TeraBox Video",
-                            sVid.size || "Unknown",
-                            sVid.res || "HD",
-                            sVid.dur || "--"
-                        );
+                        playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
                         return;
                     }
                 }
-
-                // Fallback to full videos.json
-                const retryRes = await fetch(`${VIDEOS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
-                if (retryRes.ok) {
-                    const freshDb = await retryRes.json();
-                    if (freshDb && freshDb[startParam] && freshDb[startParam].stream_url) {
-                        const cached = freshDb[startParam];
-                        playVideo(
-                            cached.stream_url,
-                            cached.title || "TeraBox Video",
-                            cached.size || "Unknown",
-                            cached.res || "HD",
-                            cached.dur || "--"
-                        );
-                        return;
-                    }
-                }
-            } catch (retryErr) {}
-        }
+            }
+        } catch (retryErr) {}
 
         // Path 2: Fetch and play video via Extractor API
         document.getElementById('loading-title').innerText = "Streaming Video...";
