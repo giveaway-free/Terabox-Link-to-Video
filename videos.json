@@ -8686,5 +8686,13 @@
     "res": "1080p",
     "dur": "02:09",
     "type": "Video"
+  },
+  "1dD4ghSp-SaRgjI_X2LTKog": {
+    "stream_url": "https://holy-wind-28d5.fedihuva.workers.dev/fast_stream?token=DrHhKkFkI_lnxgFPPvlExs1eLh4L0VfwwFRsCVvlZTBWW7gagJ87eXNPuyjJMiKEeu7whNYlv7Au3xezqg_WGd-yzdR8VnJfggwtSLWsnYdjjztU4gOkjSWxlhPKwHwb2Pz8nv8ZnVmXOhFebn8HnJgtoytQ2rClbbNMhyJNogC1gW_h86WwUJN0LUsTNbbKUFAPqoPWPiXzni1xGs_5_VFPy3vfPVs9e9b0a7it1MVTLdR_sbjymHROFDIbsBpXNmvubqpeslKvpCZ9TiWVYWKweTQr6RBrFrX9-BHei2Ys2xUkxvYdrQjmxnmkBJ3NHqg6XMO_P7I8W2ulODJNAfsB5P_GmjU66LHozMbcRVVAxQOu.m3u8",
+    "title": "648563dd85.mp4",
+    "size": "2.9 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:30",
+    "type": "Video"
   }
 }
