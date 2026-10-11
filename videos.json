@@ -3302,5 +3302,13 @@
     "res": "1080p",
     "dur": "01:16",
     "type": "Video"
+  },
+  "17VrLyLYwXWw2y2QzMDsBOQ": {
+    "stream_url": "https://iteraplay.tera-api20.workers.dev/fast_stream?token=hJ_di5zLip4mT4ugogMq25Mw_1x1jo15jYdfZSP9h58cv-RY680iU2EO9HqjsZ7EtJoUhpmE4UFFTzsw9r_qoLND6eNHCowzZFekodP0elufxfiF0Vjg_oBSZx3cj0Iw8AbkNQgXJTgkVnb4mJZFRbafVIY0uHHZ0VfZxWCAiAQtEb1KfW7H3m6HVZFOGYJmy1b2cx_jDi-eY3iW8i0MDKfrIUzOVVbAl5BlXyMLifXuKoEQT_Kh39FrOV61O1mjXBmRi8nTeoFICjVzp8WlKm0UIBPhPAWXHR1O75trrJkO59f4dF4oOoqe1BZhTPGT7PSB5qrT2a1b60G-M9-W3Zz9N-Ia1il39uZBU1ntVCbySJsmg0upoor9k7kNNxwIkcQAZmDqcd_E09HuPjvxJg.m3u8",
+    "title": "ANUJSINGH_COLLECTIONS__20231201_002729.mp4",
+    "size": "9.7 MB",
+    "res": "1080p",
+    "dur": "01:03",
+    "type": "Video"
   }
 }
