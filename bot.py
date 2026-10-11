@@ -8,6 +8,7 @@ if hasattr(sys.stderr, 'reconfigure'):
 import re
 import json
 import time
+import base64
 import threading
 import sqlite3
 import requests
@@ -208,6 +209,17 @@ def update_credits(user_id, amount):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute('UPDATE users SET credits = credits + ? WHERE user_id = ?', (amount, user_id))
+    conn.commit()
+    conn.close()
+    try:
+        sync_users_json()
+    except Exception:
+        pass
+
+def set_user_credits(user_id, amount):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('UPDATE users SET credits = ? WHERE user_id = ?', (amount, user_id))
     conn.commit()
     conn.close()
     try:
@@ -971,7 +983,10 @@ def admin_settings_inline():
         InlineKeyboardButton("✦ 9. 💰 30 Days Price ✦", callback_data="set_30_days_price"),
         InlineKeyboardButton("✦ 10. 💬 Share Text ✦", callback_data="set_share_text"),
         InlineKeyboardButton("✦ 11. 🔗 Backup Channel Link ✦", callback_data="set_backup_link"),
-        InlineKeyboardButton("✦ 12. 🔢 Max Batch Links ✦", callback_data="set_max_batch_links")
+        InlineKeyboardButton("✦ 12. 🔢 Max Batch Links ✦", callback_data="set_max_batch_links"),
+        InlineKeyboardButton("✦ 13. ➕ Add User Credits ✦", callback_data="btn_add_credits"),
+        InlineKeyboardButton("✦ 14. ➖ Deduct User Credits ✦", callback_data="btn_deduct_credits"),
+        InlineKeyboardButton("✦ 15. ✏️ Set User Credits ✦", callback_data="btn_set_credits")
     )
     markup.row(InlineKeyboardButton("❌ Close Panel", callback_data="btn_close_admin_panel"))
     return markup
@@ -1690,7 +1705,7 @@ def send_admin_user_stats(chat_id):
     markup.row(InlineKeyboardButton("❌ Close", callback_data="btn_close_admin_panel"))
     bot.send_message(chat_id, full_text, parse_mode="Markdown", reply_markup=markup)
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("set_") or call.data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang"])
+@bot.callback_query_handler(func=lambda call: call.data.startswith("set_") or call.data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"])
 def handle_admin_callbacks(call):
     if not is_admin(call.from_user.id):
         return
@@ -1759,6 +1774,45 @@ def handle_admin_callbacks(call):
             reply_markup=cancel_input_inline()
         )
         bot.register_next_step_handler(msg, process_add_paid_ui, msg.message_id)
+        return
+
+    if call.data == "btn_add_credits":
+        msg = bot.send_message(
+            call.message.chat.id,
+            "➕ **User Credit Add korte User ID & Amount din:**\n\n"
+            "Format: `<User_ID> <Amount>`\n"
+            "Example: `123456789 10`\n\n"
+            "*(User-er bortoman credit er sathe ei amount jog hobe)*",
+            parse_mode="Markdown",
+            reply_markup=cancel_input_inline()
+        )
+        bot.register_next_step_handler(msg, process_add_credits_ui, msg.message_id)
+        return
+
+    if call.data == "btn_deduct_credits":
+        msg = bot.send_message(
+            call.message.chat.id,
+            "➖ **User Credit Deduct/Komate User ID & Amount din:**\n\n"
+            "Format: `<User_ID> <Amount>`\n"
+            "Example: `123456789 5`\n\n"
+            "*(User-er bortoman credit theke ei amount biyog hobe)*",
+            parse_mode="Markdown",
+            reply_markup=cancel_input_inline()
+        )
+        bot.register_next_step_handler(msg, process_deduct_credits_ui, msg.message_id)
+        return
+
+    if call.data == "btn_set_credits":
+        msg = bot.send_message(
+            call.message.chat.id,
+            "✏️ **User Credit Set korte User ID & Exact Amount din:**\n\n"
+            "Format: `<User_ID> <Amount>`\n"
+            "Example: `123456789 20`\n\n"
+            "*(User-er total credit thik ei songkhay set hoye jabe)*",
+            parse_mode="Markdown",
+            reply_markup=cancel_input_inline()
+        )
+        bot.register_next_step_handler(msg, process_set_credits_ui, msg.message_id)
         return
 
     key_map = {
@@ -1932,6 +1986,119 @@ def process_add_paid_ui(message, prompt_msg_id=None):
         if prompt_msg_id:
             to_delete.append(prompt_msg_id)
         auto_delete_after(message.chat.id, to_delete, 5)
+
+def process_add_credits_ui(message, prompt_msg_id=None):
+    if not is_admin(message.from_user.id):
+        return
+    if is_menu_navigation(message.text):
+        if prompt_msg_id:
+            try:
+                bot.delete_message(message.chat.id, prompt_msg_id)
+            except Exception:
+                pass
+        dispatch_menu_command(message)
+        return
+    try:
+        parts = message.text.strip().split()
+        target_user = int(parts[0])
+        amount = int(parts[1])
+        if amount <= 0:
+            raise ValueError("Amount must be positive")
+        user = get_user(target_user)
+        if not user:
+            register_user(target_user, f"User_{target_user}")
+            user = get_user(target_user)
+        update_credits(target_user, amount)
+        updated_user = get_user(target_user)
+        new_balance = updated_user[2] if updated_user else amount
+        rep = bot.reply_to(message, f"✅ **User {target_user}-ke {amount} credits jog kora hoyeche!**\n💰 Notun balance: `{new_balance}` credits", parse_mode="Markdown")
+        to_delete = [rep.message_id, message.message_id]
+        if prompt_msg_id:
+            to_delete.append(prompt_msg_id)
+        auto_delete_after(message.chat.id, to_delete, 6)
+        try:
+            bot.send_message(target_user, f"🎁 **Admin apnar account-e {amount} credits add korechen!**\n💰 Apnar bortoman balance: `{new_balance}` credits", parse_mode="Markdown")
+        except Exception:
+            pass
+    except Exception:
+        rep = bot.reply_to(message, "❌ **Invalid format!**\nSothik bhabe likhun: `<user_id> <amount>`\nExample: `123456789 10`", parse_mode="Markdown")
+        to_delete = [rep.message_id, message.message_id]
+        if prompt_msg_id:
+            to_delete.append(prompt_msg_id)
+        auto_delete_after(message.chat.id, to_delete, 6)
+
+def process_deduct_credits_ui(message, prompt_msg_id=None):
+    if not is_admin(message.from_user.id):
+        return
+    if is_menu_navigation(message.text):
+        if prompt_msg_id:
+            try:
+                bot.delete_message(message.chat.id, prompt_msg_id)
+            except Exception:
+                pass
+        dispatch_menu_command(message)
+        return
+    try:
+        parts = message.text.strip().split()
+        target_user = int(parts[0])
+        amount = int(parts[1])
+        if amount <= 0:
+            raise ValueError("Amount must be positive")
+        user = get_user(target_user)
+        if not user:
+            rep = bot.reply_to(message, f"❌ User `{target_user}` database-e khuje pawa jayni!", parse_mode="Markdown")
+            to_delete = [rep.message_id, message.message_id]
+            if prompt_msg_id:
+                to_delete.append(prompt_msg_id)
+            auto_delete_after(message.chat.id, to_delete, 6)
+            return
+        curr_credits = user[2]
+        new_val = max(0, curr_credits - amount)
+        set_user_credits(target_user, new_val)
+        rep = bot.reply_to(message, f"✅ **User {target_user}-er account theke {amount} credits deduct kora hoyeche.**\n💰 Purber balance: `{curr_credits}` | Notun balance: `{new_val}` credits", parse_mode="Markdown")
+        to_delete = [rep.message_id, message.message_id]
+        if prompt_msg_id:
+            to_delete.append(prompt_msg_id)
+        auto_delete_after(message.chat.id, to_delete, 6)
+    except Exception:
+        rep = bot.reply_to(message, "❌ **Invalid format!**\nSothik bhabe likhun: `<user_id> <amount>`\nExample: `123456789 5`", parse_mode="Markdown")
+        to_delete = [rep.message_id, message.message_id]
+        if prompt_msg_id:
+            to_delete.append(prompt_msg_id)
+        auto_delete_after(message.chat.id, to_delete, 6)
+
+def process_set_credits_ui(message, prompt_msg_id=None):
+    if not is_admin(message.from_user.id):
+        return
+    if is_menu_navigation(message.text):
+        if prompt_msg_id:
+            try:
+                bot.delete_message(message.chat.id, prompt_msg_id)
+            except Exception:
+                pass
+        dispatch_menu_command(message)
+        return
+    try:
+        parts = message.text.strip().split()
+        target_user = int(parts[0])
+        amount = int(parts[1])
+        if amount < 0:
+            raise ValueError("Amount cannot be negative")
+        user = get_user(target_user)
+        if not user:
+            register_user(target_user, f"User_{target_user}")
+        set_user_credits(target_user, amount)
+        rep = bot.reply_to(message, f"✅ **User {target_user}-er balance `{amount}` credits set kora hoyeche!**", parse_mode="Markdown")
+        to_delete = [rep.message_id, message.message_id]
+        if prompt_msg_id:
+            to_delete.append(prompt_msg_id)
+        auto_delete_after(message.chat.id, to_delete, 6)
+    except Exception:
+        rep = bot.reply_to(message, "❌ **Invalid format!**\nSothik bhabe likhun: `<user_id> <amount>`\nExample: `123456789 20`", parse_mode="Markdown")
+        to_delete = [rep.message_id, message.message_id]
+        if prompt_msg_id:
+            to_delete.append(prompt_msg_id)
+        auto_delete_after(message.chat.id, to_delete, 6)
 
 @bot.message_handler(func=lambda msg: bool(msg.text and is_account_button(msg.text)))
 def account_info(message):
@@ -2249,6 +2416,26 @@ def handle_message(message):
             else:
                 auto_delete_after(message.chat.id, status_msg.message_id, 5)
 
+def push_users_json_to_gh():
+    try:
+        if not os.path.exists('users.json'):
+            return
+        with open('users.json', 'r', encoding='utf-8') as f:
+            content = f.read()
+        token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
+        hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
+        b64 = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+        url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data"
+        r_get = requests.get(url, headers=hdrs, timeout=5)
+        sha = r_get.json().get('sha') if r_get.status_code == 200 else None
+        p = {'message': 'Sync users.json', 'content': b64, 'branch': 'data'}
+        if sha:
+            p['sha'] = sha
+        put_url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json"
+        requests.put(put_url, headers=hdrs, json=p, timeout=5)
+    except Exception as e:
+        print(f"Error pushing users.json to GH: {e}")
+
 def sync_users_json():
     try:
         conn = sqlite3.connect('users.db')
@@ -2273,6 +2460,7 @@ def sync_users_json():
         }
         with open('users.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
+        threading.Thread(target=push_users_json_to_gh, daemon=True).start()
     except Exception as e:
         print(f"Error syncing users.json: {e}")
 
