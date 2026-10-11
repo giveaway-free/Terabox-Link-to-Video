@@ -7726,5 +7726,13 @@
     "res": "1080p",
     "dur": "06:32",
     "type": "Video"
+  },
+  "1RSbRtsvsgHAC5ro36DutsA": {
+    "stream_url": "https://iteraplay.tera-api20.workers.dev/fast_stream?token=fAQ9TgKpGwt63p0WXFa89TEeSNjitbakGzM8g0zuNr6vKqXiOo0Vwp68ofi2dY5mBpVc9wChD8BLqtN-ZUCsO-ZGfVawB38gteyVvvyOu-9KH1xgXMNO_Oo72POmfMgR2bI9NpJxbrSuRV8FUCX3fiFOUo7w3_KB0VLAFsHydvoe_wws6fskjoQCCLHoKMbveTunlqZd5ixK92bU6pemrRTqlW6TO9uxkU1Zghd4Vzmnt4fX7_i4rCz_J-5Ab9KZpM-z4qFYbRtmHWmkEw42UbDV0bIaVFsSMozJI6TPM1FZawUgQJw1NEDF9zgjHYaE_gSJMjLXgoBSLtJ11yC0qnk2tKLIswZHnBzFS6mg-juyHJ0PtcwvPpzoSYaSx9rXZZQNuK7s.m3u8",
+    "title": "By_@DesiJack_On_Telegram_9.mp4",
+    "size": "115.7 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "14:18",
+    "type": "Video"
   }
 }
