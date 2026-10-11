@@ -4182,5 +4182,13 @@
     "res": "1080p",
     "dur": "01:01",
     "type": "Video"
+  },
+  "1LQVA6eP80XKNH8oh2TpLLg": {
+    "stream_url": "https://icy-field-5911.dycedela.workers.dev/fast_stream?token=ZzZDXUdImFC5KFR047G2NbtRgsL7iL0dmSijJfKOs3xipoFWEbciR8t6OajZbTN_GJf5HllAh4kL3XqSVuxwlcgg9B6i6vpkLIzzcBGPEFHSupvbfqAZ-LOvWCQ0LhhHA1W5_MyDiD6AUXpLKs1qNT2REVL_NZT8UR49JXGz0ToU1KWsqyVb1Xxpu1U4VQCPawTJyWechk8oqhvi2zpVY_mQOpLnAfKmOh0Ov4wM-TgFIhVUSf25zBRGHoQsx7Tn7OGs3-TxjWiF4zDqUDOZW4M-BvLnc5NL3G-T00c18VHG9NILJObGH4gU7m1Sk3YS1mZGsveusxnIfqUGK4HsQea-N02kG5fOTWKAQ4Ci.m3u8",
+    "title": "y1ii(1).mp4",
+    "size": "23.5 MB",
+    "res": "360p",
+    "dur": "06:05",
+    "type": "Video"
   }
 }
