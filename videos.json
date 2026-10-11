@@ -5766,5 +5766,13 @@
     "res": "Auto (Adaptive)",
     "dur": "14:41",
     "type": "Video"
+  },
+  "1-rtUDSn2cYJWNdIyT8vXkg": {
+    "stream_url": "https://green-lab-9149.qazopo.workers.dev/fast_stream?token=a5rWE5rISdzxpEQNSB31u6AsUyAhcjiGTikS2HKQyysWlTtFIgvKdwSdKv_6MJFY6vnnVOd8_XYy8muk37GuGVu5U4S0SKmF71HVxF6No_yd-Atl2aIY8YMt33uXqaPUg8NKYG0GxIlQsHNc_XnMXby8z75HABIwGIijpiTk-5AP8DoKWVaHA6A55SC1-Wez0jxNaVSah7AFeEji71xcYzvF4e8fEsSs1H6Zu_Wgr2FYUXNCiyKjgloZKKG_YPiOEnakQeGBgXgaa1WVXGLHhzZI9KM5qNwpfesw_taoV1AcUGfyAcbimKPnL90efnRG_O_nP2Db_Xhev5mxEs6kSlWHdgDrRwvCVhbxxw4SMtmDfb8VH-k284It_6VS.m3u8",
+    "title": "2023-06-14-15-44-18.mp4",
+    "size": "8.7 MB",
+    "res": "480p",
+    "dur": "00:49",
+    "type": "Video"
   }
 }
