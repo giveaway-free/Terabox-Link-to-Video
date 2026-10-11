@@ -3102,5 +3102,13 @@
     "res": "1080p",
     "dur": "01:03",
     "type": "Video"
+  },
+  "1LR5Lr71Emsf6S5ooycytXg": {
+    "stream_url": "https://iteraplay.tera-api93.workers.dev/fast_stream?token=kpujoxeD9EzX1w2ltHMMf5GzEgSEVMHt4okfqmFEjGN7Jf2mmjlWvW3JqHm7YmaZhU12ne1umQRMZgxhwABUmxaTDu2_1nupoqEiK8fnXhJV6KYmE0WdE-NNA2gcWK4CcW2IRoINYWQ3Sedu5kKo7MkCs3sWhkaoJ0PUNHVxRDABDJX6s2PEZp99-kRIhT6F6Ti_1J2PfsR5hBZ5NXzFxhk5zBnGoF5ostmHDFCUykkXgkAr9VY8o63SnUBkEWiRNAj7Fx7rurN6JdJQUv3cr1ajHsMcwRnl8F-NL37uB8QOAE48d1jWN8rWuKN_kAgkMUOXC3gIZoRGrR8O1zVfi6cvUnQoczaDlKzvLYXn7q4JXZRFsnsRyZmIGFqN.m3u8",
+    "title": "vhoda kamray vid.ts",
+    "size": "29.7 MB",
+    "res": "360p",
+    "dur": "12:01",
+    "type": "Video"
   }
 }
