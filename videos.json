@@ -8478,5 +8478,13 @@
     "res": "480p",
     "dur": "02:21",
     "type": "Video"
+  },
+  "1k7YgYla9ByqvEPwP992IeA": {
+    "stream_url": "https://iteraplay.tera-api15.workers.dev/fast_stream?token=b0ohkfKvNOSSos7wWTPmnArYHnBY_o9cOFbxUNIX_wSS-D13ag8PRKWfxHg3YBRkv1rcT0-Xfsydz1SL_2q8XJnglQekN6jmLTTBYEgG69WlzwLVIql9RrJ8O2osdH_tzMIw6b7wtwHSBsSiU5faArnyBmK5SzPSYmBaMkkEeQ4NTmPxxaISjBLwt365AgIyzitFiHQlLVutZ6gLgPKiKYDthPSxsXA6UIEKy5GyFfqcVHftEtIf-FebN2oqChsKSNQVYbfLFA173OnzeF2QSejzQk34n5MIq4ga2qHBAHV6Y46mBTTKgwd1k1KAKp7dc_wfnzfrxo9aXwAx8fveOp6lesljg0_7r5Wf8zum19kfeefZsqMMhA.m3u8",
+    "title": "VN20251218_114935.mp4",
+    "size": "74.4 MB",
+    "res": "2k",
+    "dur": "01:13",
+    "type": "Video"
   }
 }
