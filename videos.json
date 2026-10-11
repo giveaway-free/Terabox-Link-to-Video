@@ -7422,5 +7422,13 @@
     "res": "1080p",
     "dur": "02:09",
     "type": "Video"
+  },
+  "1x-gb3RuSFuDeGK7TzXP5Tw": {
+    "stream_url": "https://hidden-term-b773.zalesiko.workers.dev/fast_stream?token=6bvjBCj5JR-ttefJCb5NKqlQS_lCfPBHiz7g2Mys1IODzBaieIn3JOFLPCCb-7x2ZbjAu_yaGrpTYbRwDwQbVwcCUSZ96Ro49Md2rt0PjbOZEqEAJfc-uxwSdu1vSY0sf96wwqnHYcreGlNW7aaGfjMfQ_mKxWFe6RuwNhJDJm5ZeYgUwdM7FlkTV47-FWaeSw5j5iY7er2CzcceFyACunw5ozaNHqu-pICCqra66G0Oavq4GEge_JnxM4yZtzinCYfrwDTIZNZvP9w1rQ8Q-7aBAL14XbkgWUF-m9xTlMam-x21ax1nbtZbf-ZxYuD-gi7d3GCXNup80ZbLX_HX1wH3iIjh3KKJsthdEKRUnb-9ljix-5PSNL2Uxj5T3e_e.m3u8",
+    "title": "2026-01-29-14-36-00(7).mp4",
+    "size": "4.2 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:11",
+    "type": "Video"
   }
 }
