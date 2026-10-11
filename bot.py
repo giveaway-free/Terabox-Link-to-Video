@@ -116,7 +116,49 @@ def init_db():
     conn.commit()
     conn.close()
 
+def restore_users_from_gh():
+    try:
+        token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
+        hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
+        url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data"
+        r = requests.get(url, headers=hdrs, timeout=8)
+        if r.status_code == 200:
+            content = base64.b64decode(r.json()['content']).decode('utf-8')
+            data = json.loads(content)
+            conn = sqlite3.connect('users.db')
+            cursor = conn.cursor()
+            for uid_str, uinfo in data.items():
+                if uid_str.startswith('_'):
+                    continue
+                try:
+                    uid = int(uid_str)
+                    uname = uinfo.get('username') or f"User_{uid}"
+                    credits = int(uinfo.get('credits', 10))
+                    is_paid = int(uinfo.get('is_paid', 0))
+                    paid_expiry = uinfo.get('paid_expiry')
+                    cursor.execute('''
+                        INSERT INTO users (user_id, username, credits, is_paid, paid_expiry)
+                        VALUES (?, ?, ?, ?, ?)
+                        ON CONFLICT(user_id) DO UPDATE SET
+                            username = excluded.username,
+                            credits = excluded.credits,
+                            is_paid = excluded.is_paid,
+                            paid_expiry = excluded.paid_expiry
+                    ''', (uid, uname, credits, is_paid, paid_expiry))
+                    for vid in uinfo.get('watched', []):
+                        cursor.execute('INSERT OR IGNORE INTO watched_videos (user_id, video_id, created_at) VALUES (?, ?, datetime("now"))', (uid, vid))
+                except Exception:
+                    continue
+            conn.commit()
+            conn.close()
+            with open('users.json', 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"[SUCCESS] Restored {len(data)} user accounts from GitHub data branch.")
+    except Exception as e:
+        print(f"[WARNING] Could not restore users from GH: {e}")
+
 init_db()
+restore_users_from_gh()
 
 # --- DB HELPERS ---
 def get_setting(key):
@@ -2417,24 +2459,33 @@ def handle_message(message):
                 auto_delete_after(message.chat.id, status_msg.message_id, 5)
 
 def push_users_json_to_gh():
-    try:
-        if not os.path.exists('users.json'):
-            return
-        with open('users.json', 'r', encoding='utf-8') as f:
-            content = f.read()
-        token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
-        hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
-        b64 = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-        url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data"
-        r_get = requests.get(url, headers=hdrs, timeout=5)
-        sha = r_get.json().get('sha') if r_get.status_code == 200 else None
-        p = {'message': 'Sync users.json', 'content': b64, 'branch': 'data'}
-        if sha:
-            p['sha'] = sha
-        put_url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json"
-        requests.put(put_url, headers=hdrs, json=p, timeout=5)
-    except Exception as e:
-        print(f"Error pushing users.json to GH: {e}")
+    token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
+    hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
+    url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data"
+    put_url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json"
+    
+    for attempt in range(3):
+        try:
+            if not os.path.exists('users.json'):
+                return
+            with open('users.json', 'r', encoding='utf-8') as f:
+                content = f.read()
+            b64 = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+            r_get = requests.get(url, headers=hdrs, timeout=8)
+            sha = r_get.json().get('sha') if r_get.status_code == 200 else None
+            p = {'message': 'Sync users.json', 'content': b64, 'branch': 'data'}
+            if sha:
+                p['sha'] = sha
+            res = requests.put(put_url, headers=hdrs, json=p, timeout=8)
+            if res.status_code in [200, 201]:
+                print(f"[SUCCESS] Pushed users.json to GH data branch (HTTP {res.status_code})")
+                return
+            else:
+                print(f"[WARNING] Push users.json attempt {attempt+1} got HTTP {res.status_code}")
+                time.sleep(1)
+        except Exception as e:
+            print(f"[ERROR] Error pushing users.json to GH (attempt {attempt+1}): {e}")
+            time.sleep(1)
 
 def sync_users_json():
     try:
