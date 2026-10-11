@@ -12390,5 +12390,13 @@
     "res": "1080p",
     "dur": "00:56",
     "type": "Video"
+  },
+  "177HOwvQ2EVenef8SQJvIDw": {
+    "stream_url": "https://iteraplay.tera-api85.workers.dev/fast_stream?token=4recNrnsgyWDTQUzAUTUpwv4gebIACQJOA0XDxSAIfzYX-j5ZOUSLzbuixphoOwPyI3MUoIzv50rDL7Pp5KbXfaXqixoLTrf02O_iaBIRXlwam3JW1KZXNxpxhNmVRF0iRkUhp6oV0VdY5cFfitYg2hz2G06UgsmF7-w6oXb5p4nsxbvLU1JIhx7S6urrL2JSKW1vsdK_FX-WzS1uQfJyYCjFBZBorUzVFlwW2ox7Oquf-89V1rgkLHdk3udqXv1D6Y4sSqy_-Zwev67Jct61iAAM6rTbR-eXCi8MKQhTP7BlXX6ADP3DtzDV-CNUTztqPLBkBLawTyvhWAxgiB29QjfBkOsf5G3WtQm93QJAparaPPefPuyjQu6HGwB.m3u8",
+    "title": "2024-02-17-15-41-13(8).mp4",
+    "size": "3.6 MB",
+    "res": "480p",
+    "dur": "01:21",
+    "type": "Video"
   }
 }
