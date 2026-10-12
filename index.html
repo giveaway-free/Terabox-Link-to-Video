@@ -6,6 +6,8 @@
     <title>TeraBox Stream Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Monetag Ad Network SDK for Telegram Mini App / Web -->
+    <script src="https://alwingulla.com/88/tag.min.js" data-zone="YOUR_ZONE_ID" async data-cfasync="false" id="monetag-sdk"></script>
     <style>
         :root {
             --bg-color: #0b1120;
@@ -739,6 +741,87 @@
     const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
 
+    // ==========================================
+    // MONETAG AD NETWORK CONFIGURATION
+    // ==========================================
+    // Replace with your Monetag numeric Zone ID (e.g., "8899123")
+    let MONETAG_ZONE_ID = "YOUR_ZONE_ID";
+    // Mid-roll ad interval in seconds (every 3 minutes of playback)
+    const MONETAG_MIDROLL_INTERVAL = 180;
+    let isAdMode = false;
+    let lastMidrollTime = 0;
+    let isShowingAd = false;
+
+    function initMonetagSdk() {
+        if (!MONETAG_ZONE_ID || MONETAG_ZONE_ID === "YOUR_ZONE_ID") return;
+        let script = document.getElementById('monetag-sdk');
+        if (!script) {
+            script = document.createElement('script');
+            script.id = 'monetag-sdk';
+            script.src = 'https://alwingulla.com/88/tag.min.js';
+            script.setAttribute('data-zone', MONETAG_ZONE_ID);
+            script.setAttribute('data-cfasync', 'false');
+            script.async = true;
+            document.head.appendChild(script);
+        } else {
+            script.setAttribute('data-zone', MONETAG_ZONE_ID);
+        }
+    }
+
+    function showMonetagAd() {
+        return new Promise((resolve) => {
+            if (isShowingAd) {
+                resolve();
+                return;
+            }
+            if (!MONETAG_ZONE_ID || MONETAG_ZONE_ID === "YOUR_ZONE_ID") {
+                console.log("[Monetag] Zone ID not set. Continuing video.");
+                resolve();
+                return;
+            }
+
+            isShowingAd = true;
+            let resolved = false;
+            const complete = () => {
+                if (!resolved) {
+                    resolved = true;
+                    isShowingAd = false;
+                    resolve();
+                }
+            };
+
+            // Safety timeout: 8 seconds maximum so playback never hangs
+            const timer = setTimeout(() => {
+                console.warn("[Monetag] Ad response timeout (8s). Resuming playback.");
+                complete();
+            }, 8000);
+
+            const fnName = 'show_' + MONETAG_ZONE_ID;
+            if (typeof window[fnName] === 'function') {
+                try {
+                    window[fnName]()
+                        .then(() => {
+                            clearTimeout(timer);
+                            complete();
+                        })
+                        .catch((err) => {
+                            console.warn("[Monetag] Ad dismissed or error:", err);
+                            clearTimeout(timer);
+                            complete();
+                        });
+                } catch (e) {
+                    console.warn("[Monetag] Ad call exception:", e);
+                    clearTimeout(timer);
+                    complete();
+                }
+            } else {
+                console.log(`[Monetag] SDK method ${fnName} not yet ready on window. Continuing.`);
+                clearTimeout(timer);
+                complete();
+            }
+        });
+    }
+
     let currentStreamUrl = "";
     const video = document.getElementById('video');
     const videoWrapper = document.getElementById('video-wrapper');
@@ -1030,6 +1113,7 @@
 
     function playVideo(streamUrl, title, size, res, dur) {
         currentStreamUrl = streamUrl;
+        lastMidrollTime = 0;
 
         document.getElementById('no-video-box').style.display = 'none';
         document.getElementById('loading-box').style.display = 'none';
@@ -1052,6 +1136,18 @@
             window._hlsInstance = null;
         }
 
+        function startPlaybackWithAd() {
+            if (isAdMode) {
+                showMonetagAd().then(() => {
+                    video.play().catch(() => {});
+                    updatePlayIcon(true);
+                });
+            } else {
+                video.play().catch(() => {});
+                updatePlayIcon(true);
+            }
+        }
+
         if (Hls.isSupported() && (streamUrl.includes('.m3u8') || !streamUrl.includes('.mp4'))) {
             const hls = new Hls({
                 enableWorker: true,
@@ -1061,8 +1157,7 @@
             hls.loadSource(streamUrl);
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                video.play().catch(() => {});
-                updatePlayIcon(true);
+                startPlaybackWithAd();
             });
             hls.on(Hls.Events.ERROR, function(event, data) {
                 if (data.fatal) {
@@ -1076,21 +1171,40 @@
                         default:
                             hls.destroy();
                             video.src = streamUrl;
-                            video.play().catch(() => {});
+                            startPlaybackWithAd();
                             break;
                     }
                 }
             });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = streamUrl;
-            video.play().catch(() => {});
-            updatePlayIcon(true);
+            startPlaybackWithAd();
         } else {
             video.src = streamUrl;
-            video.play().catch(() => {});
-            updatePlayIcon(true);
+            startPlaybackWithAd();
         }
     }
+
+    // Mid-Roll Monetag Ads Handler during video playback
+    video.addEventListener('timeupdate', () => {
+        if (!isAdMode) return;
+        const current = Math.floor(video.currentTime);
+        // Display mid-roll ads only after 30s of watch time and with at least 30s remaining
+        if (current > 30 && video.duration && (video.duration - current > 30)) {
+            if (current - lastMidrollTime >= MONETAG_MIDROLL_INTERVAL) {
+                lastMidrollTime = current;
+                const wasPlaying = !video.paused;
+                if (wasPlaying) video.pause();
+                showMonetagAd().then(() => {
+                    if (wasPlaying) video.play().catch(() => {});
+                });
+            }
+        }
+    });
+
+    video.addEventListener('seeked', () => {
+        lastMidrollTime = Math.floor(video.currentTime);
+    });
 
     function playEmbedVideo(surl, title = "TeraBox Video") {
         document.getElementById('no-video-box').style.display = 'none';
@@ -1159,6 +1273,15 @@
         const urlParams = new URLSearchParams(window.location.search);
         const directSrc = urlParams.get('src');
 
+        if (urlParams.get('zone_id')) {
+            MONETAG_ZONE_ID = urlParams.get('zone_id');
+            initMonetagSdk();
+        }
+
+        if (urlParams.get('ad') === '1' || urlParams.get('mode') === 'ad') {
+            isAdMode = true;
+        }
+
         // Mode 1: Direct stream URL in query params
         if (directSrc) {
             const title = urlParams.get('title') || 'TeraBox Video';
@@ -1169,7 +1292,17 @@
             return;
         }
 
-        const startParam = getTelegramStartParam();
+        let rawParam = getTelegramStartParam();
+        if (rawParam) {
+            if (rawParam.startsWith('ad_')) {
+                isAdMode = true;
+                rawParam = rawParam.substring(3);
+            } else if (rawParam.endsWith('_ad')) {
+                isAdMode = true;
+                rawParam = rawParam.slice(0, -3);
+            }
+        }
+        const startParam = rawParam;
         const tgUser = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
 
         // If no video parameter at all, display empty state
@@ -1275,7 +1408,10 @@
 
         currentCredits = Math.max(0, baseCredits);
 
-        if (isVip) {
+        if (isAdMode) {
+            badgeEl.className = "status-badge badge-vip";
+            badgeEl.innerText = "🎬 Watch Now (Ad Supported)";
+        } else if (isVip) {
             badgeEl.className = "status-badge badge-vip";
             badgeEl.innerText = "💎 VIP (Unlimited)";
         } else if (alreadyWatched) {
@@ -1289,15 +1425,15 @@
             badgeEl.innerText = "⚠️ 0 Credits";
         }
 
-        // Gate: Check if user has no credits AND has not unlocked this video before
-        if (!isVip && !alreadyWatched && currentCredits <= 0) {
+        // Gate: Check if user has no credits AND has not unlocked this video before (Bypassed in Ad Mode)
+        if (!isAdMode && !isVip && !alreadyWatched && currentCredits <= 0) {
             document.getElementById('loading-box').style.display = 'none';
             document.getElementById('paywall-box').style.display = 'block';
             return;
         }
 
-        // Deduct 1 credit ONLY if this is genuinely a new video watch
-        if (!isVip && !alreadyWatched && currentCredits > 0) {
+        // Deduct 1 credit ONLY if this is genuinely a new video watch AND NOT watching with Ads
+        if (!isAdMode && !isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
             currentCredits = Math.max(0, currentCredits - 1);
             badgeEl.className = "status-badge badge-credits";
