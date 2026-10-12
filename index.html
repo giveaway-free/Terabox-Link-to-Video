@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Monetag Ad Network SDK for Telegram Mini App / Web -->
-    <script src="https://alwingulla.com/88/tag.min.js" data-zone="12016303" async data-cfasync="false" id="monetag-sdk"></script>
+    <script src="//libtl.com/sdk.js" data-zone="12016303" data-sdk="show_12016303"></script>
     <style>
         :root {
             --bg-color: #0b1120;
@@ -757,13 +757,13 @@
         if (!script) {
             script = document.createElement('script');
             script.id = 'monetag-sdk';
-            script.src = 'https://alwingulla.com/88/tag.min.js';
+            script.src = '//libtl.com/sdk.js';
             script.setAttribute('data-zone', MONETAG_ZONE_ID);
-            script.setAttribute('data-cfasync', 'false');
-            script.async = true;
+            script.setAttribute('data-sdk', 'show_' + MONETAG_ZONE_ID);
             document.head.appendChild(script);
         } else {
             script.setAttribute('data-zone', MONETAG_ZONE_ID);
+            script.setAttribute('data-sdk', 'show_' + MONETAG_ZONE_ID);
         }
     }
 
