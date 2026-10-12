@@ -38,5 +38,13 @@
     "res": "1080p",
     "dur": "09:22",
     "type": "Video"
+  },
+  "1lyi3IR8whrmWcT3NXV_gyA": {
+    "stream_url": "https://iteraplay.tera-api22.workers.dev/fast_stream?token=KLBpgBxLtzzDLDi7f0ZpF285hyB1o6MEGcKbpLCkQNzSkyfOFdw9tKeBNgyh_SnHTne-wt-Ff2MQmvXO4mD4iOrxj1bXWa-E5gFRvnMGGyQNbqFwFV6Sncuq1XFyJxSvhAeScXv0wvtHFxVq0uQ03ze4_7azmqmXCiFYspa5l9g7pbJ0Ps7_Db89zex5lYuju8IhGCyRYooD0V_nCfX8ZaoUIXZCK4vmjxZFvIYZ3z0VV9vGKMnVhjABiYps1_FSWrbT5Md6bpgD1xz2WAKva7BT15cFSF-y2tD1NETvyihOH8tRYKU6hAlk1P3iFiVqHjV9r73P87nhqK89Wn52C0_Aif9G8A8-ckVcEEpONyUhVTdAqTemNGx7iMLKC8Swkg.m3u8",
+    "title": "2026-03-10-18-29-40(10).mp4",
+    "size": "24.8 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "02:21",
+    "type": "Video"
   }
 }
