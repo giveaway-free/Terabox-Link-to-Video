@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Monetag Ad Network SDK for Telegram Mini App / Web -->
-    <script src="https://alwingulla.com/88/tag.min.js" data-zone="YOUR_ZONE_ID" async data-cfasync="false" id="monetag-sdk"></script>
+    <script src="https://alwingulla.com/88/tag.min.js" data-zone="12016303" async data-cfasync="false" id="monetag-sdk"></script>
     <style>
         :root {
             --bg-color: #0b1120;
@@ -742,18 +742,17 @@
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
 
     // ==========================================
-    // MONETAG AD NETWORK CONFIGURATION
     // ==========================================
-    // Replace with your Monetag numeric Zone ID (e.g., "8899123")
-    let MONETAG_ZONE_ID = "YOUR_ZONE_ID";
-    // Mid-roll ad interval in seconds (every 3 minutes of playback)
-    const MONETAG_MIDROLL_INTERVAL = 180;
+    // MONETAG AD NETWORK CONFIGURATION (ZONE ID: 12016303)
+    // ==========================================
+    let MONETAG_ZONE_ID = "12016303";
+    const MONETAG_MIDROLL_INTERVAL = 180; // 3 minutes interval
     let isAdMode = false;
     let lastMidrollTime = 0;
     let isShowingAd = false;
 
     function initMonetagSdk() {
-        if (!MONETAG_ZONE_ID || MONETAG_ZONE_ID === "YOUR_ZONE_ID") return;
+        if (!MONETAG_ZONE_ID) return;
         let script = document.getElementById('monetag-sdk');
         if (!script) {
             script = document.createElement('script');
@@ -768,56 +767,110 @@
         }
     }
 
-    function showMonetagAd() {
+    // Format 1: In-App Interstitial (Automatic background frequency)
+    function initInAppInterstitial() {
+        const fnName = 'show_' + MONETAG_ZONE_ID;
+        if (typeof window[fnName] === 'function') {
+            try {
+                window[fnName]({
+                    type: 'inApp',
+                    inAppSettings: {
+                        frequency: 2,
+                        capping: 0.1,
+                        interval: 30,
+                        timeout: 5,
+                        everyPage: false
+                    }
+                });
+                console.log("[Monetag] In-App Interstitial activated successfully.");
+            } catch (e) {
+                console.warn("[Monetag] In-App Interstitial trigger note:", e);
+            }
+        }
+    }
+
+    setTimeout(initInAppInterstitial, 2500);
+    setTimeout(initInAppInterstitial, 5000);
+
+    // Format 2: Rewarded Interstitial (Mandatory completion - skip korle again ads ashbe!)
+    function showRewardedAdWithEnforcement() {
         return new Promise((resolve) => {
-            if (isShowingAd) {
-                resolve();
-                return;
-            }
-            if (!MONETAG_ZONE_ID || MONETAG_ZONE_ID === "YOUR_ZONE_ID") {
-                console.log("[Monetag] Zone ID not set. Continuing video.");
-                resolve();
-                return;
-            }
-
-            isShowingAd = true;
-            let resolved = false;
-            const complete = () => {
-                if (!resolved) {
-                    resolved = true;
-                    isShowingAd = false;
-                    resolve();
-                }
-            };
-
-            // Safety timeout: 8 seconds maximum so playback never hangs
-            const timer = setTimeout(() => {
-                console.warn("[Monetag] Ad response timeout (8s). Resuming playback.");
-                complete();
-            }, 8000);
-
             const fnName = 'show_' + MONETAG_ZONE_ID;
-            if (typeof window[fnName] === 'function') {
+
+            function runAdCycle() {
+                if (typeof window[fnName] !== 'function') {
+                    console.log("[Monetag] SDK not loaded yet. Skipping ad.");
+                    resolve();
+                    return;
+                }
+
+                const loadingBox = document.getElementById('loading-box');
+                const loadingTitle = document.getElementById('loading-title');
+                const loadingDesc = document.getElementById('loading-desc');
+
+                if (loadingBox) {
+                    loadingBox.style.display = 'block';
+                    if (loadingTitle) loadingTitle.innerText = "📺 Sponsored Video Ad";
+                    if (loadingDesc) loadingDesc.innerText = "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন...";
+                }
+
                 try {
                     window[fnName]()
                         .then(() => {
-                            clearTimeout(timer);
-                            complete();
+                            // User watched the ad completely till the end!
+                            if (loadingBox) loadingBox.style.display = 'none';
+                            resolve();
                         })
                         .catch((err) => {
-                            console.warn("[Monetag] Ad dismissed or error:", err);
-                            clearTimeout(timer);
-                            complete();
+                            // User skipped or closed prematurely: prompt & re-trigger!
+                            console.warn("[Monetag] User closed or skipped ad prematurely:", err);
+                            if (loadingBox) {
+                                loadingBox.style.display = 'block';
+                                if (loadingTitle) loadingTitle.innerText = "⚠️ অ্যাড সম্পূর্ণ দেখুন";
+                                if (loadingDesc) {
+                                    loadingDesc.innerHTML = `
+                                        <div style="font-size:14px;color:#f87171;margin-bottom:12px;font-weight:600;">
+                                            ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।
+                                        </div>
+                                        <button id="btn-re-watch-ad" style="padding:10px 24px;border-radius:10px;background:linear-gradient(135deg, #6366f1, #4f46e5);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:15px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
+                                            ▶️ আবার বিজ্ঞাপন দেখুন
+                                        </button>
+                                    `;
+                                    const reBtn = document.getElementById('btn-re-watch-ad');
+                                    if (reBtn) {
+                                        reBtn.onclick = () => {
+                                            runAdCycle();
+                                        };
+                                    }
+                                }
+                            } else {
+                                setTimeout(runAdCycle, 1500);
+                            }
                         });
-                } catch (e) {
-                    console.warn("[Monetag] Ad call exception:", e);
-                    clearTimeout(timer);
-                    complete();
+                } catch (ex) {
+                    console.warn("[Monetag] Ad execution notice:", ex);
+                    resolve();
+                }
+            }
+
+            runAdCycle();
+        });
+    }
+
+    // Format 3: Rewarded Popup (Used for mid-roll & download click)
+    function showRewardedPopup() {
+        return new Promise((resolve) => {
+            const fnName = 'show_' + MONETAG_ZONE_ID;
+            if (typeof window[fnName] === 'function') {
+                try {
+                    window[fnName]('pop')
+                        .then(() => resolve(true))
+                        .catch(() => resolve(false));
+                } catch (_) {
+                    resolve(false);
                 }
             } else {
-                console.log(`[Monetag] SDK method ${fnName} not yet ready on window. Continuing.`);
-                clearTimeout(timer);
-                complete();
+                resolve(false);
             }
         });
     }
@@ -1138,7 +1191,7 @@
 
         function startPlaybackWithAd() {
             if (isAdMode) {
-                showMonetagAd().then(() => {
+                showRewardedAdWithEnforcement().then(() => {
                     video.play().catch(() => {});
                     updatePlayIcon(true);
                 });
@@ -1195,7 +1248,7 @@
                 lastMidrollTime = current;
                 const wasPlaying = !video.paused;
                 if (wasPlaying) video.pause();
-                showMonetagAd().then(() => {
+                showRewardedPopup().then(() => {
                     if (wasPlaying) video.play().catch(() => {});
                 });
             }
@@ -1225,11 +1278,13 @@
     document.getElementById('download-btn').addEventListener('click', function(e) {
         e.preventDefault();
         if (currentStreamUrl) {
-            if (tg && tg.openLink) {
-                tg.openLink(currentStreamUrl);
-            } else {
-                window.open(currentStreamUrl, '_blank');
-            }
+            showRewardedPopup().then(() => {
+                if (tg && tg.openLink) {
+                    tg.openLink(currentStreamUrl);
+                } else {
+                    window.open(currentStreamUrl, '_blank');
+                }
+            });
         }
     });
 
