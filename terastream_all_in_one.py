@@ -1405,6 +1405,7 @@ class EngineManager:
             "button_watch_now_text": env.get("BUTTON_WATCH_NOW_TEXT", "▶️ Watch Now"),
             "button_backup_text": env.get("BUTTON_BACKUP_TEXT", "📢 Backup Channel"),
             "button_how_to_watch_text": env.get("BUTTON_HOW_TO_WATCH_TEXT", "👀 How to Watch"),
+            "button_other_text": env.get("BUTTON_OTHER_TEXT", "🔗 Open Link"),
             "dispatch_bot_token": env.get("DISPATCH_BOT_TOKEN", "7796341783:AAEng5ditGE0sYkyfSrm7DrzF1u6KTr20lI"),
             "max_concurrent_tasks": 1,
         }
