@@ -848,13 +848,13 @@ def get_terabox_media(terabox_url):
 # --- LOCALIZATION (bn, en, hi) ---
 STRINGS = {
     "bn": {
-        "btn_account": "✦ 👤 My Account ✦",
-        "btn_refer": "✦ 🎁 Refer & Earn ✦",
-        "btn_buy": "✦ 💳 Buy Subscription ✦",
-        "btn_backup": "✦ 📢 Join Backup Channel ✦",
-        "btn_contact": "✦ 💬 Contact Admin ✦",
-        "btn_lang": "✦ 🌐 ভাষা / Language ✦",
-        "btn_admin_settings": "✦ ⚙️ Admin Settings ✦",
+        "btn_account": "👤 My Account",
+        "btn_refer": "🎁 Refer & Earn",
+        "btn_buy": "💳 Buy Subscription",
+        "btn_backup": "📢 Join Backup Channel",
+        "btn_contact": "💬 Contact Admin",
+        "btn_lang": "🌐 ভাষা / Language",
+        "btn_admin_settings": "⚙️ Admin Settings",
         "select_lang_prompt": (
             "🌐 **ভাষা নির্বাচন করুন / Choose Your Language / भाषा चुनें**\n\n"
             "বটটি ব্যবহার করতে আপনার পছন্দের ভাষা নির্বাচন করুন:\n"
@@ -880,7 +880,7 @@ STRINGS = {
         "btn_invite_earn": "✨ 🎁 Invite & Earn Free Credits 💎",
         "btn_join_backup_inline": "✨ 📢 Join Backup Channel ⚡",
         "btn_open_player_app": "🎬 Play Video 👀",
-        "btn_open_player_web": "🌐 ✦ Open Web Player ✦",
+        "btn_open_player_web": "🌐 Open Web Player",
         "verify_success_alert": "✅ Join Verification Successful!",
         "verify_success_msg": "🎉 Verification সফল! রেফারেল বোনাস আনলক করা হয়েছে।",
         "verify_already_claimed": "বোনাস ইতিমধ্যে ক্লেইম করা হয়েছে!",
@@ -901,7 +901,7 @@ STRINGS = {
         "buy_title": "💳 **Buy Paid Membership**",
         "buy_desc": "আনলিমিটেড TeraBox Video Streaming পেতে Paid Membership সক্রিয় করুন।",
         "buy_pricing": "📌 **মূল্যতালিকা:**\n• 7 Days: {p7}\n• 30 Days: {p30}",
-        "buy_contact": "📞 **পেমেন্ট ও সক্রিয়করণ:**\nঅ্যাডমিনের সাথে সরাসরি যোগাযোগ করতে '✦ 💬 Contact Admin ✦' বাটন ব্যবহার করুন।",
+        "buy_contact": "📞 **পেমেন্ট ও সক্রিয়করণ:**\nঅ্যাডমিনের সাথে সরাসরি যোগাযোগ করতে '💬 Contact Admin' বাটন ব্যবহার করুন।",
         "backup_title": "📢 **Join Our Backup Channel**",
         "backup_desc": (
             "আমাদের অফিশিয়াল মূল চ্যানেল বা বট কোনো কারণে ডাউন হলে, "
@@ -932,13 +932,13 @@ STRINGS = {
         "paid_activated_msg": "🎉 আপনার {days} দিনের Paid Subscription সক্রিয় করা হয়েছে!"
     },
     "en": {
-        "btn_account": "✦ 👤 My Account ✦",
-        "btn_refer": "✦ 🎁 Refer & Earn ✦",
-        "btn_buy": "✦ 💳 Buy Subscription ✦",
-        "btn_backup": "✦ 📢 Join Backup Channel ✦",
-        "btn_contact": "✦ 💬 Contact Admin ✦",
-        "btn_lang": "✦ 🌐 Language ✦",
-        "btn_admin_settings": "✦ ⚙️ Admin Settings ✦",
+        "btn_account": "👤 My Account",
+        "btn_refer": "🎁 Refer & Earn",
+        "btn_buy": "💳 Buy Subscription",
+        "btn_backup": "📢 Join Backup Channel",
+        "btn_contact": "💬 Contact Admin",
+        "btn_lang": "🌐 Language",
+        "btn_admin_settings": "⚙️ Admin Settings",
         "select_lang_prompt": (
             "🌐 **Choose Your Language / भाषा चुनें / ভাষা নির্বাচন করুন**\n\n"
             "Please select your preferred language to continue:\n"
@@ -964,7 +964,7 @@ STRINGS = {
         "btn_invite_earn": "✨ 🎁 Invite & Earn Free Credits 💎",
         "btn_join_backup_inline": "✨ 📢 Join Backup Channel ⚡",
         "btn_open_player_app": "🎬 Play Video 👀",
-        "btn_open_player_web": "🌐 ✦ Open Web Player ✦",
+        "btn_open_player_web": "🌐 Open Web Player",
         "verify_success_alert": "✅ Join Verification Successful!",
         "verify_success_msg": "🎉 Verification Successful! Referral Bonus unlocked for your inviter.",
         "verify_already_claimed": "Bonus has already been claimed!",
@@ -985,7 +985,7 @@ STRINGS = {
         "buy_title": "💳 **Buy Paid Membership**",
         "buy_desc": "Activate Paid Membership for unlimited, instant TeraBox video streaming.",
         "buy_pricing": "📌 **Pricing:**\n• 7 Days: {p7}\n• 30 Days: {p30}",
-        "buy_contact": "📞 **Payment & Activation:**\nUse the '✦ 💬 Contact Admin ✦' button to contact the administrator.",
+        "buy_contact": "📞 **Payment & Activation:**\nUse the '💬 Contact Admin' button to contact the administrator.",
         "backup_title": "📢 **Join Our Backup Channel**",
         "backup_desc": (
             "If our official channel or bot goes down, "
@@ -1016,13 +1016,13 @@ STRINGS = {
         "paid_activated_msg": "🎉 Your {days}-day Paid Subscription has been activated!"
     },
     "hi": {
-        "btn_account": "✦ 👤 My Account ✦",
-        "btn_refer": "✦ 🎁 Refer & Earn ✦",
-        "btn_buy": "✦ 💳 Buy Subscription ✦",
-        "btn_backup": "✦ 📢 Join Backup Channel ✦",
-        "btn_contact": "✦ 💬 Contact Admin ✦",
-        "btn_lang": "✦ 🌐 भाषा / Language ✦",
-        "btn_admin_settings": "✦ ⚙️ Admin Settings ✦",
+        "btn_account": "👤 My Account",
+        "btn_refer": "🎁 Refer & Earn",
+        "btn_buy": "💳 Buy Subscription",
+        "btn_backup": "📢 Join Backup Channel",
+        "btn_contact": "💬 Contact Admin",
+        "btn_lang": "🌐 भाषा / Language",
+        "btn_admin_settings": "⚙️ Admin Settings",
         "select_lang_prompt": (
             "🌐 **अपनी भाषा चुनें / Choose Your Language / ভাষা নির্বাচন করুন**\n\n"
             "कृपया बॉट का उपयोग करने के लिए अपनी पसंदीदा भाषा चुनें:\n"
@@ -1048,7 +1048,7 @@ STRINGS = {
         "btn_invite_earn": "✨ 🎁 Invite & Earn Free Credits 💎",
         "btn_join_backup_inline": "✨ 📢 Join Backup Channel ⚡",
         "btn_open_player_app": "🎬 Play Video 👀",
-        "btn_open_player_web": "🌐 ✦ Open Web Player ✦",
+        "btn_open_player_web": "🌐 Open Web Player",
         "verify_success_alert": "✅ Join Verification Successful!",
         "verify_success_msg": "🎉 सत्यापन सफल! रेफरल बोनस अनलॉक हो गया है।",
         "verify_already_claimed": "बोनस पहले ही क्लेम किया जा चुका है!",
@@ -1069,7 +1069,7 @@ STRINGS = {
         "buy_title": "💳 **Buy Paid Membership**",
         "buy_desc": "असीमित TeraBox वीडियो स्ट्रीमिंग के लिए Paid Membership सक्रिय करें।",
         "buy_pricing": "📌 **मूल्य:**\n• 7 Days: {p7}\n• 30 Days: {p30}",
-        "buy_contact": "📞 **भुगतान और एक्टिवेशन:**\nव्यवस्थापक से सीधे संपर्क करने के लिए '✦ 💬 Contact Admin ✦' बटन का उपयोग करें।",
+        "buy_contact": "📞 **भुगतान और एक्टिवेशन:**\nव्यवस्थापक से सीधे संपर्क करने के लिए '💬 Contact Admin' बटन का उपयोग करें।",
         "backup_title": "📢 **Join Our Backup Channel**",
         "backup_desc": (
             "यदि हमारा आधिकारिक मुख्य चैनल या बॉट किसी कारण से बंद हो जाता है, "
@@ -1776,7 +1776,7 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
     sched_on = is_schedule_mode_enabled()
     sched_icon = "🟢" if sched_on else "🔴"
     markup.row(
-        InlineKeyboardButton(f"✦ {sched_icon} ⏰ Post Scheduler: {'ON' if sched_on else 'OFF'} ✦", callback_data="nav:scheduler")
+        InlineKeyboardButton(f"{sched_icon} ⏰ Post Scheduler: {'ON' if sched_on else 'OFF'}", callback_data="nav:scheduler")
     )
     markup.row(
         InlineKeyboardButton("📡 Source Channels", callback_data="nav:sources"),
@@ -2604,12 +2604,12 @@ def main_keyboard(user_id):
     )
     if is_admin(user_id):
         markup.row(
-            KeyboardButton("✦ 📊 User List & Stats ✦"),
+            KeyboardButton("📊 User List & Stats"),
             KeyboardButton(get_txt(user_id, "btn_backup"))
         )
         markup.row(
-            KeyboardButton("✦ ⚙️ Admin Settings ✦"),
-            KeyboardButton("✦ ⚡ Channel Controller ✦")
+            KeyboardButton("⚙️ Admin Settings"),
+            KeyboardButton("⚡ Channel Controller")
         )
         markup.row(
             KeyboardButton(get_txt(user_id, "btn_lang"))
@@ -2628,21 +2628,21 @@ def main_keyboard(user_id):
 def admin_settings_inline():
     markup = InlineKeyboardMarkup(row_width=2)
     markup.add(
-        InlineKeyboardButton("✦ 1. 📢 Broadcast Post ✦", callback_data="btn_broadcast"),
-        InlineKeyboardButton("✦ 2. 🔍 Find ID ✦", callback_data="btn_find_id"),
-        InlineKeyboardButton("✦ 3. 👥 Track Group ID ✦", callback_data="set_group_id"),
-        InlineKeyboardButton("✦ 4. 👑 Admin ID ✦", callback_data="set_admin_id"),
-        InlineKeyboardButton("✦ 5. ➕ Add Paid User ✦", callback_data="btn_add_paid"),
-        InlineKeyboardButton("✦ 6. 🎁 Initial Credits ✦", callback_data="set_init_credits"),
-        InlineKeyboardButton("✦ 7. 🔗 Refer Credits ✦", callback_data="set_ref_credits"),
-        InlineKeyboardButton("✦ 8. 💰 7 Days Price ✦", callback_data="set_7_days_price"),
-        InlineKeyboardButton("✦ 9. 💰 30 Days Price ✦", callback_data="set_30_days_price"),
-        InlineKeyboardButton("✦ 10. 💬 Share Text ✦", callback_data="set_share_text"),
-        InlineKeyboardButton("✦ 11. 🔗 Backup Channel Link ✦", callback_data="set_backup_link"),
-        InlineKeyboardButton("✦ 12. 🔢 Max Batch Links ✦", callback_data="set_max_batch_links"),
-        InlineKeyboardButton("✦ 13. ➕ Add User Credits ✦", callback_data="btn_add_credits"),
-        InlineKeyboardButton("✦ 14. 💰 Monetag Zone ID ✦", callback_data="set_monetag_zone"),
-        InlineKeyboardButton("✦ 15. ⏱️ Monetag Ads Time ✦", callback_data="set_monetag_interval")
+        InlineKeyboardButton("1. 📢 Broadcast Post", callback_data="btn_broadcast"),
+        InlineKeyboardButton("2. 🔍 Find ID", callback_data="btn_find_id"),
+        InlineKeyboardButton("3. 👥 Track Group ID", callback_data="set_group_id"),
+        InlineKeyboardButton("4. 👑 Admin ID", callback_data="set_admin_id"),
+        InlineKeyboardButton("5. ➕ Add Paid User", callback_data="btn_add_paid"),
+        InlineKeyboardButton("6. 🎁 Initial Credits", callback_data="set_init_credits"),
+        InlineKeyboardButton("7. 🔗 Refer Credits", callback_data="set_ref_credits"),
+        InlineKeyboardButton("8. 💰 7 Days Price", callback_data="set_7_days_price"),
+        InlineKeyboardButton("9. 💰 30 Days Price", callback_data="set_30_days_price"),
+        InlineKeyboardButton("10. 💬 Share Text", callback_data="set_share_text"),
+        InlineKeyboardButton("11. 🔗 Backup Channel Link", callback_data="set_backup_link"),
+        InlineKeyboardButton("12. 🔢 Max Batch Links", callback_data="set_max_batch_links"),
+        InlineKeyboardButton("13. ➕ Add User Credits", callback_data="btn_add_credits"),
+        InlineKeyboardButton("14. 💰 Monetag Zone ID", callback_data="set_monetag_zone"),
+        InlineKeyboardButton("15. ⏱️ Monetag Ads Time", callback_data="set_monetag_interval")
     )
     markup.row(
         InlineKeyboardButton("🔙 Back to Dashboard", callback_data="act:back_dashboard"),
@@ -3137,7 +3137,7 @@ def handle_set_language(call):
         welcome_txt = (
             f"👑 **Welcome Admin {clean_text_for_markdown(username)}!**\n\n"
             f"⚡ System is active and running.\n"
-            f"Tap **✦ ⚙️ Admin Settings ✦** below to manage the bot."
+            f"Tap **⚙️ Admin Settings** below to manage the bot."
         )
         bot.send_message(call.message.chat.id, f"{notice}\n\n{welcome_txt}", parse_mode="Markdown", reply_markup=main_keyboard(user_id))
         return
