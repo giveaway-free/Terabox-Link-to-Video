@@ -1897,16 +1897,8 @@ def build_settings_menu() -> Tuple[str, InlineKeyboardMarkup]:
         InlineKeyboardButton(f"🌐 Trans: {sw_trans} ({curr_lang.upper()})", callback_data="nav:trans"),
         InlineKeyboardButton(f"📜 Past Posts: {sw_hist}", callback_data=f"tgl:PROCESS_HISTORICAL_MESSAGES:{next_hist}")
     )
-    monetag_zone = env.get("MONETAG_ZONE_ID", "12016303").strip()
-    try:
-        int_sec = int(env.get("MONETAG_MIDROLL_INTERVAL", "180"))
-    except Exception:
-        int_sec = 180
-    int_lbl = f"{int_sec // 60}m" if int_sec >= 60 and int_sec % 60 == 0 else f"{int_sec}s"
-
     markup.row(
-        InlineKeyboardButton(f"🖼 Media: {sw_send_bot}", callback_data=f"tgl:SEND_MEDIA_TO_PROCESSING_BOT:{next_send_bot}"),
-        InlineKeyboardButton(f"💰 Monetag ({int_lbl})", callback_data="nav:monetag")
+        InlineKeyboardButton(f"🖼 Media: {sw_send_bot}", callback_data=f"tgl:SEND_MEDIA_TO_PROCESSING_BOT:{next_send_bot}")
     )
     markup.row(
         InlineKeyboardButton("🔙 Back to Dashboard", callback_data="nav:main")
@@ -2597,7 +2589,8 @@ def admin_settings_inline():
         InlineKeyboardButton("✦ 11. 🔗 Backup Channel Link ✦", callback_data="set_backup_link"),
         InlineKeyboardButton("✦ 12. 🔢 Max Batch Links ✦", callback_data="set_max_batch_links"),
         InlineKeyboardButton("✦ 13. ➕ Add User Credits ✦", callback_data="btn_add_credits"),
-        InlineKeyboardButton("✦ 14. 💰 Monetag Zone ID ✦", callback_data="set_monetag_zone")
+        InlineKeyboardButton("✦ 14. 💰 Monetag Zone ID ✦", callback_data="set_monetag_zone"),
+        InlineKeyboardButton("✦ 15. ⏱️ Monetag Ads Time ✦", callback_data="set_monetag_interval")
     )
     markup.row(InlineKeyboardButton("❌ Close Panel", callback_data="btn_close_admin_panel"))
     return markup
@@ -3278,6 +3271,16 @@ def admin_settings_panel(message):
         return
     
     track_display = get_setting('target_channel_link') or get_setting('required_group_id')
+    custom_share = clean_text_for_markdown(get_setting('custom_share_text') or 'N/A')
+    backup_link = clean_text_for_markdown(get_setting('backup_channel_link') or 'N/A')
+    m_zone = get_setting('monetag_zone_id') or read_env().get('MONETAG_ZONE_ID', '12016303')
+    m_int = get_setting('monetag_midroll_interval') or read_env().get('MONETAG_MIDROLL_INTERVAL', '180')
+    try:
+        m_int_int = int(m_int)
+        m_int_lbl = f"{m_int_int // 60}m" if m_int_int >= 60 and m_int_int % 60 == 0 else f"{m_int_int}s"
+    except Exception:
+        m_int_lbl = f"{m_int}s"
+
     text = (
         "⚙️ **Admin Control Panel**\n\n"
         f"👑 **Admin ID:** `{get_setting('admin_id')}`\n"
@@ -3286,9 +3289,11 @@ def admin_settings_panel(message):
         f"2. **Referral Bonus:** {get_setting('refer_credits')} Credits\n"
         f"3. **7-Day Plan Price:** {get_setting('paid_7_days')}\n"
         f"4. **30-Day Plan Price:** {get_setting('paid_30_days')}\n"
-        f"5. **Custom Share Text:**\n`{get_setting('custom_share_text')}`\n"
-        f"6. **Backup Channel Link:**\n`{get_setting('backup_channel_link')}`\n"
-        f"7. **Max Batch Links (per post):** {get_setting('max_batch_links') or '5'}\n\n"
+        f"5. **Custom Share Text:**\n`{custom_share}`\n"
+        f"6. **Backup Channel Link:**\n`{backup_link}`\n"
+        f"7. **Max Batch Links (per post):** {get_setting('max_batch_links') or '5'}\n"
+        f"8. **Monetag Zone ID:** `{m_zone}`\n"
+        f"9. **Monetag Ads Interval (Time):** `{m_int_lbl}` ({m_int}s)\n\n"
         "Nicher numbered buttons theke option select korun:"
     )
     try:
@@ -3471,7 +3476,8 @@ def handle_admin_callbacks(call):
         "set_share_text": ("custom_share_text", "Users share korar somoy jei caption/text show korbe ta likhe pathan (Kono link dewar dorkar nei, Track Group ID theke auto detect hobe):"),
         "set_backup_link": ("backup_channel_link", "New Backup Channel Link din (e.g., https://t.me/yourchannel):"),
         "set_max_batch_links": ("max_batch_links", "Aki post-e aksathe maximum koyta video link convert kora jabe? (e.g., 5):"),
-        "set_monetag_zone": ("monetag_zone_id", "New Monetag Ads Zone ID din (e.g., 12016303):")
+        "set_monetag_zone": ("monetag_zone_id", "New Monetag Ads Zone ID din (e.g., 12016303):"),
+        "set_monetag_interval": ("monetag_midroll_interval", "Video cholakalin koto somoy por por ads show korbe (Seconds e likhun, e.g., 180 ba 3m):")
     }
     
     if call.data in key_map:
@@ -3538,7 +3544,29 @@ def process_setting_update(message, setting_key, prompt_msg_id=None):
         dispatch_menu_command(message)
         return
     new_val = message.text.strip()
-    if setting_key == "max_batch_links":
+    if setting_key == "monetag_midroll_interval":
+        raw = new_val.lower().strip()
+        sec = 0
+        if raw.endswith("m") or raw.endswith("min") or raw.endswith("minute") or raw.endswith("minutes"):
+            num_part = re.sub(r"[^\d]", "", raw)
+            if num_part:
+                sec = int(num_part) * 60
+        else:
+            num_part = re.sub(r"[^\d]", "", raw)
+            if num_part:
+                sec = int(num_part)
+        if sec < 10:
+            sec = 180
+        new_val = str(sec)
+        update_env({"MONETAG_MIDROLL_INTERVAL": sec})
+        threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_interval": sec}, daemon=True).start()
+    elif setting_key == "monetag_zone_id":
+        clean_zone = re.sub(r"[^\d]", "", new_val)
+        if clean_zone:
+            new_val = clean_zone
+            update_env({"MONETAG_ZONE_ID": clean_zone})
+            threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_zone": clean_zone}, daemon=True).start()
+    elif setting_key == "max_batch_links":
         try:
             val_int = int(new_val)
             if val_int < 1:
@@ -4557,13 +4585,18 @@ def handle_admin_text(message):
         bot.send_message(message.chat.id, t, reply_markup=m)
 
 
-def safe_edit_message(call, text: str, reply_markup: InlineKeyboardMarkup) -> bool:
+def safe_edit_message(call, text: str, reply_markup: InlineKeyboardMarkup, parse_mode: str = "HTML") -> bool:
     try:
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=reply_markup)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=reply_markup, parse_mode=parse_mode)
         return True
     except Exception as e:
         if "message is not modified" in str(e).lower():
             return True
+        try:
+            bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=reply_markup)
+            return True
+        except Exception:
+            pass
         return False
 
 
@@ -4592,41 +4625,41 @@ def handle_controller_callbacks(call):
     elif data == "nav:output":
         clear_admin_state(call.from_user.id)
         t, m = build_output_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data == "nav:settings":
         clear_admin_state(call.from_user.id)
         t, m = build_settings_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data == "nav:btn_texts":
         clear_admin_state(call.from_user.id)
         t, m = build_btn_texts_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data == "nav:timing":
         clear_admin_state(call.from_user.id)
         t, m = build_timing_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data == "nav:logs":
         t, m = build_logs_view()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data == "nav:sysinfo":
         t, m = build_system_info_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data == "nav:trans":
         clear_admin_state(call.from_user.id)
         t, m = build_translation_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data.startswith("tgl_trans:"):
@@ -4637,7 +4670,7 @@ def handle_controller_callbacks(call):
         st_text = "অনুবাদ চালু করা হয়েছে" if next_val.lower() == "true" else "অনুবাদ বন্ধ করা হয়েছে"
         bot.answer_callback_query(call.id, st_text, show_alert=True)
         t, m = build_translation_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data.startswith("set_lang:"):
         code = data.split(":")[1]
@@ -4647,7 +4680,7 @@ def handle_controller_callbacks(call):
         l_info = SUPPORTED_LANGUAGES.get(code, (code, ""))
         bot.answer_callback_query(call.id, f"ভাষা সেট হয়েছে: {l_info[0]}!", show_alert=True)
         t, m = build_translation_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data == "act:test_trans":
         set_admin_state(call.from_user.id, "WAIT_TEST_TRANS")
@@ -4722,21 +4755,21 @@ def handle_controller_callbacks(call):
             bot.send_message(call.message.chat.id, f"⚠️ {msg}")
         time.sleep(0.5)
         t, m = build_main_dashboard()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data == "act:stop":
         bot.answer_callback_query(call.id, "Stopping engine...")
         ok, msg = mgr.stop()
         time.sleep(0.5)
         t, m = build_main_dashboard()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data == "act:restart":
         bot.answer_callback_query(call.id, "Restarting engine...")
         mgr.restart()
         time.sleep(0.5)
         t, m = build_main_dashboard()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     # Actions: Settings Toggle
     elif data.startswith("tgl:"):
@@ -4744,7 +4777,7 @@ def handle_controller_callbacks(call):
         update_env({key: next_val})
         bot.answer_callback_query(call.id, f"Updated {key} to {next_val}")
         t, m = build_settings_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     # Actions: Source Channels Management
     elif data == "act:add_source":
@@ -4763,7 +4796,7 @@ def handle_controller_callbacks(call):
 
     elif data == "act:remove_source_list":
         t, m = build_remove_source_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data.startswith("act:del_source:"):
@@ -4776,7 +4809,7 @@ def handle_controller_callbacks(call):
             update_env({"SOURCE_CHATS": ", ".join(sources)})
             bot.answer_callback_query(call.id, f"Removed {removed}", show_alert=True)
         t, m = build_sources_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     # Actions: Output Channel Management
     elif data == "act:set_output":
@@ -4883,7 +4916,7 @@ def handle_controller_callbacks(call):
     elif data == "nav:creds":
         clear_admin_state(call.from_user.id)
         t, m = build_credentials_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data.startswith("act:edit_cred:"):
@@ -4950,13 +4983,13 @@ def handle_controller_callbacks(call):
         clear_admin_state(call.from_user.id)
         bot.answer_callback_query(call.id, "লগইন বাতিল করা হয়েছে")
         t, m = build_credentials_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     # Actions: Auto-Join Management
     elif data == "nav:auto_join":
         clear_admin_state(call.from_user.id)
         t, m = build_auto_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data.startswith("tgl_aj:"):
@@ -4967,7 +5000,7 @@ def handle_controller_callbacks(call):
         st_text = "Auto-Join চালু করা হয়েছে" if next_val.lower() == "true" else "Auto-Join বন্ধ করা হয়েছে"
         bot.answer_callback_query(call.id, st_text, show_alert=True)
         t, m = build_auto_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data == "act:add_aj_chat":
         set_admin_state(call.from_user.id, "WAIT_ADD_AJ_CHAT")
@@ -4982,7 +5015,7 @@ def handle_controller_callbacks(call):
 
     elif data == "act:rem_aj_chat":
         t, m = build_remove_aj_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data.startswith("act:del_aj_chat:"):
@@ -4995,7 +5028,7 @@ def handle_controller_callbacks(call):
             update_env({"AUTO_JOIN_CHATS": ", ".join(chats)})
             bot.answer_callback_query(call.id, f"Removed {removed}", show_alert=True)
         t, m = build_auto_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data == "act:copy_src_to_aj":
         env = read_env()
@@ -5003,7 +5036,7 @@ def handle_controller_callbacks(call):
         update_env({"AUTO_JOIN_CHATS": src_raw})
         bot.answer_callback_query(call.id, "সোর্স চ্যানেলগুলো Auto-Join তালিকায় কপি করা হয়েছে!", show_alert=True)
         t, m = build_auto_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data == "act:set_aj_delay":
         set_admin_state(call.from_user.id, "WAIT_SET_AJ_DELAY")
@@ -5020,7 +5053,7 @@ def handle_controller_callbacks(call):
     elif data == "nav:hide_join":
         clear_admin_state(call.from_user.id)
         t, m = build_hide_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data.startswith("tgl_hj:"):
@@ -5031,7 +5064,7 @@ def handle_controller_callbacks(call):
         st_text = "Clean Notifications চালু করা হয়েছে" if next_val.lower() == "true" else "Clean Notifications বন্ধ করা হয়েছে"
         bot.answer_callback_query(call.id, st_text, show_alert=True)
         t, m = build_hide_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data.startswith("tgl_hj_leave:"):
         next_val = data.split(":")[1]
@@ -5041,7 +5074,7 @@ def handle_controller_callbacks(call):
         st_text = "Leave message ডিলিট চালু করা হয়েছে" if next_val.lower() == "true" else "Leave message ডিলিট বন্ধ করা হয়েছে"
         bot.answer_callback_query(call.id, st_text, show_alert=True)
         t, m = build_hide_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data == "act:add_hj_chat":
         set_admin_state(call.from_user.id, "WAIT_ADD_HJ_CHAT")
@@ -5056,7 +5089,7 @@ def handle_controller_callbacks(call):
 
     elif data == "act:rem_hj_chat":
         t, m = build_remove_hj_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
         bot.answer_callback_query(call.id)
 
     elif data.startswith("act:del_hj_chat:"):
@@ -5069,7 +5102,7 @@ def handle_controller_callbacks(call):
             update_env({"HIDE_JOIN_CHATS": ", ".join(chats)})
             bot.answer_callback_query(call.id, f"Removed {removed}", show_alert=True)
         t, m = build_hide_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     elif data == "act:copy_src_to_hj":
         env = read_env()
@@ -5077,14 +5110,14 @@ def handle_controller_callbacks(call):
         update_env({"HIDE_JOIN_CHATS": src_raw})
         bot.answer_callback_query(call.id, "সোর্স গ্রুপগুলো Clean Notifications তালিকায় কপি করা হয়েছে!", show_alert=True)
         t, m = build_hide_join_menu()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     # Actions: Logs
     elif data == "act:clear_logs":
         log_buffer.clear()
         bot.answer_callback_query(call.id, "Logs cleared.")
         t, m = build_logs_view()
-        bot.edit_message_text(t, call.message.chat.id, call.message.message_id, reply_markup=m)
+        safe_edit_message(call, t, m)
 
     # Actions: Resolvers & Link Testers
     elif data == "nav:resolve":
