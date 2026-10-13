@@ -1098,10 +1098,9 @@ scheduler_service = SchedulerService()
 # ADMIN DASHBOARD BUILDERS (ORGANIZED & SEPARATE)
 # -------------------------------------------------------------
 admin_states: Dict[int, Dict[str, Any]] = {}
-authenticated_admins: Set[int] = set()
 
 def is_admin_auth(user_id: int) -> bool:
-    return is_admin(user_id) and (user_id in authenticated_admins)
+    return is_admin(user_id)
 
 def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
     env = read_env()
@@ -1330,14 +1329,6 @@ def handle_start_cmd(message):
     username = message.from_user.username or message.from_user.first_name or "User"
     args = message.text.split()
     
-    # Check if admin is entering password via /start <password>
-    if len(args) > 1 and args[1].strip() == DEFAULT_BOT_PASSWORD and is_admin(uid):
-        authenticated_admins.add(uid)
-        bot.reply_to(message, "✅ <b>Password Verified!</b> Welcome to Admin Dashboard.")
-        t_dash, m_dash = build_main_dashboard()
-        bot.send_message(message.chat.id, t_dash, reply_markup=m_dash, parse_mode="HTML")
-        return
-
     referrer_id = None
     if len(args) > 1 and args[1].isdigit():
         referrer_id = int(args[1])
@@ -1390,11 +1381,6 @@ def handle_admin_entry(message):
     uid = message.from_user.id
     if not is_admin(uid):
         bot.reply_to(message, "❌ Unauthorized! Only Admin can access this.")
-        return
-
-    if not is_admin_auth(uid):
-        admin_states[uid] = {"state": "WAIT_PWD"}
-        bot.reply_to(message, "🔒 <b>Admin Security Lock</b>\n\nঅনুগ্রহ করে অ্যাক্সেস পাসওয়ার্ডটি লিখুন / Please enter admin password:", parse_mode="HTML")
         return
 
     t_dash, m_dash = build_main_dashboard()
@@ -1515,19 +1501,7 @@ def handle_all_text_inputs(message):
         handle_admin_text_state(message)
         return
 
-    # 2. Check if password is being typed
-    if is_admin(uid) and not is_admin_auth(uid):
-        if txt == DEFAULT_BOT_PASSWORD:
-            authenticated_admins.add(uid)
-            bot.reply_to(message, "✅ <b>Password Accepted!</b> Welcome Admin.", parse_mode="HTML")
-            t_dash, m_dash = build_main_dashboard()
-            bot.send_message(message.chat.id, t_dash, reply_markup=m_dash, parse_mode="HTML")
-            return
-        elif uid in admin_states and admin_states[uid].get("state") == "WAIT_PWD":
-            bot.reply_to(message, "❌ Incorrect password. Try again:")
-            return
-
-    # 3. Customer Menu Buttons
+    # 2. Customer Menu Buttons
     if txt in [t("btn_account", lang="bn"), t("btn_account", lang="en")]:
         user = get_user(uid)
         credits = user[2] if user else 0
