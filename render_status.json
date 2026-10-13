@@ -35,8 +35,8 @@
     "RENDER_DOCKER_LOCAL_CACHE": "/opt/render/docker-cache",
     "KUBERNETES_PORT_443_TCP_PROTO": "tcp",
     "KUBERNETES_PORT_443_TCP_ADDR": "10.12.0.1",
-    "RENDER_ENV": "python-3",
     "RENDER_INTERNAL_HOSTNAME": "srv-db56fffavr4c73fkjuf0.own-d20dh1fdiees739df6l0.svc.cluster.local",
+    "RENDER_ENV": "python-3",
     "RENDER_DISCOVERY_SERVICE": "terabox-link-to-video-1-discovery",
     "RENDER_DIR": "render",
     "RENDER_SERVICE_SLUG": "terabox-link-to-video-1",
@@ -48,5 +48,5 @@
     "RENDER_PROJECT_ROOT": "/opt/render/project",
     "RENDER_SRC_ROOT": "/opt/render/project/src"
   },
-  "time": "2026-10-13 09:24:11.749375"
+  "time": "2026-10-13 09:24:40.856632"
 }
