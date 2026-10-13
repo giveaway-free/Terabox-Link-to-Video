@@ -6,5 +6,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:44",
     "type": "Video"
+  },
+  "1lJptkUzZvQUzc9HdCZEBmw": {
+    "stream_url": "https://iteraplay.tera-api80.workers.dev/fast_stream?token=4t5QOunfhkPa7Jf6X2CMCsha6Y-5yC9ALmT7jkHPGmiNYMHbrqHrwUJ0k8Ykc-It8h2xmKc1xqUbNrY5DL2v478p01fG1O-IJsqtQWtjjr0y0gQNuUc2ei5LX2amRxLn9z-ZV6meHNLBGtcDAj-u1ON-QEyeReacZsimGdOdE9mVEaLpl6E5dsstqEWa1ZmvmLYEEn0JrlQXFk1ncP-IPGUj_UlGQxdfV1oa25Ual_IEEiLWGp9uTi1YRrQtXLKkG3BtAxwxS-ztGd0b-nulzb8yw3BCDm5pDq8QHxEeja0mE69Xd27rSmKiSF5lVLZZvKIGB1cLtV6jEqGKDI6POs1kVCzsAVCQ7_pTQvTKwHkPYwawgzUzUg.m3u8",
+    "title": "fblite_video-1.mp4",
+    "size": "7.9 MB",
+    "res": "480p",
+    "dur": "03:17",
+    "type": "Video"
   }
 }
