@@ -110,5 +110,13 @@
     "res": "480p",
     "dur": "01:53",
     "type": "Video"
+  },
+  "1sfExO3sH9ZMMGxqeexNakQ": {
+    "stream_url": "https://throbbing-bird-96d7.dycyqufo.workers.dev/fast_stream?token=cl3ESJd10fZIDzdGbXpRxHdxoUreDc1R3qf0G6bX8Bfxdtc8TbOZqfcnBg6coDJfk_Uvy_3ehTiHLxoOCEGY7t4GoBWG5jeZplIvv2Pq4AMLFV6hDn9QLiI8horE7yA-7zjMLjnPtArd5Og0oF-Rt2QvLQHSr-6w3Zj-H0acBx9quISeJW-NTOR1ZXhaM0ad22u_W5Mx6qkZ_GPvAEXEGZ08zy606YzIsX-GsohCLhbZJ1HCF6ghVMRxFsfdAXvE2oSxZK_UwYhKQGtm8yVt-DH3r-xuLk7AJwwWpYkDZG_KfGkkDIrATZzxZ1v3OC3jJ8LQkghHarELHl6DZWIIByFcQgKHisI6blaEcTdeTEEcJXiQEJ2sTzut.m3u8",
+    "title": "2023-07-21-02-33-05.mp4",
+    "size": "194.9 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "20:21",
+    "type": "Video"
   }
 }
