@@ -1612,7 +1612,7 @@
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        const directSrc = urlParams.get('src');
+        const directSrc = urlParams.get('src') || urlParams.get('url');
 
         if (urlParams.get('zone_id')) {
             MONETAG_ZONE_ID = urlParams.get('zone_id');
