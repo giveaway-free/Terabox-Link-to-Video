@@ -1195,6 +1195,8 @@ class SchedulerService:
             time.sleep(30)
 
     def _check_and_dispatch(self):
+        if not is_schedule_mode_enabled():
+            return
         schedules = get_post_schedules()
         now = datetime.now()
         current_time_str = now.strftime("%I:%M %p").lstrip("0")
@@ -1203,8 +1205,8 @@ class SchedulerService:
         for sched in schedules:
             if not sched["active"]: continue
             s_time = sched["time"].strip().upper()
-            if s_time == current_time_str.upper() and sched["last_run"] != today_date:
-                push_log("SCHEDULER", f"Triggering schedule [{s_time}] - Target: {sched['count']} posts")
+            if s_time.lstrip("0") == current_time_str.upper().lstrip("0") and sched["last_run"] != today_date:
+                push_log("SCHEDULER", f"⏰ Triggering schedule [{s_time}] - Target: {sched['count']} posts")
                 self.flush_target_count(sched["count"])
                 conn = sqlite3.connect('users.db')
                 c = conn.cursor()
@@ -1247,13 +1249,28 @@ class SchedulerService:
                     if p["media_path"] and os.path.exists(p["media_path"]):
                         with open(p["media_path"], "rb") as mf:
                             if p["media_type"] == "photo":
-                                bot.send_photo(target_id, mf, caption=p["caption"], parse_mode="HTML", reply_markup=reply_markup)
+                                try:
+                                    bot.send_photo(target_id, mf, caption=p["caption"], parse_mode="HTML", reply_markup=reply_markup)
+                                except Exception:
+                                    mf.seek(0)
+                                    bot.send_photo(target_id, mf, caption=p["caption"], reply_markup=reply_markup)
                             elif p["media_type"] == "video":
-                                bot.send_video(target_id, mf, caption=p["caption"], parse_mode="HTML", reply_markup=reply_markup)
+                                try:
+                                    bot.send_video(target_id, mf, caption=p["caption"], parse_mode="HTML", reply_markup=reply_markup)
+                                except Exception:
+                                    mf.seek(0)
+                                    bot.send_video(target_id, mf, caption=p["caption"], reply_markup=reply_markup)
                             else:
-                                bot.send_document(target_id, mf, caption=p["caption"], parse_mode="HTML", reply_markup=reply_markup)
+                                try:
+                                    bot.send_document(target_id, mf, caption=p["caption"], parse_mode="HTML", reply_markup=reply_markup)
+                                except Exception:
+                                    mf.seek(0)
+                                    bot.send_document(target_id, mf, caption=p["caption"], reply_markup=reply_markup)
                     else:
-                        bot.send_message(target_id, p["caption"], parse_mode="HTML", reply_markup=reply_markup)
+                        try:
+                            bot.send_message(target_id, p["caption"], parse_mode="HTML", reply_markup=reply_markup)
+                        except Exception:
+                            bot.send_message(target_id, p["caption"], reply_markup=reply_markup)
 
                 remove_scheduled_post(p["id"], p["media_path"])
                 posted += 1
@@ -1721,7 +1738,7 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
         )
 
     markup.row(
-        InlineKeyboardButton("⏰ ✦ Post Scheduler (শিডিউল পোস্ট) ✦", callback_data="nav:scheduler")
+        InlineKeyboardButton("✦ ⏰ Post Scheduler ✦", callback_data="nav:scheduler")
     )
     markup.row(
         InlineKeyboardButton("📡 Source Channels", callback_data="nav:sources"),
