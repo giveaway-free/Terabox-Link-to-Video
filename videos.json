@@ -70,5 +70,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:32",
     "type": "Video"
+  },
+  "1K0pVn3BTxNTMF5WI5jQ22A": {
+    "stream_url": "https://iteraplay.tera-api56.workers.dev/fast_stream?token=fmj1rkMEdFShaFobRyrwv-HF21KNfCkdMreS7lpbMJ_-AwW-BKqhzJwRtjBQ5CayY5vBe1C6DsZYHHCYT_bSvkeT13_Yhs7W0DZM7QH8dMhjVB_cmuKDZK6LtHjMhqCFth7Jfo2AcxvXif1oegD_5wcbz5qHMgBRueI8JCUf3UaG8IU45gLNIPjAruYEPo4XmWJu44KfqlgBGrSlq7f-m9NQDgQwVaRwzcwnZBdIFvnkXIJH9t9nCx2LZLJJjfc6OH9-VVoUwwEodO7Cbop9fz126kz7qiXm7Qx72rDpgCjYJASKwd-b9S8alLvXpHXeC9HMik_dbgIpkxfPGoChJEkGIOYhx7seufjQlnpdsurj5tRlGhhDEGjWKrh9.m3u8",
+    "title": "2026-06-14-22-30-16.mp4",
+    "size": "31.4 MB",
+    "res": "480p",
+    "dur": "07:16",
+    "type": "Video"
   }
 }
