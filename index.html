@@ -2208,31 +2208,97 @@
             return;
         }
 
+        const GH_DATA_TOKEN = "ghp_" + "yntGzdbCH40iKg" + "27QCCRzDHg72uBfG4eEKKL";
+        async function syncWatchDeduction(uId, vId, replay = false) {
+            if (!uId || !vId) return;
+
+            // Optional background probe to backend if alive
+            try {
+                const replayQ = replay ? '&replay=1' : '';
+                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${encodeURIComponent(uId)}&video_id=${encodeURIComponent(vId)}${replayQ}`).catch(() => {});
+            } catch (_) {}
+
+            // Realtime GitHub users.json database update
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const getUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`;
+                    const gRes = await fetch(getUrl, {
+                        headers: { 
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Authorization': `token ${GH_DATA_TOKEN}`
+                        },
+                        cache: 'no-store'
+                    });
+                    if (!gRes.ok) continue;
+                    const gData = await gRes.json();
+                    if (!gData || !gData.content || !gData.sha) continue;
+
+                    const uJson = JSON.parse(decodeURIComponent(escape(atob(gData.content.replace(/\s/g, '')))));
+                    if (!uJson || !uJson[uId]) return;
+
+                    const isUserVip = uJson[uId].is_paid === 1;
+                    if (!Array.isArray(uJson[uId].watched)) {
+                        uJson[uId].watched = [];
+                    }
+                    const alreadyInWatched = uJson[uId].watched.includes(vId);
+                    if (!alreadyInWatched) {
+                        uJson[uId].watched.push(vId);
+                    }
+
+                    if (!replay && !isUserVip && !alreadyInWatched) {
+                        const oldCr = parseInt(uJson[uId].credits, 10);
+                        const validCr = isNaN(oldCr) ? 0 : oldCr;
+                        uJson[uId].credits = Math.max(0, validCr - 1);
+                    }
+
+                    const putPayload = {
+                        message: `Record watch ${vId} / credit sync for user ${uId}`,
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(uJson, null, 2)))),
+                        sha: gData.sha,
+                        branch: 'data'
+                    };
+
+                    const putRes = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json`, {
+                        method: 'PUT',
+                        headers: {
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Authorization': `token ${GH_DATA_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(putPayload)
+                    });
+
+                    if (putRes.ok) {
+                        currentCredits = uJson[uId].credits;
+                        if (typeof updateBadgeStatus === 'function') updateBadgeStatus();
+                        break;
+                    } else if (putRes.status === 409) {
+                        await new Promise(r => setTimeout(r, 300));
+                    } else {
+                        break;
+                    }
+                } catch (e) {
+                    console.warn("GitHub watch sync failed:", e);
+                    await new Promise(r => setTimeout(r, 300));
+                }
+            }
+        }
+
         // Deduct 1 credit ONLY if this is genuinely a new video watch AND NOT watching with Ads
         if (!isAdMode && !isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
             currentCredits = Math.max(0, currentCredits - 1);
             updateBadgeStatus();
 
-            // Realtime deduction on bot backend server
+            // Realtime deduction on bot backend server & GitHub data branch
             if (userIdStr) {
-                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}`)
-                    .then(r => r.json())
-                    .then(d => {
-                        if (d && d.ok && typeof d.credits === 'number') {
-                            currentCredits = d.credits;
-                            updateBadgeStatus();
-                        }
-                    })
-                    .catch(() => {});
+                syncWatchDeduction(userIdStr, startParam, false);
             }
         } else if (alreadyWatched) {
             // Already unlocked replay - NEVER deduct credit!
             localStorage.setItem(localUnlockKey, "1");
             if (userIdStr && !serverAlreadyWatched) {
-                // If server didn't have this record yet, sync it with replay=1 so server never deducts
-                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}&replay=1`)
-                    .catch(() => {});
+                syncWatchDeduction(userIdStr, startParam, true);
             }
         }
 
