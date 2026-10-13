@@ -1769,6 +1769,30 @@
         else window.open(link, '_blank');
     });
 
+    // Helper: Extract Telegram User across SDK, WebApp Hash, or Query
+    function getTelegramUser() {
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            return tg.initDataUnsafe.user;
+        }
+        if (window.location.hash.includes('tgWebAppData=')) {
+            try {
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const rawAppData = hashParams.get('tgWebAppData');
+                if (rawAppData) {
+                    const parsedApp = new URLSearchParams(rawAppData);
+                    const userJson = parsedApp.get('user');
+                    if (userJson) return JSON.parse(userJson);
+                }
+            } catch (_) {}
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const qUid = urlParams.get('user_id') || urlParams.get('uid');
+        if (qUid) {
+            return { id: qUid, first_name: 'User' };
+        }
+        return null;
+    }
+
     // Helper: Extract Start Param across Telegram Desktop / Mobile WebApp
     function getTelegramStartParam() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1809,16 +1833,6 @@
             isAdMode = true;
         }
 
-        // Mode 1: Direct stream URL in query params
-        if (directSrc) {
-            const title = urlParams.get('title') || 'TeraBox Video';
-            const size = urlParams.get('size') || 'Unknown';
-            const res = urlParams.get('res') || 'Auto';
-            const dur = urlParams.get('dur') || '--';
-            playVideo(directSrc, title, size, res, dur);
-            return;
-        }
-
         let rawParam = getTelegramStartParam();
         if (rawParam) {
             if (rawParam.startsWith('ad_')) {
@@ -1830,12 +1844,12 @@
             }
         }
         const startParam = rawParam;
-        const tgUser = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+        const tgUser = getTelegramUser();
+        const userIdStr = tgUser && tgUser.id ? String(tgUser.id) : null;
 
-        // If no video parameter at all, display empty state
-        if (!startParam) {
-            document.getElementById('no-video-box').style.display = 'block';
-            return;
+        if (tgUser) {
+            document.getElementById('user-status-bar').style.display = 'flex';
+            document.getElementById('user-display-name').innerText = tgUser.first_name || tgUser.username || `User #${tgUser.id}`;
         }
 
         // Show Loading State
@@ -1847,23 +1861,16 @@
         let currentCredits = 0;
         let uData = null;
         let videosDb = {};
-        const userIdStr = tgUser && tgUser.id ? String(tgUser.id) : null;
-
-        if (tgUser) {
-            document.getElementById('user-status-bar').style.display = 'flex';
-            document.getElementById('user-display-name').innerText = tgUser.first_name || tgUser.username || `User #${tgUser.id}`;
-        }
-
         const BOT_BACKEND_URL = "https://terabox-link-to-video-1.onrender.com";
         let liveStatusFetched = false;
         let baseCredits = 10;
         let serverAlreadyWatched = false;
 
-        // Step 1: Live balance and watched state from Render backend (Instant SQLite lookup, 0ms cache delay)
+        // Step 1: Live balance and Block/Stop Guard from Render backend (Instant SQLite lookup)
         if (userIdStr) {
             try {
                 const liveCtrl = new AbortController();
-                const liveTimeout = setTimeout(() => liveCtrl.abort(), 2000);
+                const liveTimeout = setTimeout(() => liveCtrl.abort(), 6000);
                 const queryVid = startParam ? `&video_id=${encodeURIComponent(startParam)}` : '';
                 const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}${queryVid}`, {
                     signal: liveCtrl.signal
@@ -1872,6 +1879,7 @@
                 if (liveRes.ok) {
                     const liveData = await liveRes.json();
                     if (liveData && liveData.ok) {
+                        liveStatusFetched = true;
                         if (liveData.is_blocked || !liveData.exists) {
                             if (liveData.bot_username) {
                                 window.CURRENT_BOT_USERNAME = liveData.bot_username;
@@ -1900,7 +1908,6 @@
                         }
                         if (typeof liveData.credits === 'number') {
                             baseCredits = liveData.credits;
-                            liveStatusFetched = true;
                         }
                         if (liveData.already_watched) {
                             serverAlreadyWatched = true;
@@ -1911,7 +1918,7 @@
         }
 
         // Step 2: Fallback to GitHub users.json if backend was unreachable
-        if (!liveStatusFetched) {
+        if (userIdStr && !liveStatusFetched) {
             try {
                 try {
                     const apiRes = await fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
@@ -1931,17 +1938,12 @@
                 }
 
                 if (uData && userIdStr) {
-                    if (!uData[userIdStr]) {
+                    if (!uData[userIdStr] || uData[userIdStr].is_blocked) {
                         document.getElementById('loading-box').style.display = 'none';
                         document.getElementById('restart-bot-box').style.display = 'block';
                         return;
                     }
                     userRecord = uData[userIdStr];
-                    if (userRecord.is_blocked) {
-                        document.getElementById('loading-box').style.display = 'none';
-                        document.getElementById('restart-bot-box').style.display = 'block';
-                        return;
-                    }
                     isVip = userRecord.is_paid === 1;
                     const parsedCr = parseInt(userRecord.credits, 10);
                     if (!isNaN(parsedCr)) baseCredits = parsedCr;
@@ -1950,18 +1952,28 @@
                         localStorage.setItem('bot_lang_' + userIdStr, userRecord.lang);
                         localStorage.setItem('player_lang', userRecord.lang);
                     }
-                } else if (uData && uData._settings && uData._settings.initial_credits) {
-                    baseCredits = parseInt(uData._settings.initial_credits, 10) || 10;
-                }
-                if (uData && uData._settings && uData._settings.monetag_zone_id) {
-                    setMonetagZone(uData._settings.monetag_zone_id);
-                }
-                if (uData && uData._settings && uData._settings.monetag_midroll_interval) {
-                    setMonetagMidrollInterval(uData._settings.monetag_midroll_interval);
                 }
             } catch (e) {
-                console.warn("Could not fetch remote databases, using fallback balance:", e);
+                console.warn("Could not fetch remote databases, using fallback:", e);
             }
+        }
+
+        // Mode 1: Direct stream URL in query params (Executed only if verified not blocked)
+        if (directSrc) {
+            document.getElementById('loading-box').style.display = 'none';
+            const title = urlParams.get('title') || 'TeraBox Video';
+            const size = urlParams.get('size') || 'Unknown';
+            const res = urlParams.get('res') || 'Auto';
+            const dur = urlParams.get('dur') || '--';
+            playVideo(directSrc, title, size, res, dur);
+            return;
+        }
+
+        // If no video parameter at all, display empty state
+        if (!startParam) {
+            document.getElementById('loading-box').style.display = 'none';
+            document.getElementById('no-video-box').style.display = 'block';
+            return;
         }
 
         const badgeEl = document.getElementById('user-badge');
