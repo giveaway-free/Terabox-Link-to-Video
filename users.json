@@ -92,7 +92,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "en",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": [
       "1AO23X2A2nTKsJnEW0R0ZnQ",
       "1BauGAWKfJjlSjKTHaDtPwA",
