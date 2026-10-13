@@ -246,13 +246,14 @@ def get_terabox_media(terabox_url: str):
             
     return None, None, None, None, None, None
 
-def build_player_url(stream_url: str, title: str, size: str, resolution: str, duration: str, file_type: str = "Video") -> str:
+def build_player_url(stream_url: str, title: str, size: str, resolution: str, duration: str, file_type: str = "Video", lang: str = "bn") -> str:
     encoded_stream_url = quote(stream_url, safe='')
     encoded_title = quote(title or "TeraBox Video", safe='')
     encoded_size = quote(size or "", safe='')
     encoded_res = quote(resolution or "Auto", safe='')
     encoded_dur = quote(duration or "--", safe='')
     encoded_type = quote(file_type or "Video", safe='')
+    encoded_lang = quote(lang or "bn", safe='')
     return (
         f"{MY_PLAYER_URL}?"
         f"src={encoded_stream_url}&"
@@ -260,7 +261,8 @@ def build_player_url(stream_url: str, title: str, size: str, resolution: str, du
         f"size={encoded_size}&"
         f"res={encoded_res}&"
         f"dur={encoded_dur}&"
-        f"type={encoded_type}"
+        f"type={encoded_type}&"
+        f"lang={encoded_lang}"
     )
 
 def push_single_video_to_gh(vid_id: str, stream_url: str, title: str, size: str, res: str, dur: str, file_type: str = "Video") -> bool:
