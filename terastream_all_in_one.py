@@ -12,6 +12,7 @@ if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 import re
+import html
 import json
 import time
 import base64
@@ -300,15 +301,17 @@ def restore_users_from_gh():
                     credits = int(uinfo.get('credits', 10))
                     is_paid = int(uinfo.get('is_paid', 0))
                     paid_expiry = uinfo.get('paid_expiry')
+                    is_blk = 1 if uinfo.get('is_blocked') else 0
                     cursor.execute('''
-                        INSERT INTO users (user_id, username, credits, is_paid, paid_expiry)
-                        VALUES (?, ?, ?, ?, ?)
+                        INSERT INTO users (user_id, username, credits, is_paid, paid_expiry, is_blocked)
+                        VALUES (?, ?, ?, ?, ?, ?)
                         ON CONFLICT(user_id) DO UPDATE SET
                             username = excluded.username,
                             credits = excluded.credits,
                             is_paid = excluded.is_paid,
-                            paid_expiry = excluded.paid_expiry
-                    ''', (uid, uname, credits, is_paid, paid_expiry))
+                            paid_expiry = excluded.paid_expiry,
+                            is_blocked = excluded.is_blocked
+                    ''', (uid, uname, credits, is_paid, paid_expiry, is_blk))
                     for vid in uinfo.get('watched', []):
                         cursor.execute('INSERT OR IGNORE INTO watched_videos (user_id, video_id, created_at) VALUES (?, ?, datetime("now"))', (uid, vid))
                 except Exception:
@@ -366,7 +369,11 @@ def mark_user_blocked(user_id: int, blocked: bool):
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
         val = 1 if blocked else 0
-        cursor.execute('UPDATE users SET is_blocked = ? WHERE user_id = ?', (val, user_id))
+        cursor.execute('''
+            INSERT INTO users (user_id, username, is_blocked)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET is_blocked = excluded.is_blocked
+        ''', (user_id, f"User_{user_id}", val))
         conn.commit()
         conn.close()
     except Exception as e:
@@ -379,9 +386,10 @@ def is_user_blocked(user_id: int) -> bool:
         cursor.execute('SELECT is_blocked FROM users WHERE user_id = ?', (user_id,))
         row = cursor.fetchone()
         conn.close()
-        if row and row[0] == 1:
+        if not row:
+            # User has not started the bot yet
             return True
-        return False
+        return row[0] == 1
     except Exception:
         return False
 
@@ -1946,9 +1954,6 @@ def build_settings_menu() -> Tuple[str, InlineKeyboardMarkup]:
     markup.row(
         InlineKeyboardButton(f"📜 Past Posts: {sw_hist}", callback_data=f"tgl:PROCESS_HISTORICAL_MESSAGES:{next_hist}"),
         InlineKeyboardButton(f"🖼 Media: {sw_send_bot}", callback_data=f"tgl:SEND_MEDIA_TO_PROCESSING_BOT:{next_send_bot}")
-    )
-    markup.row(
-        InlineKeyboardButton(f"🌐 Trans: {sw_trans} ({curr_lang.upper()})", callback_data="nav:trans")
     )
     markup.row(
         InlineKeyboardButton("🔙 Back to Dashboard", callback_data="nav:main")
@@ -4332,7 +4337,7 @@ def sync_users_json():
     try:
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
-        rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry, language FROM users').fetchall()
+        rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry, language, is_blocked FROM users').fetchall()
         try:
             watched_rows = c.execute('SELECT user_id, video_id FROM watched_videos').fetchall()
         except Exception:
@@ -4348,6 +4353,7 @@ def sync_users_json():
                 'is_paid': r[3],
                 'paid_expiry': r[4],
                 'lang': r[5] or 'bn',
+                'is_blocked': bool(r[6]),
                 'watched': watched_map.get(str(r[0]), [])
             } for r in rows
         }
@@ -5615,6 +5621,7 @@ def handle_scheduler_cmd(message):
 def master_message_dispatcher(message):
     uid = message.from_user.id
     txt = (message.text or message.caption or "").strip()
+    mark_user_blocked(uid, False)
 
     # 1. Sticker / Photo watermark upload from admin
     if is_admin(uid) and (message.sticker or message.photo or (message.document and (message.document.mime_type or "").startswith("image/"))):
@@ -5744,7 +5751,8 @@ def start_render_health_server():
                                 bot.send_chat_action(uid_int, 'typing')
                             except Exception as act_err:
                                 err_str = str(act_err).lower()
-                                if "blocked" in err_str or "deactivated" in err_str or "can't initiate" in err_str or "chat not found" in err_str:
+                                err_code = getattr(act_err, 'error_code', None)
+                                if err_code == 403 or "blocked" in err_str or "deactivated" in err_str or "can't initiate" in err_str or "chat not found" in err_str or "forbidden" in err_str:
                                     user_blocked = True
                                     mark_user_blocked(uid_int, True)
 
