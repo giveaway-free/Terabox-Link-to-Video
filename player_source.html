@@ -1905,11 +1905,6 @@
             }
         }
 
-        // Strict VIP Protection: Paid users NEVER receive ads regardless of link clicked!
-        if (isVip) {
-            isAdMode = false;
-        }
-
         const badgeEl = document.getElementById('user-badge');
 
         // Check if video is already unlocked/watched (Free replay forever)
@@ -1927,21 +1922,36 @@
 
         currentCredits = Math.max(0, baseCredits);
 
+        // Unified Single Button Dynamic Mode Determination:
+        // 1. VIP users: Instant play, no ads, unlimited.
+        // 2. Already watched/unlocked videos: Free replay forever, no ads, no credit deduction.
+        // 3. User with credits (> 0): Instant play, no ads, deducts 1 credit.
+        // 4. User with 0 credits: Watches Monetag Rewarded Ad first, then plays! No credit deduction.
+        if (isVip) {
+            isAdMode = false;
+        } else if (alreadyWatched) {
+            isAdMode = false;
+        } else if (currentCredits > 0) {
+            isAdMode = false;
+        } else {
+            isAdMode = true;
+        }
+
         function updateBadgeStatus() {
             if (!badgeEl) return;
-            const t = I18N[currentLang];
+            const t = I18N[currentLang] || I18N.bn;
             if (isVip) {
                 badgeEl.className = "status-badge badge-vip";
                 badgeEl.innerText = t.vip;
-            } else if (isAdMode) {
-                badgeEl.className = "status-badge badge-vip";
-                badgeEl.innerText = t.ad_supported;
             } else if (alreadyWatched) {
                 badgeEl.className = "status-badge badge-vip";
                 badgeEl.innerText = t.unlocked.replace('{n}', currentCredits);
             } else if (currentCredits > 0) {
                 badgeEl.className = "status-badge badge-credits";
                 badgeEl.innerText = t.credits_left.replace('{n}', currentCredits);
+            } else if (isAdMode) {
+                badgeEl.className = "status-badge badge-vip";
+                badgeEl.innerText = t.ad_supported;
             } else {
                 badgeEl.className = "status-badge badge-exhausted";
                 badgeEl.innerText = t.zero_credits;
