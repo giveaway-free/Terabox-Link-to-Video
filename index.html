@@ -605,6 +605,9 @@
             <button class="btn-action btn-vip-upgrade" id="btn-restart-bot">
                 🚀 বট রিস্টার্ট করুন (/start)
             </button>
+            <button class="btn-action btn-secondary" id="btn-check-restart" style="margin-top: 8px;">
+                🔄 রিস্টার্ট করেছি (যাচাই করুন)
+            </button>
         </div>
     </div>
 
@@ -794,6 +797,10 @@
             restart_title: "🔄 বটটি রিস্টার্ট করুন",
             restart_desc: "আপনি বটটি ব্লক বা স্টপ করে রেখেছেন। ভিডিও দেখতে ও সকল ফিচার ব্যবহার করতে প্রথমে বটটি রিস্টার্ট (/start) করুন।",
             restart_btn: "🚀 বট রিস্টার্ট করুন (/start)",
+            check_restart_btn: "🔄 রিস্টার্ট করেছি (যাচাই করুন)",
+            verifying_restart: "⚡ যাচাই করা হচ্ছে...",
+            unlocked_success: "✅ আনলক সফল! ভিডিও লোড হচ্ছে...",
+            still_blocked_alert: "বটে এখনো /start দেওয়া হয়নি। দয়া করে বটে গিয়ে Start বাটনে চাপুন।",
             paywall_title: "⚡ ক্রেডিট শেষ হয়ে গেছে!",
             paywall_desc: "আপনার অ্যাকাউন্টের ফ্রি ক্রেডিট শেষ হয়ে গেছে। আনলিমিটেড ভিডিও দেখতে VIP সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট পান।",
             buy_vip_btn: "💎 VIP সাবস্ক্রিপশন নিন (50 / 150 BDT)",
@@ -838,6 +845,10 @@
             restart_title: "🔄 Please Restart the Bot",
             restart_desc: "You have stopped or blocked the bot. To watch videos and use all features, please restart (/start) the bot first.",
             restart_btn: "🚀 Restart Bot (/start)",
+            check_restart_btn: "🔄 I've Restarted (Verify Now)",
+            verifying_restart: "⚡ Verifying...",
+            unlocked_success: "✅ Unlocked! Loading video...",
+            still_blocked_alert: "Bot is still stopped/blocked. Please send /start in the bot chat.",
             paywall_title: "⚡ Credits Exhausted!",
             paywall_desc: "You have run out of free credits. Upgrade to VIP for unlimited streaming or invite friends for free credits.",
             buy_vip_btn: "💎 Upgrade to VIP (50 / 150 BDT)",
@@ -880,8 +891,12 @@
             join_desc: "वीडियो चलाने के लिए पहले हमारे टेलीग्राम बॉट से जुड़ें और मुफ़्त क्रेडिट प्राप्त करें।",
             open_bot_btn: "🚀 @leadox_bot खोलें और मुफ़्त क्रेडिट पाएं",
             restart_title: "🔄 बॉट को रीस्टार्ट करें",
-            restart_desc: "आपने बॉट को ब्लॉक या बंद कर दिया है। वीडियो देखने और सभी सुविधाओं का उपयोग करने के लिए कृपया पहले बॉट को रीस्टार्ट (/start) करें।",
+            restart_desc: "आपने बॉट को ब्लॉक या बंद कर दिया है। वीडियो देखने और सभी सुविधाओं का उपयोग करने के लिए कृपया पहले बॉট को रीस्टार्ट (/start) करें।",
             restart_btn: "🚀 बॉट रीस्टार्ट करें (/start)",
+            check_restart_btn: "🔄 पुनः आरंभ किया (सत्यापित करें)",
+            verifying_restart: "⚡ सत्यापन हो रहा है...",
+            unlocked_success: "✅ अनलॉक हो गया! वीडियो लोड हो रहा है...",
+            still_blocked_alert: "बॉट अभी भी बंद है। कृपया बॉट में जाकर /start दबाएं।",
             paywall_title: "⚡ क्रेडिट समाप्त!",
             paywall_desc: "आपके मुफ़्त क्रेडिट समाप्त हो गए हैं। असीमित वीडियो के लिए VIP सदस्यता लें या दोस्तों को आमंत्रित करें।",
             buy_vip_btn: "💎 VIP अपग्रेड करें (50 / 150 BDT)",
@@ -926,6 +941,7 @@
         const restartTitle = document.getElementById('restart-box-title'); if (restartTitle) restartTitle.innerText = t.restart_title;
         const restartDesc = document.getElementById('restart-box-desc'); if (restartDesc) restartDesc.innerText = t.restart_desc;
         const restartBtn = document.getElementById('btn-restart-bot'); if (restartBtn) restartBtn.innerText = t.restart_btn;
+        const checkRestartBtn = document.getElementById('btn-check-restart'); if (checkRestartBtn) checkRestartBtn.innerText = t.check_restart_btn;
 
         const payTitle = document.getElementById('paywall-box-title'); if (payTitle) payTitle.innerText = t.paywall_title;
         const payDesc = document.getElementById('paywall-box-desc'); if (payDesc) payDesc.innerText = t.paywall_desc;
@@ -1867,14 +1883,127 @@
         let baseCredits = 10;
         let serverAlreadyWatched = false;
 
+        let restartGuardActive = false;
+        function activateRestartBotGuard(uId, sParam) {
+            if (restartGuardActive) return;
+            restartGuardActive = true;
+            document.getElementById('loading-box').style.display = 'none';
+            document.getElementById('restart-bot-box').style.display = 'block';
+
+            let isVerifying = false;
+            async function recheckRestartStatus(interactive = false) {
+                if (isVerifying) return;
+                const btnCheck = document.getElementById('btn-check-restart');
+                const t = I18N[currentLang] || I18N.bn;
+                if (interactive && btnCheck) {
+                    btnCheck.disabled = true;
+                    btnCheck.innerText = t.verifying_restart || "⚡ যাচাই করা হচ্ছে...";
+                }
+                isVerifying = true;
+                try {
+                    let unblocked = false;
+                    // Probe backend with cache busting
+                    try {
+                        const qV = sParam ? `&video_id=${encodeURIComponent(sParam)}` : '';
+                        const rCheck = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${uId}${qV}&_t=${Date.now()}`, {
+                            cache: 'no-store',
+                            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+                        });
+                        if (rCheck.ok) {
+                            const dCheck = await rCheck.json();
+                            if (dCheck && dCheck.ok && !dCheck.is_blocked && dCheck.exists) {
+                                unblocked = true;
+                            }
+                        }
+                    } catch (_) {}
+
+                    // Fallback to GitHub users.json if backend was unreachable
+                    if (!unblocked) {
+                        try {
+                            const ghCheck = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`, {
+                                headers: { 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+                                cache: 'no-store'
+                            });
+                            if (ghCheck.ok) {
+                                const j = await ghCheck.json();
+                                if (j && j.content) {
+                                    const parsedUsers = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                                    if (parsedUsers && parsedUsers[uId] && !parsedUsers[uId].is_blocked) {
+                                        unblocked = true;
+                                    }
+                                }
+                            }
+                        } catch (_) {}
+                    }
+
+                    if (unblocked) {
+                        cleanupGuard();
+                        document.getElementById('restart-bot-box').style.display = 'none';
+                        document.getElementById('loading-box').style.display = 'block';
+                        document.getElementById('loading-title').innerText = t.unlocked_success || "✅ আনলক সফল! ভিডিও লোড হচ্ছে...";
+                        document.getElementById('loading-desc').innerText = t.loading_desc || "ভিডিও প্রস্তুত হচ্ছে...";
+                        setTimeout(() => {
+                            initMiniApp(true);
+                        }, 500);
+                        return;
+                    }
+
+                    if (interactive) {
+                        alert(t.still_blocked_alert || "বটে এখনো /start দেওয়া হয়নি। দয়া করে বটে গিয়ে Start বাটনে চাপুন।");
+                    }
+                } catch (err) {
+                    console.warn("Recheck status err:", err);
+                } finally {
+                    isVerifying = false;
+                    if (interactive && btnCheck) {
+                        btnCheck.disabled = false;
+                        btnCheck.innerText = t.check_restart_btn || "🔄 রিস্টার্ট করেছি (যাচাই করুন)";
+                    }
+                }
+            }
+
+            const onResume = () => {
+                const box = document.getElementById('restart-bot-box');
+                if (box && box.style.display !== 'none') {
+                    recheckRestartStatus(false);
+                }
+            };
+            const onVisibility = () => {
+                if (!document.hidden) onResume();
+            };
+
+            window.addEventListener('focus', onResume);
+            document.addEventListener('visibilitychange', onVisibility);
+            const poller = setInterval(onResume, 2500);
+
+            const btnCheck = document.getElementById('btn-check-restart');
+            const onBtnClick = () => recheckRestartStatus(true);
+            if (btnCheck) {
+                btnCheck.onclick = onBtnClick;
+            }
+
+            function cleanupGuard() {
+                restartGuardActive = false;
+                clearInterval(poller);
+                window.removeEventListener('focus', onResume);
+                document.removeEventListener('visibilitychange', onVisibility);
+                if (btnCheck) btnCheck.onclick = null;
+            }
+        }
+
         // Step 1: Live balance and Block/Stop Guard from Render backend (Instant SQLite lookup)
         if (userIdStr) {
             try {
                 const liveCtrl = new AbortController();
                 const liveTimeout = setTimeout(() => liveCtrl.abort(), 6000);
                 const queryVid = startParam ? `&video_id=${encodeURIComponent(startParam)}` : '';
-                const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}${queryVid}`, {
-                    signal: liveCtrl.signal
+                const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}${queryVid}&_t=${Date.now()}`, {
+                    signal: liveCtrl.signal,
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
                 });
                 clearTimeout(liveTimeout);
                 if (liveRes.ok) {
@@ -1890,8 +2019,7 @@
                                 localStorage.setItem('bot_lang_' + userIdStr, liveData.lang);
                                 localStorage.setItem('player_lang', liveData.lang);
                             }
-                            document.getElementById('loading-box').style.display = 'none';
-                            document.getElementById('restart-bot-box').style.display = 'block';
+                            activateRestartBotGuard(userIdStr, startParam);
                             return;
                         }
 
@@ -1925,8 +2053,9 @@
         if (userIdStr && !liveStatusFetched) {
             try {
                 try {
-                    const apiRes = await fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
-                        headers: { 'Accept': 'application/vnd.github.v3+json' }
+                    const apiRes = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`, {
+                        headers: { 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+                        cache: 'no-store'
                     });
                     if (apiRes.ok) {
                         const j = await apiRes.json();
@@ -1937,14 +2066,16 @@
                 } catch (_) {}
 
                 if (!uData) {
-                    const usersRes = await fetch(`${USERS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                    const usersRes = await fetch(`${USERS_DB_URL}?_t=${Date.now()}`, { 
+                        cache: 'no-store',
+                        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+                    });
                     if (usersRes.ok) uData = await usersRes.json();
                 }
 
                 if (uData && userIdStr) {
                     if (!uData[userIdStr] || uData[userIdStr].is_blocked) {
-                        document.getElementById('loading-box').style.display = 'none';
-                        document.getElementById('restart-bot-box').style.display = 'block';
+                        activateRestartBotGuard(userIdStr, startParam);
                         return;
                     }
                     userRecord = uData[userIdStr];
