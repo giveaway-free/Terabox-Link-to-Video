@@ -192,6 +192,10 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN language TEXT DEFAULT 'bn'")
     except Exception:
         pass
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_blocked INTEGER DEFAULT 0")
+    except Exception:
+        pass
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS settings (
@@ -356,6 +360,30 @@ def get_user(user_id):
     user = cursor.fetchone()
     conn.close()
     return user
+
+def mark_user_blocked(user_id: int, blocked: bool):
+    try:
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        val = 1 if blocked else 0
+        cursor.execute('UPDATE users SET is_blocked = ? WHERE user_id = ?', (val, user_id))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logging.error(f"Error marking user blocked {user_id}: {e}")
+
+def is_user_blocked(user_id: int) -> bool:
+    try:
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT is_blocked FROM users WHERE user_id = ?', (user_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row and row[0] == 1:
+            return True
+        return False
+    except Exception:
+        return False
 
 def get_all_users():
     conn = sqlite3.connect('users.db')
@@ -2853,6 +2881,22 @@ def process_admin_reply_send(message, target_user_id, prompt_msg_id=None):
         auto_delete_after(message.chat.id, to_delete, 5)
 
 # --- HANDLERS ---
+@bot.my_chat_member_handler()
+def handle_my_chat_member_update(chat_member_updated):
+    try:
+        chat = chat_member_updated.chat
+        if chat.type == "private":
+            uid = chat.id
+            new_status = chat_member_updated.new_chat_member.status
+            if new_status in ["kicked", "left"]:
+                mark_user_blocked(uid, True)
+                logging.info(f"[BLOCKED] User {uid} stopped/blocked the bot.")
+            elif new_status == "member":
+                mark_user_blocked(uid, False)
+                logging.info(f"[UNBLOCKED] User {uid} restarted/unblocked the bot.")
+    except Exception as e:
+        logging.error(f"Error in my_chat_member_handler: {e}")
+
 @bot.message_handler(commands=['lang', 'language'])
 def change_language_command(message):
     user_id = message.from_user.id
@@ -2873,6 +2917,7 @@ def get_cached_video(vid_id):
 def handle_direct_video_watch(message, vid_id):
     user_id = message.from_user.id
     username = message.from_user.username or message.from_user.first_name or "User"
+    mark_user_blocked(user_id, False)
     
     # 1. Register user if not exists
     user = get_user(user_id)
@@ -3016,6 +3061,7 @@ def handle_direct_video_watch(message, vid_id):
 def send_welcome(message):
     user_id = message.from_user.id
     username = message.from_user.username or message.from_user.first_name or "User"
+    mark_user_blocked(user_id, False)
     
     command_args = message.text.split()
     if len(command_args) > 1 and command_args[1].startswith("v_"):
@@ -4353,10 +4399,11 @@ def handle_sticker_upload(message):
         bot.reply_to(
             message,
             "✅ <b>স্টিকার সফলভাবে সিলেক্ট ও সেভ হয়েছে!</b>\n\n"
-            "এখন থেকে এই নতুন স্টিকারটি সোর্স চ্যানেল থেকে আসা সমস্ত পোস্ট ও মিডিয়াতে স্বয়ংক্রিয়ভাবে ওয়াটারমার্ক হিসেবে ব্যবহার করা হবে।"
+            "এখন থেকে এই নতুন স্টিকারটি সোর্স চ্যানেল থেকে আসা সমস্ত পোস্ট ও মিডিয়াতে স্বয়ংক্রিয়ভাবে ওয়াটারমার্ক হিসেবে ব্যবহার করা হবে।",
+            parse_mode="HTML"
         )
         t, m = build_sticker_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
     except Exception as e:
         bot.reply_to(message, f"❌ স্টিকার সেভ করতে সমস্যা হয়েছে: {e}")
 
@@ -4373,7 +4420,7 @@ def handle_admin_text(message):
     # Check if engine is waiting for 2FA or login auth
     if mgr.auth_future and not mgr.auth_future.done():
         if mgr.provide_auth_input(text_val):
-            bot.reply_to(message, "✅ <b>Auth input forwarded to engine.</b>")
+            bot.reply_to(message, "✅ <b>Auth input forwarded to engine.</b>", parse_mode="HTML")
             return
 
     if not state_obj:
@@ -4385,7 +4432,8 @@ def handle_admin_text(message):
         bot.reply_to(
             message,
             "💡 Use /admin or /dashboard to open the main control panel.",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("📱 Open Dashboard", callback_data="nav:main"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("📱 Open Dashboard", callback_data="nav:main")),
+            parse_mode="HTML"
         )
         return
 
@@ -4394,9 +4442,9 @@ def handle_admin_text(message):
 
     if text_val.lower() in ["/cancel", "cancel", "বাতিল"]:
         clear_admin_state(message.from_user.id)
-        bot.reply_to(message, "❌ <i>Action canceled.</i>")
+        bot.reply_to(message, "❌ <i>Action canceled.</i>", parse_mode="HTML")
         t, m = build_main_dashboard()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
         return
 
     if st == "WAIT_ADD_SOURCE":
@@ -4406,40 +4454,40 @@ def handle_admin_text(message):
         if text_val not in sources:
             sources.append(text_val)
             update_env({"SOURCE_CHATS": ", ".join(sources)})
-            bot.reply_to(message, f"✅ <b>Added source channel:</b> <code>{text_val}</code>")
+            bot.reply_to(message, f"✅ <b>Added source channel:</b> <code>{text_val}</code>", parse_mode="HTML")
         else:
             bot.reply_to(message, "⚠️ Channel is already in source list.")
         clear_admin_state(message.from_user.id)
         t, m = build_sources_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_SET_OUTPUT":
         update_env({"OUTPUT_CHANNEL": text_val})
-        bot.reply_to(message, f"✅ <b>Output channel updated to:</b> <code>{text_val}</code>")
+        bot.reply_to(message, f"✅ <b>Output channel updated to:</b> <code>{text_val}</code>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_output_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_EDIT_BTN":
         key = meta.get("key")
         if key:
             update_env({key: text_val})
-            bot.reply_to(message, f"✅ <b>Button label updated:</b> <code>{text_val}</code>")
+            bot.reply_to(message, f"✅ <b>Button label updated:</b> <code>{text_val}</code>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_btn_texts_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_EDIT_MONETAG_ZONE":
         new_zone = re.sub(r"[^\d]", "", text_val.strip())
         if not new_zone:
-            bot.reply_to(message, "⚠️ Invalid Zone ID. Please enter numeric digits only, e.g. <code>12016303</code>.")
+            bot.reply_to(message, "⚠️ Invalid Zone ID. Please enter numeric digits only, e.g. <code>12016303</code>.", parse_mode="HTML")
             return
         update_env({"MONETAG_ZONE_ID": new_zone})
-        bot.reply_to(message, f"✅ <b>Monetag Ads Zone ID updated to:</b> <code>{new_zone}</code>\n<i>Syncing Mini App player on GitHub Pages...</i>")
+        bot.reply_to(message, f"✅ <b>Monetag Ads Zone ID updated to:</b> <code>{new_zone}</code>\n<i>Syncing Mini App player on GitHub Pages...</i>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_zone": new_zone}, daemon=True).start()
         t, m = build_monetag_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_EDIT_MONETAG_INTERVAL":
         raw = text_val.lower().strip()
@@ -4454,15 +4502,15 @@ def handle_admin_text(message):
                 sec = int(num_part)
 
         if sec < 10:
-            bot.reply_to(message, "⚠️ Invalid interval. Minimum interval is 10 seconds. Examples: <code>180</code> or <code>3m</code>.")
+            bot.reply_to(message, "⚠️ Invalid interval. Minimum interval is 10 seconds. Examples: <code>180</code> or <code>3m</code>.", parse_mode="HTML")
             return
 
         update_env({"MONETAG_MIDROLL_INTERVAL": sec})
-        bot.reply_to(message, f"✅ <b>Video mid-roll ads interval updated to:</b> <code>{sec}s</code>\n<i>Syncing Mini App player on GitHub Pages...</i>")
+        bot.reply_to(message, f"✅ <b>Video mid-roll ads interval updated to:</b> <code>{sec}s</code>\n<i>Syncing Mini App player on GitHub Pages...</i>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_interval": sec}, daemon=True).start()
         t, m = build_monetag_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_SET_DELAY":
         # expects format "1 - 3" or single integer "2"
@@ -4474,7 +4522,7 @@ def handle_admin_text(message):
             d_min = int(nums[0])
             d_max = int(nums[1])
         else:
-            bot.reply_to(message, "⚠️ Invalid format. Send like <code>1 - 3</code> or <code>2</code>.")
+            bot.reply_to(message, "⚠️ Invalid format. Send like <code>1 - 3</code> or <code>2</code>.", parse_mode="HTML")
             return
 
         update_env({
@@ -4482,21 +4530,21 @@ def handle_admin_text(message):
             "POST_DELAY_MAX_SECONDS": d_max,
             "POST_DELAY_SECONDS": d_max
         })
-        bot.reply_to(message, f"✅ <b>Post delay set to:</b> <code>{d_min}s - {d_max}s</code>")
+        bot.reply_to(message, f"✅ <b>Post delay set to:</b> <code>{d_min}s - {d_max}s</code>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_timing_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_SET_TIMEOUT":
         if text_val.isdigit():
             update_env({"REPLY_TIMEOUT": int(text_val)})
-            bot.reply_to(message, f"✅ <b>Bot response timeout set to:</b> <code>{text_val}s</code>")
+            bot.reply_to(message, f"✅ <b>Bot response timeout set to:</b> <code>{text_val}s</code>", parse_mode="HTML")
         else:
             bot.reply_to(message, "⚠️ Please send a valid number of seconds.")
             return
         clear_admin_state(message.from_user.id)
         t, m = build_timing_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_RESOLVE_LINK":
         clear_admin_state(message.from_user.id)
@@ -4521,37 +4569,37 @@ def handle_admin_text(message):
             )
         except Exception as e:
             resp = f"❌ Translation Error: {e}"
-        bot.reply_to(message, resp, reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("🔙 Back to Translation Menu", callback_data="nav:trans")))
+        bot.reply_to(message, resp, reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("🔙 Back to Translation Menu", callback_data="nav:trans")), parse_mode="HTML")
 
     elif st == "WAIT_EDIT_CRED":
         key = meta.get("key")
         if key:
             update_env({key: text_val})
-            bot.reply_to(message, f"✅ <b>{key} সফলভাবে আপডেট করা হয়েছে:</b> <code>{text_val}</code>\n<i>সতর্কতা: ইঞ্জিন রিস্টার্ট করলে নতুন ক্রেডেনশিয়াল কার্যকর হবে।</i>")
+            bot.reply_to(message, f"✅ <b>{key} সফলভাবে আপডেট করা হয়েছে:</b> <code>{text_val}</code>\n<i>সতর্কতা: ইঞ্জিন রিস্টার্ট করলে নতুন ক্রেডেনশিয়াল কার্যকর হবে।</i>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_credentials_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_CHANGE_PWD":
         if len(text_val) < 4:
-            bot.reply_to(message, "⚠️ পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে। অন্য একটি পাসওয়ার্ড দিন:")
+            bot.reply_to(message, "⚠️ পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে। অন্য একটি পাসওয়ার্ড দিন:", parse_mode="HTML")
             return
         update_env({"BOT_PASSWORD": text_val})
-        bot.reply_to(message, f"✅ <b>বট অ্যাক্সেস পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!</b>\nনতুন পাসওয়ার্ড: <code>{text_val}</code>")
+        bot.reply_to(message, f"✅ <b>বট অ্যাক্সেস পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!</b>\nনতুন পাসওয়ার্ড: <code>{text_val}</code>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_credentials_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_TG_PHONE":
         phone = text_val.replace(" ", "").replace("-", "")
         if len(phone) < 7:
-            bot.reply_to(message, "⚠️ অনুগ্রহ করে সঠিক কান্ট্রি কোড সহ ফোন নম্বর দিন (যেমন: <code>+8801721007568</code>):")
+            bot.reply_to(message, "⚠️ অনুগ্রহ করে সঠিক কান্ট্রি কোড সহ ফোন নম্বর দিন (যেমন: <code>+8801721007568</code>):", parse_mode="HTML")
             return
         update_env({"TELEGRAM_PHONE": phone})
         env = read_env()
         api_id = env.get("API_ID")
         api_hash = env.get("API_HASH")
-        status_msg = bot.reply_to(message, "⏳ <i>টেলিগ্রাম সার্ভারে কোড রিকোয়েস্ট পাঠানো হচ্ছে...</i>")
+        status_msg = bot.reply_to(message, "⏳ <i>টেলিগ্রাম সার্ভারে কোড রিকোয়েস্ট পাঠানো হচ্ছে...</i>", parse_mode="HTML")
         try:
             login_mgr.run(login_mgr._send_code(uid, phone, int(api_id), api_hash))
             set_admin_state(uid, "WAIT_TG_CODE")
@@ -4561,19 +4609,20 @@ def handle_admin_text(message):
                 "<i>নোট: কোডের মাঝে স্পেস থাকলে স্পেস ছাড়া শুধু সংখ্যাগুলো পাঠাবেন।</i>",
                 message.chat.id,
                 status_msg.message_id,
-                reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+                reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login")),
+                parse_mode="HTML"
             )
         except errors.PhoneNumberInvalidError:
-            bot.edit_message_text("❌ <b>ভুল ফোন নম্বর!</b> টেলিগ্রাম অ্যাকাউন্টটি যে নম্বরে খোলা সেটি কান্ট্রি কোড সহ লিখুন:", message.chat.id, status_msg.message_id)
+            bot.edit_message_text("❌ <b>ভুল ফোন নম্বর!</b> টেলিগ্রাম অ্যাকাউন্টটি যে নম্বরে খোলা সেটি কান্ট্রি কোড সহ লিখুন:", message.chat.id, status_msg.message_id, parse_mode="HTML")
         except errors.FloodWaitError as fe:
             clear_admin_state(uid)
-            bot.edit_message_text(f"⚠️ <b>Flood Wait!</b> টেলিগ্রাম রিকোয়েস্ট লিমিট হয়েছে। অনুগ্রহ করে {fe.seconds} সেকেন্ড পর চেষ্টা করুন।", message.chat.id, status_msg.message_id)
+            bot.edit_message_text(f"⚠️ <b>Flood Wait!</b> টেলিগ্রাম রিকোয়েস্ট লিমিট হয়েছে। অনুগ্রহ করে {fe.seconds} সেকেন্ড পর চেষ্টা করুন।", message.chat.id, status_msg.message_id, parse_mode="HTML")
         except Exception as e:
-            bot.edit_message_text(f"❌ <b>কোড পাঠানোর ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id)
+            bot.edit_message_text(f"❌ <b>কোড পাঠানোর ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id, parse_mode="HTML")
 
     elif st == "WAIT_TG_CODE":
         clean_code = text_val.replace(" ", "").replace("-", "").strip()
-        status_msg = bot.reply_to(message, "⏳ <i>কোড যাচাই করা হচ্ছে...</i>")
+        status_msg = bot.reply_to(message, "⏳ <i>কোড যাচাই করা হচ্ছে...</i>", parse_mode="HTML")
         try:
             res = login_mgr.run(login_mgr._submit_code(uid, clean_code))
             if res["status"] == "ok":
@@ -4591,7 +4640,8 @@ def handle_admin_text(message):
                     reply_markup=InlineKeyboardMarkup().row(
                         InlineKeyboardButton("📱 Open Dashboard", callback_data="nav:main"),
                         InlineKeyboardButton("🔴 Start Engine", callback_data="act:start")
-                    )
+                    ),
+                    parse_mode="HTML"
                 )
             elif res["status"] == "2fa_needed":
                 set_admin_state(uid, "WAIT_TG_2FA")
@@ -4600,14 +4650,16 @@ def handle_admin_text(message):
                     "আপনার টেলিগ্রাম অ্যাকাউন্টের ক্লাউড পাসওয়ার্ডটি (2FA Password) এখানে লিখে পাঠান:",
                     message.chat.id,
                     status_msg.message_id,
-                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login")),
+                    parse_mode="HTML"
                 )
             elif res["status"] == "invalid_code":
                 bot.edit_message_text(
                     "❌ <b>ভুল ওটিপি কোড!</b> কোডটি টেলিগ্রাম অ্যাপে দেখে সঠিকভাবে সংখ্যাগুলো লিখে পাঠান (যেমন: <code>12345</code>):",
                     message.chat.id,
                     status_msg.message_id,
-                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login")),
+                    parse_mode="HTML"
                 )
             elif res["status"] == "expired_code":
                 clear_admin_state(uid)
@@ -4615,15 +4667,16 @@ def handle_admin_text(message):
                     "⚠️ <b>কোডের মেয়াদ শেষ হয়ে গেছে!</b> অনুগ্রহ করে আবার নতুন করে লগইন শুরু করুন।",
                     message.chat.id,
                     status_msg.message_id,
-                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("📲 Login Again", callback_data="act:start_tg_login"))
+                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("📲 Login Again", callback_data="act:start_tg_login")),
+                    parse_mode="HTML"
                 )
             else:
-                bot.edit_message_text(f"❌ <b>লগইন ব্যর্থ:</b> {res.get('error', 'অজানা ত্রুটি')}", message.chat.id, status_msg.message_id)
+                bot.edit_message_text(f"❌ <b>লগইন ব্যর্থ:</b> {res.get('error', 'অজানা ত্রুটি')}", message.chat.id, status_msg.message_id, parse_mode="HTML")
         except Exception as e:
-            bot.edit_message_text(f"❌ <b>ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id)
+            bot.edit_message_text(f"❌ <b>ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id, parse_mode="HTML")
 
     elif st == "WAIT_TG_2FA":
-        status_msg = bot.reply_to(message, "⏳ <i>2FA পাসওয়ার্ড যাচাই করা হচ্ছে...</i>")
+        status_msg = bot.reply_to(message, "⏳ <i>2FA পাসওয়ার্ড যাচাই করা হচ্ছে...</i>", parse_mode="HTML")
         try:
             res = login_mgr.run(login_mgr._submit_2fa(uid, text_val))
             if res["status"] == "ok":
@@ -4641,19 +4694,21 @@ def handle_admin_text(message):
                     reply_markup=InlineKeyboardMarkup().row(
                         InlineKeyboardButton("📱 Open Dashboard", callback_data="nav:main"),
                         InlineKeyboardButton("🔴 Start Engine", callback_data="act:start")
-                    )
+                    ),
+                    parse_mode="HTML"
                 )
             elif res["status"] == "invalid_pwd":
                 bot.edit_message_text(
                     "❌ <b>ভুল 2FA পাসওয়ার্ড!</b> সঠিক টু-স্টেপ পাসওয়ার্ডটি আবার লিখুন:",
                     message.chat.id,
                     status_msg.message_id,
-                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login")),
+                    parse_mode="HTML"
                 )
             else:
-                bot.edit_message_text(f"❌ <b>2FA ব্যর্থ:</b> {res.get('error', 'অজানা ত্রুটি')}", message.chat.id, status_msg.message_id)
+                bot.edit_message_text(f"❌ <b>2FA ব্যর্থ:</b> {res.get('error', 'অজানা ত্রুটি')}", message.chat.id, status_msg.message_id, parse_mode="HTML")
         except Exception as e:
-            bot.edit_message_text(f"❌ <b>ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id)
+            bot.edit_message_text(f"❌ <b>ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id, parse_mode="HTML")
 
     elif st == "WAIT_ADD_AJ_CHAT":
         env = read_env()
@@ -4662,23 +4717,23 @@ def handle_admin_text(message):
         if text_val not in chats:
             chats.append(text_val)
             update_env({"AUTO_JOIN_CHATS": ", ".join(chats)})
-            bot.reply_to(message, f"✅ <b>Auto-Join টার্গেট চ্যাট যোগ করা হয়েছে:</b> <code>{text_val}</code>")
+            bot.reply_to(message, f"✅ <b>Auto-Join টার্গেট চ্যাট যোগ করা হয়েছে:</b> <code>{text_val}</code>", parse_mode="HTML")
         else:
-            bot.reply_to(message, "⚠️ এই চ্যাটটি ইতোমধ্যেই তালিকায় রয়েছে।")
+            bot.reply_to(message, "⚠️ এই চ্যাটটি ইতোমধ্যেই তালিকায় রয়েছে।", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_auto_join_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_SET_AJ_DELAY":
         if text_val.isdigit():
             update_env({"AUTO_JOIN_DELAY_SECONDS": int(text_val)})
-            bot.reply_to(message, f"✅ <b>Auto-Join বিলম্ব সময় নির্ধারণ করা হয়েছে:</b> <code>{text_val}s</code>")
+            bot.reply_to(message, f"✅ <b>Auto-Join বিলম্ব সময় নির্ধারণ করা হয়েছে:</b> <code>{text_val}s</code>", parse_mode="HTML")
         else:
-            bot.reply_to(message, "⚠️ অনুগ্রহ করে শুধু পূর্ণসংখ্যা সেকেন্ড লিখুন (যেমন: 1 বা 2)।")
+            bot.reply_to(message, "⚠️ অনুগ্রহ করে শুধু পূর্ণসংখ্যা সেকেন্ড লিখুন (যেমন: 1 বা 2)।", parse_mode="HTML")
             return
         clear_admin_state(message.from_user.id)
         t, m = build_auto_join_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
     elif st == "WAIT_ADD_HJ_CHAT":
         env = read_env()
@@ -4687,12 +4742,12 @@ def handle_admin_text(message):
         if text_val not in chats:
             chats.append(text_val)
             update_env({"HIDE_JOIN_CHATS": ", ".join(chats)})
-            bot.reply_to(message, f"✅ <b>Clean Notification টার্গেট গ্রুপ যোগ করা হয়েছে:</b> <code>{text_val}</code>")
+            bot.reply_to(message, f"✅ <b>Clean Notification টার্গেট গ্রুপ যোগ করা হয়েছে:</b> <code>{text_val}</code>", parse_mode="HTML")
         else:
-            bot.reply_to(message, "⚠️ এই গ্রুপটি ইতোমধ্যেই তালিকায় রয়েছে।")
+            bot.reply_to(message, "⚠️ এই গ্রুপটি ইতোমধ্যেই তালিকায় রয়েছে।", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_hide_join_menu()
-        bot.send_message(message.chat.id, t, reply_markup=m)
+        bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
 
 
 def safe_edit_message(call, text: str, reply_markup: InlineKeyboardMarkup, parse_mode: str = "HTML") -> bool:
@@ -4830,7 +4885,8 @@ def handle_controller_callbacks(call):
             f"🧪 <b>Live Translation Tester:</b>\n\n"
             f"Active Language: <b>{l_info[0]} ({curr_lang})</b>\n\n"
             "<i>যেকোনো লেখা বা পোস্টের ক্যাপশন পাঠান—বট সাথে সাথে অনুবাদ করে দেখাবে:</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:trans"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:trans")),
+            parse_mode="HTML"
         )
 
     # Actions: Sticker Management
@@ -4859,7 +4915,8 @@ def handle_controller_callbacks(call):
             "টেলিগ্রামের যেকোনো <b>Sticker</b>, <b>Photo</b> বা <b>PNG</b> ফাইল এখনই এখানে পাঠান।\n"
             "বট সাথে সাথে এটিকে নতুন ওয়াটারমার্ক হিসেবে সেট করে নেবে।\n\n"
             "<i>বাতিল করতে /cancel পাঠান।</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:sticker"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:sticker")),
+            parse_mode="HTML"
         )
 
     elif data == "act:prev_sticker":
@@ -4868,7 +4925,7 @@ def handle_controller_callbacks(call):
         if os.path.exists(stk_path):
             try:
                 with open(stk_path, "rb") as sf:
-                    bot.send_document(call.message.chat.id, sf, caption="🏷 <b>Current Active Watermark Sticker</b>")
+                    bot.send_document(call.message.chat.id, sf, caption="🏷 <b>Current Active Watermark Sticker</b>", parse_mode="HTML")
                 bot.answer_callback_query(call.id, "Sticker preview sent!")
             except Exception as e:
                 bot.answer_callback_query(call.id, f"Error: {e}", show_alert=True)
@@ -4930,7 +4987,8 @@ def handle_controller_callbacks(call):
             "• <code>@my_source_channel</code>\n"
             "• <code>https://t.me/+AbCdEfGh</code>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:sources"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:sources")),
+            parse_mode="HTML"
         )
 
     elif data == "act:remove_source_list":
@@ -4959,7 +5017,8 @@ def handle_controller_callbacks(call):
             "🎯 <b>Send Destination Channel ID or @username:</b>\n\n"
             "Example: <code>-1003938077680</code> or <code>@target_channel</code>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:output"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:output")),
+            parse_mode="HTML"
         )
 
     elif data.startswith("tgl_btn_master:"):
@@ -4980,7 +5039,8 @@ def handle_controller_callbacks(call):
             call.message.chat.id,
             f"✏️ <b>Send new text for {key}:</b>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:btn_texts"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:btn_texts")),
+            parse_mode="HTML"
         )
 
     # Actions: Edit Monetag Zone ID
@@ -4996,7 +5056,8 @@ def handle_controller_callbacks(call):
             "Example: <code>12016303</code>\n\n"
             "<i>(This will instantly update the Mini App video player on GitHub Pages in real-time)</i>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:monetag"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:monetag")),
+            parse_mode="HTML"
         )
 
     # Actions: Monetag Ads Management & Navigation
@@ -5034,7 +5095,8 @@ def handle_controller_callbacks(call):
             "• <code>3m</code> (3 minutes)\n"
             "• <code>90s</code> (90 seconds)\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:monetag"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:monetag")),
+            parse_mode="HTML"
         )
 
     # Actions: Set Timing
@@ -5046,7 +5108,8 @@ def handle_controller_callbacks(call):
             "⏱ <b>Send delay range in seconds:</b>\n\n"
             "Example: <code>1 - 3</code> or <code>2</code>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:timing"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:timing")),
+            parse_mode="HTML"
         )
 
     elif data == "act:set_timeout":
@@ -5057,7 +5120,8 @@ def handle_controller_callbacks(call):
             "⏱ <b>Send bot response timeout (seconds):</b>\n\n"
             "Example: <code>120</code>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:timing"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:timing")),
+            parse_mode="HTML"
         )
 
     # Actions: Credentials & Security
@@ -5075,7 +5139,8 @@ def handle_controller_callbacks(call):
             call.message.chat.id,
             f"✏️ <b>Send new value for {key}:</b>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:creds"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:creds")),
+            parse_mode="HTML"
         )
 
     elif data == "act:change_pwd":
@@ -5085,7 +5150,8 @@ def handle_controller_callbacks(call):
             call.message.chat.id,
             "🔑 <b>Send new bot access password:</b>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:creds"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:creds")),
+            parse_mode="HTML"
         )
 
     elif data == "act:start_tg_login":
@@ -5103,7 +5169,8 @@ def handle_controller_callbacks(call):
                     InlineKeyboardButton("✏️ Edit API Hash", callback_data="act:edit_cred:API_HASH")
                 ).row(
                     InlineKeyboardButton("🔙 Back to Credentials", callback_data="nav:creds")
-                )
+                ),
+                parse_mode="HTML"
             )
             return
 
@@ -5123,7 +5190,8 @@ def handle_controller_callbacks(call):
             "<i>উদাহরণ:</i> <code>+8801721007568</code>"
             f"{hint}\n\n"
             "<i>বাতিল করতে নিচে Cancel বাটন চাপুন।</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login")),
+            parse_mode="HTML"
         )
 
     elif data == "act:cancel_tg_login":
@@ -5158,7 +5226,8 @@ def handle_controller_callbacks(call):
             "👥 <b>Send Target Chat ID or @username for Auto-Join:</b>\n\n"
             "Example: <code>-1003842038004</code> or <code>@group_username</code>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:auto_join"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:auto_join")),
+            parse_mode="HTML"
         )
 
     elif data == "act:rem_aj_chat":
@@ -5194,7 +5263,8 @@ def handle_controller_callbacks(call):
             "⏱ <b>Send Auto-Join delay in seconds:</b>\n\n"
             "Example: <code>1</code> or <code>2</code>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:auto_join"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:auto_join")),
+            parse_mode="HTML"
         )
 
     # Actions: Clean Notifications (Join/Leave Message Hider)
@@ -5232,7 +5302,8 @@ def handle_controller_callbacks(call):
             "🚫 <b>Send Target Group ID or @username for Clean Notifications:</b>\n\n"
             "Example: <code>-1003842038004</code> or <code>@group_username</code>\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:hide_join"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:hide_join")),
+            parse_mode="HTML"
         )
 
     elif data == "act:rem_hj_chat":
@@ -5277,7 +5348,8 @@ def handle_controller_callbacks(call):
             "Send any Telegram channel link, invite link (<code>t.me/+...</code>), "
             "post link (<code>t.me/c/...</code>), or <code>@username</code> to resolve its MTProto ID.\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:main"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:main")),
+            parse_mode="HTML"
         )
 
     elif data == "nav:test_link":
@@ -5288,7 +5360,8 @@ def handle_controller_callbacks(call):
             "🧪 <b>TeraBox Link Tester</b>\n\n"
             "Paste any TeraBox / 1024tera URL here to test metadata extraction, stream link, and buttons.\n\n"
             "<i>Send /cancel to abort.</i>",
-            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:main"))
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:main")),
+            parse_mode="HTML"
         )
 
 # -------------------------------------------------------------
@@ -5309,7 +5382,8 @@ def resolve_channel_link(message, link_text: str):
             reply_markup=InlineKeyboardMarkup().row(
                 InlineKeyboardButton("➕ Add as Source", callback_data=f"act:quick_add_src:{cid}"),
                 InlineKeyboardButton("🎯 Set as Output", callback_data=f"act:quick_set_out:{cid}")
-            )
+            ),
+            parse_mode="HTML"
         )
         return
 
@@ -5336,13 +5410,14 @@ def resolve_channel_link(message, link_text: str):
                     reply_markup=InlineKeyboardMarkup().row(
                         InlineKeyboardButton("➕ Add as Source", callback_data=f"act:quick_add_src:{cid}"),
                         InlineKeyboardButton("🎯 Set as Output", callback_data=f"act:quick_set_out:{cid}")
-                    )
+                    ),
+                    parse_mode="HTML"
                 )
                 return
         except Exception:
             pass
 
-    bot.reply_to(message, f"ℹ️ <b>Input:</b> <code>{clean}</code>\nCould not resolve via MTProto. You can still use it directly if it is a valid ID.")
+    bot.reply_to(message, f"ℹ️ <b>Input:</b> <code>{clean}</code>\nCould not resolve via MTProto. You can still use it directly if it is a valid ID.", parse_mode="HTML")
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("act:quick_add_src:") or call.data.startswith("act:quick_set_out:"))
 def handle_quick_actions(call):
@@ -5364,7 +5439,7 @@ def handle_quick_actions(call):
         bot.answer_callback_query(call.id, f"Output set to {cid}!", show_alert=True)
 
 def test_terabox_url(message, raw_url: str):
-    bot.reply_to(message, "⏳ <i>Extracting TeraBox video metadata and generating test player link...</i>")
+    bot.reply_to(message, "⏳ <i>Extracting TeraBox video metadata and generating test player link...</i>", parse_mode="HTML")
     bot.send_chat_action(message.chat.id, "typing")
 
     def _extract():
@@ -5379,7 +5454,7 @@ def test_terabox_url(message, raw_url: str):
 def _async_extract_and_send(message, raw_url: str, extract_fn):
     title, stream_url, size, resolution, duration, file_type = extract_fn()
     if not stream_url:
-        bot.send_message(message.chat.id, f"❌ <b>Extraction failed:</b>\n{file_type or 'Unable to resolve stream URL'}")
+        bot.send_message(message.chat.id, f"❌ <b>Extraction failed:</b>\n{file_type or 'Unable to resolve stream URL'}", parse_mode="HTML")
         return
 
     vid_id = "test"
@@ -5421,7 +5496,7 @@ def _async_extract_and_send(message, raw_url: str, extract_fn):
         f"🌐 <b>In-App Player:</b> <a href='{player_url}'>Open Web Player</a>"
     )
 
-    bot.send_message(message.chat.id, caption, reply_markup=markup, disable_web_page_preview=True)
+    bot.send_message(message.chat.id, caption, reply_markup=markup, disable_web_page_preview=True, parse_mode="HTML")
 
 
 
@@ -5544,10 +5619,6 @@ def handle_scheduler_cmd(message):
     clear_admin_state(message.from_user.id)
     text, markup = build_scheduler_menu()
     bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="HTML")
-
-@bot.message_handler(commands=['lang', 'language'])
-def handle_language_cmd(message):
-    change_language_command(message)
 
 @bot.message_handler(content_types=['text', 'photo', 'video', 'document', 'audio', 'animation', 'sticker'], func=lambda message: True)
 def master_message_dispatcher(message):
@@ -5675,9 +5746,22 @@ def start_render_health_server():
                         already = False
                         if vid:
                             already = has_watched_video(uid_int, vid)
+
+                        user_blocked = is_user_blocked(uid_int) or (u is None)
+                        if u and not user_blocked:
+                            try:
+                                bot.send_chat_action(uid_int, 'typing')
+                            except Exception as act_err:
+                                err_str = str(act_err).lower()
+                                if "blocked" in err_str or "deactivated" in err_str or "can't initiate" in err_str or "chat not found" in err_str:
+                                    user_blocked = True
+                                    mark_user_blocked(uid_int, True)
+
                         self.wfile.write(json.dumps({
                             "ok": True,
                             "exists": u is not None,
+                            "is_blocked": user_blocked,
+                            "bot_username": get_bot_username(),
                             "is_paid": 1 if is_p else 0,
                             "credits": cr,
                             "already_watched": already,
