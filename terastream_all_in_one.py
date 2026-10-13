@@ -2587,7 +2587,10 @@ def admin_settings_inline():
         InlineKeyboardButton("✦ 14. 💰 Monetag Zone ID ✦", callback_data="set_monetag_zone"),
         InlineKeyboardButton("✦ 15. ⏱️ Monetag Ads Time ✦", callback_data="set_monetag_interval")
     )
-    markup.row(InlineKeyboardButton("❌ Close Panel", callback_data="btn_close_admin_panel"))
+    markup.row(
+        InlineKeyboardButton("🔙 Back to Dashboard", callback_data="act:back_dashboard"),
+        InlineKeyboardButton("❌ Close Panel", callback_data="btn_close_admin_panel")
+    )
     return markup
 
 def cancel_input_inline():
@@ -2940,6 +2943,7 @@ def handle_direct_video_watch(message, vid_id):
     encoded_dur = quote(duration, safe='')
     encoded_type = quote(file_type, safe='')
     
+    u_lang = get_user_lang(user_id) or "bn"
     player_url = (
         f"{MY_PLAYER_URL}?"
         f"src={encoded_stream_url}&"
@@ -2947,7 +2951,8 @@ def handle_direct_video_watch(message, vid_id):
         f"size={encoded_size}&"
         f"res={encoded_res}&"
         f"dur={encoded_dur}&"
-        f"type={encoded_type}"
+        f"type={encoded_type}&"
+        f"lang={u_lang}"
     )
 
     markup = InlineKeyboardMarkup()
@@ -3037,6 +3042,10 @@ def handle_set_language(call):
             
     # Set user language
     set_user_lang(user_id, lang_code)
+    try:
+        sync_users_json()
+    except Exception:
+        pass
     
     notice = get_txt(user_id, "lang_selected_notice")
     bot.answer_callback_query(call.id, notice)
@@ -3357,13 +3366,33 @@ ADMIN_SETTING_KEYS = {
     "set_max_batch_links", "set_monetag_zone", "set_monetag_interval"
 }
 
-@bot.callback_query_handler(func=lambda call: (call.data in ADMIN_SETTING_KEYS) or call.data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"])
+@bot.callback_query_handler(func=lambda call: (call.data in ADMIN_SETTING_KEYS) or call.data in ["act:back_dashboard", "btn_back_to_dashboard", "btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"])
 def handle_admin_callbacks(call):
     if not is_admin(call.from_user.id):
         try:
             bot.answer_callback_query(call.id, "Access Denied!", show_alert=True)
         except Exception:
             pass
+        return
+
+    if call.data in ["act:back_dashboard", "btn_back_to_dashboard"]:
+        try:
+            bot.answer_callback_query(call.id, "🔙 Back to Dashboard")
+        except Exception:
+            pass
+        try:
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+        except Exception:
+            try:
+                bot.edit_message_text("✅ Closed.", chat_id=call.message.chat.id, message_id=call.message.message_id)
+            except Exception:
+                pass
+        welcome_txt = (
+            f"👑 <b>Admin Dashboard</b>\n\n"
+            f"⚡ System is active and running.\n"
+            f"নিচের মেনু বাটনগুলো থেকে যেকোনো অপশন ব্যবহার করতে পারেন:"
+        )
+        bot.send_message(call.message.chat.id, welcome_txt, parse_mode="HTML", reply_markup=main_keyboard(call.from_user.id))
         return
 
     if call.data == "btn_admin_lang":
@@ -4146,6 +4175,7 @@ def handle_message(message):
             encoded_dur = quote(duration, safe='')
             encoded_type = quote(file_type, safe='')
             
+            u_lang = get_user_lang(user_id) or "bn"
             player_url = (
                 f"{MY_PLAYER_URL}?"
                 f"src={encoded_stream_url}&"
@@ -4153,7 +4183,8 @@ def handle_message(message):
                 f"size={encoded_size}&"
                 f"res={encoded_res}&"
                 f"dur={encoded_dur}&"
-                f"type={encoded_type}"
+                f"type={encoded_type}&"
+                f"lang={u_lang}"
             )
             
             markup = InlineKeyboardMarkup()
@@ -4230,7 +4261,7 @@ def sync_users_json():
     try:
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
-        rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry FROM users').fetchall()
+        rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry, language FROM users').fetchall()
         try:
             watched_rows = c.execute('SELECT user_id, video_id FROM watched_videos').fetchall()
         except Exception:
@@ -4245,6 +4276,7 @@ def sync_users_json():
                 'credits': r[2],
                 'is_paid': r[3],
                 'paid_expiry': r[4],
+                'lang': r[5] or 'bn',
                 'watched': watched_map.get(str(r[0]), [])
             } for r in rows
         }
@@ -5611,6 +5643,7 @@ def start_render_health_server():
                             "is_paid": 1 if is_p else 0,
                             "credits": cr,
                             "already_watched": already,
+                            "lang": get_user_lang(uid_int) or "bn",
                             "monetag_zone_id": get_setting("monetag_zone_id") or read_env().get("MONETAG_ZONE_ID") or "12016303",
                             "monetag_midroll_interval": int(get_setting("monetag_midroll_interval") or read_env().get("MONETAG_MIDROLL_INTERVAL") or 180)
                         }).encode("utf-8"))
