@@ -746,11 +746,19 @@
     // MONETAG AD NETWORK CONFIGURATION (ZONE ID: 12016303)
     // ==========================================
     let MONETAG_ZONE_ID = "12016303";
-    const MONETAG_MIDROLL_INTERVAL = 180; // 3 minutes interval
+    let MONETAG_MIDROLL_INTERVAL = 180; // default 3 minutes
     let isAdMode = false;
     let isVip = false;
     let lastMidrollTime = 0;
     let isShowingAd = false;
+
+    function setMonetagMidrollInterval(sec) {
+        const s = parseInt(sec, 10);
+        if (!isNaN(s) && s >= 10) {
+            MONETAG_MIDROLL_INTERVAL = s;
+            console.log("[Monetag] Midroll ads interval updated to " + s + "s");
+        }
+    }
 
     function setMonetagZone(newZone) {
         if (!newZone) return;
@@ -1449,6 +1457,9 @@
                         if (liveData.monetag_zone_id) {
                             setMonetagZone(liveData.monetag_zone_id);
                         }
+                        if (liveData.monetag_midroll_interval) {
+                            setMonetagMidrollInterval(liveData.monetag_midroll_interval);
+                        }
                         if (typeof liveData.credits === 'number') {
                             baseCredits = liveData.credits;
                             liveStatusFetched = true;
@@ -1491,6 +1502,9 @@
                 }
                 if (uData && uData._settings && uData._settings.monetag_zone_id) {
                     setMonetagZone(uData._settings.monetag_zone_id);
+                }
+                if (uData && uData._settings && uData._settings.monetag_midroll_interval) {
+                    setMonetagMidrollInterval(uData._settings.monetag_midroll_interval);
                 }
             } catch (e) {
                 console.warn("Could not fetch remote databases, using fallback balance:", e);
