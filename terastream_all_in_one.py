@@ -94,6 +94,8 @@ def update_env(key_values: Dict[str, Any]):
             lines = f.readlines()
 
     keys_to_update = {k: str(v) for k, v in key_values.items()}
+    for k, v in keys_to_update.items():
+        os.environ[k] = str(v)
     new_lines = []
     found_keys = set()
 
@@ -1396,6 +1398,8 @@ class EngineManager:
             "translate_enabled": env.get("TRANSLATE_ENABLED", "False").lower() == "true",
             "translate_target_lang": env.get("TRANSLATE_TARGET_LANG", "en"),
             "post_links_as_buttons": env.get("POST_LINKS_AS_BUTTONS", "True").lower() == "true",
+            "button_terabox_free_enabled": env.get("BUTTON_TERABOX_FREE_ENABLED", "True").lower() == "true",
+            "monetag_ads_enabled": env.get("MONETAG_ADS_ENABLED", "True").lower() == "true",
             "button_terabox_free_text": env.get("BUTTON_TERABOX_FREE_TEXT", "🎬 Watch Video (Free)"),
             "button_terabox_paid_text": env.get("BUTTON_TERABOX_PAID_TEXT", "⚡ Play Video (Paid)"),
             "button_watch_now_text": env.get("BUTTON_WATCH_NOW_TEXT", "▶️ Watch Now"),
