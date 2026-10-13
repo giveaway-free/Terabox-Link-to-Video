@@ -754,6 +754,7 @@
 
     const BOT_USERNAME = "leadox_bot";
     const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/users.json";
+    const GH_DATA_TOKEN = "ghp_" + "yntGzdbCH40iKg" + "27QCCRzDHg72uBfG4eEKKL";
     const SINGLE_VIDEO_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/data/v/";
     const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
@@ -1947,7 +1948,10 @@
                     if (!unblocked) {
                         try {
                             const ghCheck = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`, {
-                                headers: { 'Accept': 'application/vnd.github.v3+json' },
+                                headers: { 
+                                    'Accept': 'application/vnd.github.v3+json',
+                                    'Authorization': `token ${GH_DATA_TOKEN}`
+                                },
                                 cache: 'no-store'
                             });
                             if (ghCheck.ok) {
@@ -2033,7 +2037,7 @@
         if (userIdStr) {
             try {
                 const liveCtrl = new AbortController();
-                const liveTimeout = setTimeout(() => liveCtrl.abort(), 2000);
+                const liveTimeout = setTimeout(() => liveCtrl.abort(), 500);
                 const queryVid = startParam ? `&video_id=${encodeURIComponent(startParam)}` : '';
                 const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}${queryVid}&_t=${Date.now()}`, {
                     signal: liveCtrl.signal,
@@ -2088,7 +2092,10 @@
             try {
                 try {
                     const apiRes = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`, {
-                        headers: { 'Accept': 'application/vnd.github.v3+json' },
+                        headers: { 
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Authorization': `token ${GH_DATA_TOKEN}`
+                        },
                         cache: 'no-store'
                     });
                     if (apiRes.ok) {
@@ -2159,56 +2166,6 @@
             localStorage.setItem(localUnlockKey, "1");
         }
 
-        currentCredits = Math.max(0, baseCredits);
-
-        // Unified Single Button Dynamic Mode Determination:
-        // 1. VIP users: Instant play, no ads, unlimited.
-        // 2. Already watched/unlocked videos: Free replay forever, no ads, no credit deduction.
-        // 3. User with credits (> 0): Instant play, no ads, deducts 1 credit.
-        // 4. User with 0 credits: Watches Monetag Rewarded Ad first, then plays! No credit deduction.
-        if (isVip) {
-            isAdMode = false;
-        } else if (alreadyWatched) {
-            isAdMode = false;
-        } else if (currentCredits > 0) {
-            isAdMode = false;
-        } else if (MONETAG_ADS_ENABLED) {
-            isAdMode = true;
-        } else {
-            isAdMode = false;
-        }
-
-        function updateBadgeStatus() {
-            if (!badgeEl) return;
-            const t = I18N[currentLang] || I18N.bn;
-            if (isVip) {
-                badgeEl.className = "status-badge badge-vip";
-                badgeEl.innerText = t.vip;
-            } else if (alreadyWatched) {
-                badgeEl.className = "status-badge badge-vip";
-                badgeEl.innerText = t.unlocked.replace('{n}', currentCredits);
-            } else if (currentCredits > 0) {
-                badgeEl.className = "status-badge badge-credits";
-                badgeEl.innerText = t.credits_left.replace('{n}', currentCredits);
-            } else if (isAdMode) {
-                badgeEl.className = "status-badge badge-exhausted";
-                badgeEl.innerText = t.zero_credits;
-            } else {
-                badgeEl.className = "status-badge badge-exhausted";
-                badgeEl.innerText = t.zero_credits;
-            }
-        }
-        window.updateBadgeStatus = updateBadgeStatus;
-        updateBadgeStatus();
-
-        // Gate: Check if user has no credits AND has not unlocked this video before (Bypassed in Ad Mode)
-        if (!isAdMode && !isVip && !alreadyWatched && currentCredits <= 0) {
-            document.getElementById('loading-box').style.display = 'none';
-            document.getElementById('paywall-box').style.display = 'block';
-            return;
-        }
-
-        const GH_DATA_TOKEN = "ghp_" + "yntGzdbCH40iKg" + "27QCCRzDHg72uBfG4eEKKL";
         async function syncWatchDeduction(uId, vId, replay = false) {
             if (!uId || !vId) return;
 
@@ -2284,22 +2241,69 @@
             }
         }
 
-        // Deduct 1 credit ONLY if this is genuinely a new video watch AND NOT watching with Ads
+        currentCredits = Math.max(0, baseCredits);
+
+        // Unified Single Button Dynamic Mode Determination:
+        // 1. VIP users: Instant play, no ads, unlimited.
+        // 2. Already watched/unlocked videos: Free replay forever, no ads, no credit deduction.
+        // 3. User with credits (> 0): Instant play, no ads, deducts 1 credit.
+        // 4. User with 0 credits: Watches Monetag Rewarded Ad first, then plays! No credit deduction.
+        if (isVip) {
+            isAdMode = false;
+        } else if (alreadyWatched) {
+            isAdMode = false;
+        } else if (currentCredits > 0) {
+            isAdMode = false;
+        } else if (MONETAG_ADS_ENABLED) {
+            isAdMode = true;
+        } else {
+            isAdMode = false;
+        }
+
+        // Realtime credit calculation:
+        // If this is genuinely a new video watch for a non-VIP user with credits,
+        // deduct immediately BEFORE first badge display so real balance shows right away!
         if (!isAdMode && !isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
             currentCredits = Math.max(0, currentCredits - 1);
-            updateBadgeStatus();
-
-            // Realtime deduction on bot backend server & GitHub data branch
             if (userIdStr) {
                 syncWatchDeduction(userIdStr, startParam, false);
             }
         } else if (alreadyWatched) {
-            // Already unlocked replay - NEVER deduct credit!
             localStorage.setItem(localUnlockKey, "1");
             if (userIdStr && !serverAlreadyWatched) {
                 syncWatchDeduction(userIdStr, startParam, true);
             }
+        }
+
+        function updateBadgeStatus() {
+            if (!badgeEl) return;
+            const t = I18N[currentLang] || I18N.bn;
+            if (isVip) {
+                badgeEl.className = "status-badge badge-vip";
+                badgeEl.innerText = t.vip;
+            } else if (alreadyWatched) {
+                badgeEl.className = "status-badge badge-vip";
+                badgeEl.innerText = t.unlocked.replace('{n}', currentCredits);
+            } else if (currentCredits > 0) {
+                badgeEl.className = "status-badge badge-credits";
+                badgeEl.innerText = t.credits_left.replace('{n}', currentCredits);
+            } else if (isAdMode) {
+                badgeEl.className = "status-badge badge-exhausted";
+                badgeEl.innerText = t.zero_credits;
+            } else {
+                badgeEl.className = "status-badge badge-exhausted";
+                badgeEl.innerText = t.zero_credits;
+            }
+        }
+        window.updateBadgeStatus = updateBadgeStatus;
+        updateBadgeStatus();
+
+        // Gate: Check if user has no credits AND has not unlocked this video before (Bypassed in Ad Mode)
+        if (!isAdMode && !isVip && !alreadyWatched && currentCredits <= 0 && baseCredits <= 0) {
+            document.getElementById('loading-box').style.display = 'none';
+            document.getElementById('paywall-box').style.display = 'block';
+            return;
         }
 
         // Fast Path 0: Instant realtime GitHub REST API lookup (Bypasses Fastly CDN 100%, 0ms cache delay!)
