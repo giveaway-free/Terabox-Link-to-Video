@@ -1933,7 +1933,6 @@ def build_settings_menu() -> Tuple[str, InlineKeyboardMarkup]:
     sw_hist, next_hist = get_sw("PROCESS_HISTORICAL_MESSAGES", "False")
     sw_send_bot, next_send_bot = get_sw("SEND_MEDIA_TO_PROCESSING_BOT", "True")
     sw_tb_free, next_tb_free = get_sw("BUTTON_TERABOX_FREE_ENABLED", "True")
-    sw_monetag, next_monetag = get_sw("MONETAG_ADS_ENABLED", "True")
 
     text = (
         "⚙️ <b>Settings & Automated Filters</b>\n\n"
@@ -1949,10 +1948,9 @@ def build_settings_menu() -> Tuple[str, InlineKeyboardMarkup]:
     )
     markup.row(
         InlineKeyboardButton(f"🎬 Free Btn: {sw_tb_free}", callback_data=f"tgl:BUTTON_TERABOX_FREE_ENABLED:{next_tb_free}"),
-        InlineKeyboardButton(f"💰 Monetag Ads: {sw_monetag}", callback_data=f"tgl:MONETAG_ADS_ENABLED:{next_monetag}")
+        InlineKeyboardButton(f"📜 Past Posts: {sw_hist}", callback_data=f"tgl:PROCESS_HISTORICAL_MESSAGES:{next_hist}")
     )
     markup.row(
-        InlineKeyboardButton(f"📜 Past Posts: {sw_hist}", callback_data=f"tgl:PROCESS_HISTORICAL_MESSAGES:{next_hist}"),
         InlineKeyboardButton(f"🖼 Media: {sw_send_bot}", callback_data=f"tgl:SEND_MEDIA_TO_PROCESSING_BOT:{next_send_bot}")
     )
     markup.row(
@@ -1962,13 +1960,13 @@ def build_settings_menu() -> Tuple[str, InlineKeyboardMarkup]:
 
 def build_monetag_menu() -> Tuple[str, InlineKeyboardMarkup]:
     env = read_env()
-    zone_id = env.get("MONETAG_ZONE_ID", "12016303").strip()
+    zone_id = (get_setting("monetag_zone_id") or env.get("MONETAG_ZONE_ID", "12016303")).strip()
     is_ads_on = env.get("MONETAG_ADS_ENABLED", "True").lower() == "true"
     next_ads_val = "False" if is_ads_on else "True"
-    status_icon = "🟢 <b>ACTIVE (Watch Now চালু)</b>" if is_ads_on else "🔴 <b>DISABLED (Watch Now বন্ধ)</b>"
+    status_icon = "🟢 <b>ACTIVE (বিজ্ঞাপন চালু)</b>" if is_ads_on else "🔴 <b>DISABLED (বিজ্ঞাপন বন্ধ)</b>"
 
     try:
-        interval_sec = int(env.get("MONETAG_MIDROLL_INTERVAL", "180"))
+        interval_sec = int(get_setting("monetag_midroll_interval") or env.get("MONETAG_MIDROLL_INTERVAL", "180"))
     except Exception:
         interval_sec = 180
 
@@ -1980,18 +1978,18 @@ def build_monetag_menu() -> Tuple[str, InlineKeyboardMarkup]:
         time_display = f"{interval_sec} Seconds"
 
     text = (
-        "💰 <b>Monetag Ads Network Settings</b>\n"
+        "💰 <b>Monetag Ads Settings</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         f"• <b>Status:</b> {status_icon}\n"
         f"• <b>Zone ID:</b> <code>{zone_id}</code>\n"
-        f"• <b>Video Mid-Roll Interval:</b> <b>{time_display}</b> (<code>{interval_sec}s</code>)\n\n"
-        "💡 <i>Monetag অন থাকলে পোস্টে [ ▶️ Watch Now ] বাটন আসবে এবং ভিডিওতে বিজ্ঞাপন চালু থাকবে। অফ করলে বাটন ও বিজ্ঞাপন পুরোপুরি বন্ধ হয়ে যাবে।</i>\n"
+        f"• <b>Ads Interval (Time):</b> <b>{time_display}</b> (<code>{interval_sec}s</code>)\n\n"
+        "💡 <i>Monetag অন থাকলে ফ্রি ইউজারদের জন্য ভিডিওতে বিজ্ঞাপন চালু থাকবে। অফ করলে বিজ্ঞাপন পুরোপুরি বন্ধ থাকবে।</i>\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
-        "<i>নিচ থেকে Watch Now বাটন অন/অফ করুন, Zone ID বা সময় পরিবর্তন করুন:</i>"
+        "<i>নিচ থেকে Monetag Ads অন/অফ করুন, Zone ID বা Ads Time পরিবর্তন করুন:</i>"
     )
 
     markup = InlineKeyboardMarkup()
-    tgl_btn_text = "🔴 Turn OFF Watch Now Button" if is_ads_on else "🟢 Turn ON Watch Now Button"
+    tgl_btn_text = "🔴 Turn OFF Monetag Ads" if is_ads_on else "🟢 Turn ON Monetag Ads"
     markup.row(
         InlineKeyboardButton(tgl_btn_text, callback_data=f"tgl_monetag:{next_ads_val}")
     )
@@ -2007,11 +2005,11 @@ def build_monetag_menu() -> Tuple[str, InlineKeyboardMarkup]:
         InlineKeyboardButton("⏱ 5 Minutes (300s)", callback_data="set_midroll:300")
     )
     markup.row(
-        InlineKeyboardButton("✏️ Custom Seconds / Minutes", callback_data="act:edit_monetag_interval")
+        InlineKeyboardButton("✏️ Custom Ads Time (Seconds / Minutes)", callback_data="act:edit_monetag_interval")
     )
     markup.row(
-        InlineKeyboardButton("⚙️ Settings Menu", callback_data="nav:settings"),
-        InlineKeyboardButton("🔙 Back to Dashboard", callback_data="nav:main")
+        InlineKeyboardButton("⚙️ Admin Settings", callback_data="nav:admin_settings"),
+        InlineKeyboardButton("🔙 Back to Dashboard", callback_data="act:back_dashboard")
     )
     return text, markup
 
@@ -2626,6 +2624,10 @@ def main_keyboard(user_id):
     return markup
 
 def admin_settings_inline():
+    env = read_env()
+    is_ads_on = env.get("MONETAG_ADS_ENABLED", "True").lower() == "true"
+    monetag_st = "🟢 ON" if is_ads_on else "🔴 OFF"
+
     markup = InlineKeyboardMarkup(row_width=2)
     markup.add(
         InlineKeyboardButton("1. 📢 Broadcast Post", callback_data="btn_broadcast"),
@@ -2641,8 +2643,7 @@ def admin_settings_inline():
         InlineKeyboardButton("11. 🔗 Backup Channel Link", callback_data="set_backup_link"),
         InlineKeyboardButton("12. 🔢 Max Batch Links", callback_data="set_max_batch_links"),
         InlineKeyboardButton("13. ➕ Add User Credits", callback_data="btn_add_credits"),
-        InlineKeyboardButton("14. 💰 Monetag Zone ID", callback_data="set_monetag_zone"),
-        InlineKeyboardButton("15. ⏱️ Monetag Ads Time", callback_data="set_monetag_interval")
+        InlineKeyboardButton(f"14. 💰 Monetag Ads: {monetag_st}", callback_data="nav:monetag")
     )
     markup.row(
         InlineKeyboardButton("🔙 Back to Dashboard", callback_data="act:back_dashboard"),
@@ -3345,15 +3346,14 @@ def is_scheduler_button(text):
     if not text: return False
     return any(k in text for k in ["Post Scheduler", "শিডিউল পোস্ট", "পোস্ট শিডিউলার", "Scheduler"])
 
-def admin_settings_panel(message):
-    if not is_admin(message.from_user.id):
-        return
-    
+def get_admin_settings_content() -> Tuple[str, InlineKeyboardMarkup]:
     track_display = get_setting('target_channel_link') or get_setting('required_group_id')
     custom_share = clean_text_for_markdown(get_setting('custom_share_text') or 'N/A')
     backup_link = clean_text_for_markdown(get_setting('backup_channel_link') or 'N/A')
-    m_zone = get_setting('monetag_zone_id') or read_env().get('MONETAG_ZONE_ID', '12016303')
-    m_int = get_setting('monetag_midroll_interval') or read_env().get('MONETAG_MIDROLL_INTERVAL', '180')
+    env = read_env()
+    m_zone = get_setting('monetag_zone_id') or env.get('MONETAG_ZONE_ID', '12016303')
+    m_int = get_setting('monetag_midroll_interval') or env.get('MONETAG_MIDROLL_INTERVAL', '180')
+    is_ads_on = env.get("MONETAG_ADS_ENABLED", "True").lower() == "true"
     try:
         m_int_int = int(m_int)
         m_int_lbl = f"{m_int_int // 60}m" if m_int_int >= 60 and m_int_int % 60 == 0 else f"{m_int_int}s"
@@ -3371,15 +3371,20 @@ def admin_settings_panel(message):
         f"5. <b>Custom Share Text:</b>\n<code>{html.escape(str(get_setting('custom_share_text') or 'N/A'))}</code>\n"
         f"6. <b>Backup Channel Link:</b>\n<code>{html.escape(str(get_setting('backup_channel_link') or 'N/A'))}</code>\n"
         f"7. <b>Max Batch Links (per post):</b> <code>{html.escape(str(get_setting('max_batch_links') or '5'))}</code>\n"
-        f"8. <b>Monetag Zone ID:</b> <code>{html.escape(str(m_zone))}</code>\n"
-        f"9. <b>Monetag Ads Interval (Time):</b> <code>{html.escape(str(m_int_lbl))}</code> (<code>{m_int}s</code>)\n\n"
+        f"8. <b>Monetag Ads:</b> {'🟢 ON' if is_ads_on else '🔴 OFF'} (Zone: <code>{html.escape(str(m_zone))}</code> | Time: <code>{html.escape(str(m_int_lbl))}</code>)\n\n"
         "<i>Nicher numbered buttons theke option select korun:</i>"
     )
+    return text, admin_settings_inline()
+
+def admin_settings_panel(message):
+    if not is_admin(message.from_user.id):
+        return
+    text, markup = get_admin_settings_content()
     try:
-        bot.send_message(message.chat.id, text, parse_mode="HTML", reply_markup=admin_settings_inline())
+        bot.send_message(message.chat.id, text, parse_mode="HTML", reply_markup=markup)
     except Exception:
         clean_text = re.sub(r'<[^>]+>', '', text)
-        bot.send_message(message.chat.id, clean_text, reply_markup=admin_settings_inline())
+        bot.send_message(message.chat.id, clean_text, reply_markup=markup)
     auto_delete_after(message.chat.id, message.message_id, 5)
 
 def send_admin_user_stats(chat_id):
@@ -3442,11 +3447,22 @@ ADMIN_SETTING_KEYS = {
     "set_max_batch_links", "set_monetag_zone", "set_monetag_interval"
 }
 
-@bot.callback_query_handler(func=lambda call: (call.data in ADMIN_SETTING_KEYS) or call.data in ["act:back_dashboard", "btn_back_to_dashboard", "btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"])
+@bot.callback_query_handler(func=lambda call: (call.data in ADMIN_SETTING_KEYS) or call.data in ["act:back_dashboard", "btn_back_to_dashboard", "btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits", "nav:admin_settings", "btn_admin_settings"])
 def handle_admin_callbacks(call):
     if not is_admin(call.from_user.id):
         try:
             bot.answer_callback_query(call.id, "Access Denied!", show_alert=True)
+        except Exception:
+            pass
+        return
+
+    if call.data in ["nav:admin_settings", "btn_admin_settings"]:
+        clear_admin_state(call.from_user.id)
+        t, m = get_admin_settings_content()
+        if not safe_edit_message(call, t, m):
+            bot.send_message(call.message.chat.id, t, parse_mode="HTML", reply_markup=m)
+        try:
+            bot.answer_callback_query(call.id)
         except Exception:
             pass
         return
@@ -4485,6 +4501,10 @@ def handle_admin_text(message):
             bot.reply_to(message, "⚠️ Invalid Zone ID. Please enter numeric digits only, e.g. <code>12016303</code>.", parse_mode="HTML")
             return
         update_env({"MONETAG_ZONE_ID": new_zone})
+        try:
+            set_setting("monetag_zone_id", new_zone)
+        except Exception:
+            pass
         bot.reply_to(message, f"✅ <b>Monetag Ads Zone ID updated to:</b> <code>{new_zone}</code>\n<i>Syncing Mini App player on GitHub Pages...</i>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_zone": new_zone}, daemon=True).start()
@@ -4508,6 +4528,10 @@ def handle_admin_text(message):
             return
 
         update_env({"MONETAG_MIDROLL_INTERVAL": sec})
+        try:
+            set_setting("monetag_midroll_interval", str(sec))
+        except Exception:
+            pass
         bot.reply_to(message, f"✅ <b>Video mid-roll ads interval updated to:</b> <code>{sec}s</code>\n<i>Syncing Mini App player on GitHub Pages...</i>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_interval": sec}, daemon=True).start()
@@ -5075,17 +5099,31 @@ def handle_controller_callbacks(call):
         update_env({"MONETAG_ADS_ENABLED": next_val})
         if mgr.engine and hasattr(mgr.engine, "config"):
             mgr.engine.config["monetag_ads_enabled"] = (next_val.lower() == "true")
-        bot.answer_callback_query(call.id, f"Watch Now button is now {'ON' if next_val == 'True' else 'OFF'}")
+        bot.answer_callback_query(call.id, f"Monetag Ads is now {'ON' if next_val == 'True' else 'OFF'}")
         t, m = build_monetag_menu()
         safe_edit_message(call, t, m)
 
     elif data.startswith("set_midroll:"):
         sec = int(data.split(":")[1])
         update_env({"MONETAG_MIDROLL_INTERVAL": sec})
+        try:
+            set_setting("monetag_midroll_interval", str(sec))
+        except Exception:
+            pass
         bot.answer_callback_query(call.id, f"Ads interval set to {sec}s!", show_alert=True)
         threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_interval": sec}, daemon=True).start()
         t, m = build_monetag_menu()
         safe_edit_message(call, t, m)
+
+    elif data in ["nav:admin_settings", "btn_admin_settings"]:
+        clear_admin_state(call.from_user.id)
+        t, m = get_admin_settings_content()
+        if not safe_edit_message(call, t, m):
+            bot.send_message(call.message.chat.id, t, parse_mode="HTML", reply_markup=m)
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
 
     elif data == "act:edit_monetag_interval":
         set_admin_state(call.from_user.id, "WAIT_EDIT_MONETAG_INTERVAL")
@@ -5765,6 +5803,7 @@ def start_render_health_server():
                             "credits": cr,
                             "already_watched": already,
                             "lang": get_user_lang(uid_int) or "bn",
+                            "monetag_ads_enabled": read_env().get("MONETAG_ADS_ENABLED", "True").lower() == "true",
                             "monetag_zone_id": get_setting("monetag_zone_id") or read_env().get("MONETAG_ZONE_ID") or "12016303",
                             "monetag_midroll_interval": int(get_setting("monetag_midroll_interval") or read_env().get("MONETAG_MIDROLL_INTERVAL") or 180)
                         }).encode("utf-8"))
