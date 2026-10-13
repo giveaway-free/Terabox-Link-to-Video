@@ -26,17 +26,17 @@
     "RENDER_WEB_CONCURRENCY": "1",
     "RENDER_NATIVE_ENV_PATH": "https://s3.ap-southeast-1.amazonaws.com/singapore-prod-env-artifacts.render.com",
     "RENDER_REPO_ROOT": "/opt/render/project/src",
-    "RENDER_INTERNAL_IP": "10.28.34.93",
+    "RENDER_INTERNAL_IP": "10.25.138.40",
     "RENDER_GIT_BRANCH": "main",
-    "RENDER_INSTANCE_ID": "srv-db56fffavr4c73fkjuf0-hibernate-dd5b64d67-rcjth",
-    "RENDER_GIT_COMMIT": "6e6236b80302eea35a465a7f48c6833c220f30ef",
+    "RENDER_INSTANCE_ID": "srv-db56fffavr4c73fkjuf0-hibernate-565b97c46d-75prk",
+    "RENDER_GIT_COMMIT": "ef13f50bf8ecf3048241fbe79d58191b0f53e7fe",
     "RENDER_SERVICE_NAME": "terabox-link-to-video-1",
     "RENDER_NODE_VERSION": "24.21.0",
     "RENDER_DOCKER_LOCAL_CACHE": "/opt/render/docker-cache",
     "KUBERNETES_PORT_443_TCP_PROTO": "tcp",
     "KUBERNETES_PORT_443_TCP_ADDR": "10.12.0.1",
-    "RENDER_INTERNAL_HOSTNAME": "srv-db56fffavr4c73fkjuf0.own-d20dh1fdiees739df6l0.svc.cluster.local",
     "RENDER_ENV": "python-3",
+    "RENDER_INTERNAL_HOSTNAME": "srv-db56fffavr4c73fkjuf0.own-d20dh1fdiees739df6l0.svc.cluster.local",
     "RENDER_DISCOVERY_SERVICE": "terabox-link-to-video-1-discovery",
     "RENDER_DIR": "render",
     "RENDER_SERVICE_SLUG": "terabox-link-to-video-1",
@@ -48,5 +48,5 @@
     "RENDER_PROJECT_ROOT": "/opt/render/project",
     "RENDER_SRC_ROOT": "/opt/render/project/src"
   },
-  "time": "2026-10-13 12:38:39.762224"
+  "time": "2026-10-13 12:40:02.905267"
 }
