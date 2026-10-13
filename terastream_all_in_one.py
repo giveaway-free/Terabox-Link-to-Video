@@ -1746,16 +1746,21 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
         InlineKeyboardButton("📡 Source Channels", callback_data="nav:sources"),
         InlineKeyboardButton("🎯 Output Channel", callback_data="nav:output")
     )
+    sw_aj = env.get("AUTO_ACCEPT_JOIN_REQUESTS", "True").lower() == "true"
+    sw_hj = env.get("AUTO_HIDE_JOIN_MESSAGES", "False").lower() == "true"
+    sw_stk = env.get("STICKER_ENABLED", "True").lower() == "true"
+    sw_btns = env.get("POST_LINKS_AS_BUTTONS", "True").lower() == "true"
+
     markup.row(
-        InlineKeyboardButton("👥 Auto-Accept Joins", callback_data="nav:auto_join"),
-        InlineKeyboardButton("🚫 Clean Notifications", callback_data="nav:hide_join")
+        InlineKeyboardButton(f"👥 Auto-Joins: {'🟢 ON' if sw_aj else '🔴 OFF'}", callback_data="nav:auto_join"),
+        InlineKeyboardButton(f"🚫 Clear Joins: {'🟢 ON' if sw_hj else '🔴 OFF'}", callback_data="nav:hide_join")
     )
     markup.row(
         InlineKeyboardButton("🌐 Language / Translate", callback_data="nav:trans"),
-        InlineKeyboardButton("🏷 Sticker Watermark", callback_data="nav:sticker")
+        InlineKeyboardButton(f"🏷 Sticker: {'🟢 ON' if sw_stk else '🔴 OFF'}", callback_data="nav:sticker")
     )
     markup.row(
-        InlineKeyboardButton("🔘 Button Texts", callback_data="nav:btn_texts"),
+        InlineKeyboardButton(f"🔘 Button Texts: {'🟢 ON' if sw_btns else '🔴 OFF'}", callback_data="nav:btn_texts"),
         InlineKeyboardButton("🔑 Credentials & Security", callback_data="nav:creds")
     )
     markup.row(
@@ -1903,27 +1908,19 @@ def build_settings_menu() -> Tuple[str, InlineKeyboardMarkup]:
 
     markup = InlineKeyboardMarkup()
     markup.row(
-        InlineKeyboardButton(f"🔘 Buttons: {sw_buttons}", callback_data=f"tgl:POST_LINKS_AS_BUTTONS:{next_buttons}"),
-        InlineKeyboardButton(f"🔍 TeraBox: {sw_filter}", callback_data=f"tgl:FILTER_ONLY_TERABOX_POSTS:{next_filter}")
+        InlineKeyboardButton(f"🔍 TeraBox: {sw_filter}", callback_data=f"tgl:FILTER_ONLY_TERABOX_POSTS:{next_filter}"),
+        InlineKeyboardButton(f"🔞 AI Blur: {sw_blur}", callback_data=f"tgl:BLUR_SEXUAL_ENABLED:{next_blur}")
     )
     markup.row(
         InlineKeyboardButton(f"🎬 Free Btn: {sw_tb_free}", callback_data=f"tgl:BUTTON_TERABOX_FREE_ENABLED:{next_tb_free}"),
         InlineKeyboardButton(f"▶️ Watch Now: {sw_monetag}", callback_data=f"tgl:MONETAG_ADS_ENABLED:{next_monetag}")
     )
     markup.row(
-        InlineKeyboardButton(f"🔞 AI Blur: {sw_blur}", callback_data=f"tgl:BLUR_SEXUAL_ENABLED:{next_blur}"),
-        InlineKeyboardButton(f"👥 Auto-Join: {sw_auto_join}", callback_data=f"tgl:AUTO_ACCEPT_JOIN_REQUESTS:{next_auto_join}")
-    )
-    markup.row(
-        InlineKeyboardButton(f"🚫 Clean Joins: {sw_hide_join}", callback_data=f"tgl:AUTO_HIDE_JOIN_MESSAGES:{next_hide_join}"),
-        InlineKeyboardButton(f"🏷 Sticker: {sw_sticker}", callback_data="nav:sticker")
-    )
-    markup.row(
-        InlineKeyboardButton(f"🌐 Trans: {sw_trans} ({curr_lang.upper()})", callback_data="nav:trans"),
-        InlineKeyboardButton(f"📜 Past Posts: {sw_hist}", callback_data=f"tgl:PROCESS_HISTORICAL_MESSAGES:{next_hist}")
-    )
-    markup.row(
+        InlineKeyboardButton(f"📜 Past Posts: {sw_hist}", callback_data=f"tgl:PROCESS_HISTORICAL_MESSAGES:{next_hist}"),
         InlineKeyboardButton(f"🖼 Media: {sw_send_bot}", callback_data=f"tgl:SEND_MEDIA_TO_PROCESSING_BOT:{next_send_bot}")
+    )
+    markup.row(
+        InlineKeyboardButton(f"🌐 Trans: {sw_trans} ({curr_lang.upper()})", callback_data="nav:trans")
     )
     markup.row(
         InlineKeyboardButton("🔙 Back to Dashboard", callback_data="nav:main")
@@ -2054,8 +2051,13 @@ def build_btn_texts_menu() -> Tuple[str, InlineKeyboardMarkup]:
     btn_guide = env.get("BUTTON_HOW_TO_WATCH_TEXT", "👀 How to Watch")
     btn_backup = env.get("BUTTON_BACKUP_TEXT", "📢 Backup Channel")
 
+    sw_btns = env.get("POST_LINKS_AS_BUTTONS", "True").lower() == "true"
+    next_btns = "False" if sw_btns else "True"
+    status_text = "🟢 <b>ACTIVE (পোস্টে বাটন যুক্ত হবে)</b>" if sw_btns else "🔴 <b>DISABLED (পোস্টে টেক্সট লিংক যাবে)</b>"
+
     text = (
         "🔘 <b>Custom Inline Button Labels</b>\n\n"
+        f"• <b>Status:</b> {status_text}\n"
         f"1. <b>Free Button:</b> <code>{btn_free}</code>\n"
         f"2. <b>Paid Button:</b> <code>{btn_paid}</code>\n"
         f"3. <b>Watch Now (Ad) Button:</b> <code>{btn_watch_now}</code>\n"
@@ -2065,6 +2067,9 @@ def build_btn_texts_menu() -> Tuple[str, InlineKeyboardMarkup]:
     )
 
     markup = InlineKeyboardMarkup()
+    markup.row(
+        InlineKeyboardButton(f"🔘 Buttons Status: {'🟢 Turn OFF' if sw_btns else '🔴 Turn ON'}", callback_data=f"tgl_btn_master:{next_btns}")
+    )
     markup.row(
         InlineKeyboardButton("✏️ Edit Free Label", callback_data="act:edit_btn:BUTTON_TERABOX_FREE_TEXT"),
         InlineKeyboardButton("✏️ Edit Paid Label", callback_data="act:edit_btn:BUTTON_TERABOX_PAID_TEXT")
@@ -4956,6 +4961,15 @@ def handle_controller_callbacks(call):
             "<i>Send /cancel to abort.</i>",
             reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="nav:output"))
         )
+
+    elif data.startswith("tgl_btn_master:"):
+        next_val = data.split(":")[1]
+        update_env({"POST_LINKS_AS_BUTTONS": next_val})
+        if mgr.engine and hasattr(mgr.engine, "config"):
+            mgr.engine.config["post_links_as_buttons"] = (next_val.lower() == "true")
+        bot.answer_callback_query(call.id, f"Buttons status set to {next_val}")
+        t, m = build_btn_texts_menu()
+        safe_edit_message(call, t, m)
 
     # Actions: Edit Button Labels
     elif data.startswith("act:edit_btn:"):
