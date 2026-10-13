@@ -1026,6 +1026,7 @@
     // ==========================================
     let MONETAG_ZONE_ID = "12016303";
     let MONETAG_MIDROLL_INTERVAL = 180; // default 3 minutes
+    let MONETAG_ADS_ENABLED = true;
     let isAdMode = false;
     let isVip = false;
     let lastMidrollTime = 0;
@@ -1088,9 +1089,9 @@
     // Format 1: In-App Interstitial (Automatic background frequency)
     // ONLY executed for non-VIP users in Ad Mode!
     async function initInAppInterstitial() {
-        if (!isAdMode || isVip) return;
+        if (!isAdMode || isVip || !MONETAG_ADS_ENABLED) return;
         const sdkFn = await waitForMonetagSdk(8000);
-        if (typeof sdkFn === 'function' && isAdMode && !isVip) {
+        if (typeof sdkFn === 'function' && isAdMode && !isVip && MONETAG_ADS_ENABLED) {
             try {
                 sdkFn({
                     type: 'inApp',
@@ -1112,8 +1113,8 @@
     // Format 2: Rewarded Interstitial (Mandatory completion - skip or click-back korle auto again ads ashbe!)
     function showRewardedAdWithEnforcement() {
         return new Promise((resolve) => {
-            // Paid users or direct mode: bypass ads 100%
-            if (!isAdMode || isVip) {
+            // Paid users, direct mode, or Monetag disabled: bypass ads 100%
+            if (!isAdMode || isVip || !MONETAG_ADS_ENABLED) {
                 resolve();
                 return;
             }
@@ -1310,9 +1311,9 @@
 
     // Format 3: Rewarded Popup (Used for mid-roll & download click)
     async function showRewardedPopup() {
-        if (!isAdMode || isVip) return true;
+        if (!isAdMode || isVip || !MONETAG_ADS_ENABLED) return true;
         const sdkFn = await waitForMonetagSdk(3000);
-        if (typeof sdkFn === 'function' && isAdMode && !isVip) {
+        if (typeof sdkFn === 'function' && isAdMode && !isVip && MONETAG_ADS_ENABLED) {
             try {
                 return await sdkFn('pop').then(() => true).catch(() => false);
             } catch (_) {
@@ -1899,6 +1900,9 @@
                             applyPlayerLanguage(liveData.lang);
                             localStorage.setItem('bot_lang_' + userIdStr, liveData.lang);
                             localStorage.setItem('player_lang', liveData.lang);
+                        }
+                        if (typeof liveData.monetag_ads_enabled === 'boolean') {
+                            MONETAG_ADS_ENABLED = liveData.monetag_ads_enabled;
                         }
                         if (liveData.monetag_zone_id) {
                             setMonetagZone(liveData.monetag_zone_id);
