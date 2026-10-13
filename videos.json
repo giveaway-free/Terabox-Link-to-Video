@@ -742,5 +742,13 @@
     "res": "480p",
     "dur": "08:16",
     "type": "Video"
+  },
+  "1vxNInywXmtQT9bL1U5Kt4w": {
+    "stream_url": "https://small-lake-3eb1.xuhiju.workers.dev/fast_stream?token=tUj9uIRJDcrbEUDCcDGN2t7KRGqKvvzLBES91oZRA0Zqvbr_YYufVRmN71IneO-5SG-DK7hSSG3xYUBK0bzndwYUVyFA9sLF7mUh5YnwoiwoDtzhfhsGeZqKr2Tzp_dHmswXXz047tfESZ8A9h4d15kJFv2nnX97Vh55IBkRW4Tg6jHrqkJBDQMWKQmedmNLYD7ys74uV-ik73zfIpqOumezn0PQa6-Y_nZqi_Mj2zY_NIzkZr0ZjAB5k761CneTLeelRQemRQHPcdlG8H_REUQvN5IPlJ5kErbbhQxJNBFwu7TMcX5FSgSAhMmFBuf9mMN5VLDouZ19RISOiXSJz6VRy3yrr_BO1Xk2NZyX86l7QyDXVpoGx7EW.m3u8",
+    "title": "2025-07-26-10-49-20.mp4",
+    "size": "3.4 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:32",
+    "type": "Video"
   }
 }
