@@ -3293,7 +3293,10 @@ def admin_settings_panel(message):
         f"7. **Max Batch Links (per post):** {get_setting('max_batch_links') or '5'}\n\n"
         "Nicher numbered buttons theke option select korun:"
     )
-    bot.send_message(message.chat.id, text, parse_mode="Markdown", reply_markup=admin_settings_inline())
+    try:
+        bot.send_message(message.chat.id, text, parse_mode="Markdown", reply_markup=admin_settings_inline())
+    except Exception:
+        bot.send_message(message.chat.id, text, reply_markup=admin_settings_inline())
     auto_delete_after(message.chat.id, message.message_id, 5)
 
 def send_admin_user_stats(chat_id):
@@ -3883,20 +3886,37 @@ def user_stats_menu_prompt(message):
         return
     send_admin_user_stats(message.chat.id)
 
+
+@bot.message_handler(func=lambda msg: bool(msg.text and ("Admin Settings" in msg.text or "অ্যাডমিন সেটিংস" in msg.text)))
+def explicit_admin_settings_btn_handler(message):
+    admin_settings_panel(message)
+
+@bot.message_handler(func=lambda msg: bool(msg.text and is_controller_button(msg.text)))
+def explicit_channel_controller_btn_handler(message):
+    if is_admin(message.from_user.id):
+        clear_admin_state(message.from_user.id)
+        text, markup = build_main_dashboard()
+        bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="HTML")
+
+@bot.message_handler(func=lambda msg: bool(msg.text and is_scheduler_button(msg.text)))
+def explicit_post_scheduler_btn_handler(message):
+    if is_admin(message.from_user.id):
+        clear_admin_state(message.from_user.id)
+        text, markup = build_scheduler_menu()
+        bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="HTML")
+
 @bot.message_handler(func=lambda msg: bool(msg.text and is_lang_button(msg.text)))
 def language_menu_prompt(message):
     user_id = message.from_user.id
     prompt_text = get_txt(user_id, "select_lang_prompt")
     bot.reply_to(message, prompt_text, parse_mode="Markdown", reply_markup=language_selection_markup())
 
-@bot.message_handler(content_types=['text', 'photo', 'video', 'document', 'audio', 'animation'], func=lambda message: True)
 def handle_message(message):
     user_id = message.from_user.id
     raw_content = message.text or message.caption or ""
     
-    if raw_content and (is_account_button(raw_content) or is_refer_button(raw_content) or is_buy_button(raw_content) or 
-        is_backup_button(raw_content) or is_contact_button(raw_content) or is_lang_button(raw_content) or 
-        is_user_stats_button(raw_content) or "Admin Settings" in raw_content):
+    if raw_content and is_menu_navigation(raw_content):
+        dispatch_menu_command(message)
         return
 
     user = get_user(user_id)
@@ -4204,7 +4224,6 @@ def handle_sticker_upload(message):
     except Exception as e:
         bot.reply_to(message, f"❌ স্টিকার সেভ করতে সমস্যা হয়েছে: {e}")
 
-@bot.message_handler(func=lambda msg: True, content_types=["text"])
 def handle_admin_text(message):
     uid = message.from_user.id
     text_val = message.text.strip()
