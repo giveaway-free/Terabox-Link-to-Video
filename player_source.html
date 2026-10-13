@@ -6,6 +6,8 @@
     <title>TeraBox Stream Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Monetag Ad Network SDK for Telegram Mini App / Web -->
+    <script src="https://libtl.com/sdk.js" data-zone="12016303" data-sdk="show_12016303"></script>
     <style>
         :root {
             --bg-color: #0b1120;
@@ -739,6 +741,302 @@
     const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
 
+    // ==========================================
+    // ==========================================
+    // MONETAG AD NETWORK CONFIGURATION (ZONE ID: 12016303)
+    // ==========================================
+    let MONETAG_ZONE_ID = "12016303";
+    let MONETAG_MIDROLL_INTERVAL = 180; // default 3 minutes
+    let isAdMode = false;
+    let isVip = false;
+    let lastMidrollTime = 0;
+    let isShowingAd = false;
+
+    function setMonetagMidrollInterval(sec) {
+        const s = parseInt(sec, 10);
+        if (!isNaN(s) && s >= 10) {
+            MONETAG_MIDROLL_INTERVAL = s;
+            console.log("[Monetag] Midroll ads interval updated to " + s + "s");
+        }
+    }
+
+    function setMonetagZone(newZone) {
+        if (!newZone) return;
+        const cleanZone = String(newZone).replace(/[^\d]/g, '').trim();
+        if (!cleanZone || cleanZone === MONETAG_ZONE_ID) return;
+        MONETAG_ZONE_ID = cleanZone;
+        initMonetagSdk();
+    }
+
+    function initMonetagSdk() {
+        if (!MONETAG_ZONE_ID) return;
+        let script = document.getElementById('monetag-sdk');
+        if (!script) {
+            script = document.createElement('script');
+            script.id = 'monetag-sdk';
+            script.src = 'https://libtl.com/sdk.js';
+            script.setAttribute('data-zone', MONETAG_ZONE_ID);
+            script.setAttribute('data-sdk', 'show_' + MONETAG_ZONE_ID);
+            document.head.appendChild(script);
+        } else {
+            script.setAttribute('data-zone', MONETAG_ZONE_ID);
+            script.setAttribute('data-sdk', 'show_' + MONETAG_ZONE_ID);
+        }
+    }
+
+    // Helper: Wait until Monetag SDK is fully downloaded and available on window
+    function waitForMonetagSdk(maxWaitMs = 8000) {
+        return new Promise((resolve) => {
+            const fnName = 'show_' + MONETAG_ZONE_ID;
+            if (typeof window[fnName] === 'function') {
+                resolve(window[fnName]);
+                return;
+            }
+            const startTime = Date.now();
+            const poll = setInterval(() => {
+                if (typeof window[fnName] === 'function') {
+                    clearInterval(poll);
+                    resolve(window[fnName]);
+                } else if (Date.now() - startTime >= maxWaitMs) {
+                    clearInterval(poll);
+                    console.warn("[Monetag] SDK load timed out after " + maxWaitMs + "ms");
+                    resolve(null);
+                }
+            }, 100);
+        });
+    }
+
+    // Format 1: In-App Interstitial (Automatic background frequency)
+    // ONLY executed for non-VIP users in Ad Mode!
+    async function initInAppInterstitial() {
+        if (!isAdMode || isVip) return;
+        const sdkFn = await waitForMonetagSdk(8000);
+        if (typeof sdkFn === 'function' && isAdMode && !isVip) {
+            try {
+                sdkFn({
+                    type: 'inApp',
+                    inAppSettings: {
+                        frequency: 2,
+                        capping: 0.1,
+                        interval: 30,
+                        timeout: 5,
+                        everyPage: false
+                    }
+                });
+                console.log("[Monetag] In-App Interstitial activated successfully.");
+            } catch (e) {
+                console.warn("[Monetag] In-App Interstitial notice:", e);
+            }
+        }
+    }
+
+    // Format 2: Rewarded Interstitial (Mandatory completion - skip or click-back korle auto again ads ashbe!)
+    function showRewardedAdWithEnforcement() {
+        return new Promise((resolve) => {
+            // Paid users or direct mode: bypass ads 100%
+            if (!isAdMode || isVip) {
+                resolve();
+                return;
+            }
+
+            const loadingBox = document.getElementById('loading-box');
+            const loadingTitle = document.getElementById('loading-title');
+            const loadingDesc = document.getElementById('loading-desc');
+            const MIN_WATCH_TIME_MS = 10000; // 10 seconds minimum watch duration
+
+            let adCompletedSuccessfully = false;
+            let userLeftPage = false;
+            let adStartTime = 0;
+            let leaveTime = 0;
+            let retryTimer = null;
+            let consecutiveFailures = 0;
+
+            function updateLoadingUI(title, desc) {
+                if (loadingBox) {
+                    loadingBox.style.display = 'block';
+                    if (loadingTitle) loadingTitle.innerText = title;
+                    if (loadingDesc) loadingDesc.innerHTML = desc;
+                }
+            }
+
+            function scheduleAutoRetry(delayMs, msg) {
+                if (adCompletedSuccessfully) return;
+
+                if (retryTimer) {
+                    clearTimeout(retryTimer);
+                    retryTimer = null;
+                }
+
+                updateLoadingUI(
+                    "⚠️ অ্যাড সম্পূর্ণ দেখুন",
+                    `<div style="font-size:14px;color:#f87171;margin-bottom:8px;font-weight:600;line-height:1.5;">
+                        ${msg || "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি।"}
+                    </div>
+                    <div style="font-size:13px;color:#818cf8;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;">
+                        <span>🔄 স্বয়ংক্রিয়ভাবে পুনরায় বিজ্ঞাপন চালু হচ্ছে...</span>
+                    </div>`
+                );
+
+                retryTimer = setTimeout(() => {
+                    retryTimer = null;
+                    if (!adCompletedSuccessfully) {
+                        runAdCycle();
+                    }
+                }, delayMs);
+            }
+
+            const onBlur = () => {
+                userLeftPage = true;
+                leaveTime = Date.now();
+                console.log("[Monetag] Page lost focus/blurred (User navigated away/clicked ad).");
+            };
+
+            const onVisibilityChange = () => {
+                if (document.hidden) {
+                    userLeftPage = true;
+                    leaveTime = Date.now();
+                    console.log("[Monetag] Page hidden (User clicked ad / left page).");
+                } else {
+                    // User returned to mini app via back button!
+                    console.log("[Monetag] Page visible again.");
+                    if (!adCompletedSuccessfully && userLeftPage) {
+                        console.warn("[Monetag] User returned after clicking ad/leaving. Triggering auto ad re-show.");
+                        scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                    }
+                }
+            };
+
+            const onFocus = () => {
+                if (!document.hidden && !adCompletedSuccessfully && userLeftPage) {
+                    console.log("[Monetag] Window focused. Triggering auto ad re-show.");
+                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                }
+            };
+
+            const onPageShow = () => {
+                if (!document.hidden && !adCompletedSuccessfully && userLeftPage) {
+                    console.log("[Monetag] Page shown. Triggering auto ad re-show.");
+                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                }
+            };
+
+            function attachListeners() {
+                window.addEventListener('blur', onBlur);
+                window.addEventListener('focus', onFocus);
+                window.addEventListener('pageshow', onPageShow);
+                document.addEventListener('visibilitychange', onVisibilityChange);
+            }
+
+            function detachListeners() {
+                window.removeEventListener('blur', onBlur);
+                window.removeEventListener('focus', onFocus);
+                window.removeEventListener('pageshow', onPageShow);
+                document.removeEventListener('visibilitychange', onVisibilityChange);
+            }
+
+            async function runAdCycle() {
+                if (adCompletedSuccessfully) return;
+                if (!isAdMode || isVip) {
+                    adCompletedSuccessfully = true;
+                    detachListeners();
+                    if (loadingBox) loadingBox.style.display = 'none';
+                    resolve();
+                    return;
+                }
+
+                if (consecutiveFailures >= 5) {
+                    console.warn("[Monetag] Multiple consecutive ad failures or blocked. Allowing playback fallback.");
+                    adCompletedSuccessfully = true;
+                    detachListeners();
+                    if (loadingBox) loadingBox.style.display = 'none';
+                    initInAppInterstitial();
+                    resolve();
+                    return;
+                }
+
+                updateLoadingUI("📺 Sponsored Video Ad", "বিজ্ঞাপন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...");
+
+                const sdkFn = await waitForMonetagSdk(8000);
+                if (typeof sdkFn !== 'function') {
+                    console.warn("[Monetag] SDK unavailable or blocked. Continuing playback.");
+                    adCompletedSuccessfully = true;
+                    detachListeners();
+                    if (loadingBox) loadingBox.style.display = 'none';
+                    resolve();
+                    return;
+                }
+
+                updateLoadingUI("📺 Sponsored Video Ad", "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন (স্কিপ বা ক্লিক করে ব্যাক করবেন না)...");
+
+                userLeftPage = false;
+                leaveTime = 0;
+                adStartTime = Date.now();
+
+                try {
+                    sdkFn()
+                        .then(() => {
+                            const elapsed = Date.now() - adStartTime;
+                            const leftEarly = userLeftPage && (leaveTime - adStartTime < MIN_WATCH_TIME_MS);
+
+                            if (userLeftPage || leftEarly || elapsed < MIN_WATCH_TIME_MS) {
+                                // Ad was clicked or closed prematurely!
+                                console.warn("[Monetag] Premature completion (ad clicked or early close). Elapsed:", elapsed, "ms. userLeftPage:", userLeftPage);
+                                if (document.hidden) {
+                                    // User is still outside on advertiser site, wait until return
+                                    userLeftPage = true;
+                                } else {
+                                    // User is on page, automatically restart ad after 800ms
+                                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি। ভিডিও দেখতে অ্যাডটি পুরো দেখুন।");
+                                }
+                            } else {
+                                // Genuinely watched ad till finish!
+                                adCompletedSuccessfully = true;
+                                if (retryTimer) clearTimeout(retryTimer);
+                                detachListeners();
+                                console.log("[Monetag] Rewarded ad genuinely watched completely (" + Math.round(elapsed / 1000) + "s).");
+                                if (loadingBox) loadingBox.style.display = 'none';
+                                // Pre-roll ad complete, activate in-app background interstitials
+                                initInAppInterstitial();
+                                resolve();
+                            }
+                        })
+                        .catch((err) => {
+                            console.warn("[Monetag] User closed or skipped ad prematurely:", err);
+                            consecutiveFailures++;
+                            if (document.hidden) {
+                                userLeftPage = true;
+                            } else {
+                                scheduleAutoRetry(800, "ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।");
+                            }
+                        });
+                } catch (ex) {
+                    console.warn("[Monetag] Ad execution exception:", ex);
+                    consecutiveFailures++;
+                    if (!document.hidden) {
+                        scheduleAutoRetry(1000, "বিজ্ঞাপন লোড হতে সমস্যা হয়েছে। পুনরায় চেষ্টা করা হচ্ছে...");
+                    }
+                }
+            }
+
+            attachListeners();
+            runAdCycle();
+        });
+    }
+
+    // Format 3: Rewarded Popup (Used for mid-roll & download click)
+    async function showRewardedPopup() {
+        if (!isAdMode || isVip) return true;
+        const sdkFn = await waitForMonetagSdk(3000);
+        if (typeof sdkFn === 'function' && isAdMode && !isVip) {
+            try {
+                return await sdkFn('pop').then(() => true).catch(() => false);
+            } catch (_) {
+                return false;
+            }
+        }
+        return false;
+    }
+
     let currentStreamUrl = "";
     const video = document.getElementById('video');
     const videoWrapper = document.getElementById('video-wrapper');
@@ -1030,6 +1328,7 @@
 
     function playVideo(streamUrl, title, size, res, dur) {
         currentStreamUrl = streamUrl;
+        lastMidrollTime = 0;
 
         document.getElementById('no-video-box').style.display = 'none';
         document.getElementById('loading-box').style.display = 'none';
@@ -1052,6 +1351,18 @@
             window._hlsInstance = null;
         }
 
+        function startPlaybackWithAd() {
+            if (isAdMode) {
+                showRewardedAdWithEnforcement().then(() => {
+                    video.play().catch(() => {});
+                    updatePlayIcon(true);
+                });
+            } else {
+                video.play().catch(() => {});
+                updatePlayIcon(true);
+            }
+        }
+
         if (Hls.isSupported() && (streamUrl.includes('.m3u8') || !streamUrl.includes('.mp4'))) {
             const hls = new Hls({
                 enableWorker: true,
@@ -1061,8 +1372,7 @@
             hls.loadSource(streamUrl);
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                video.play().catch(() => {});
-                updatePlayIcon(true);
+                startPlaybackWithAd();
             });
             hls.on(Hls.Events.ERROR, function(event, data) {
                 if (data.fatal) {
@@ -1076,21 +1386,40 @@
                         default:
                             hls.destroy();
                             video.src = streamUrl;
-                            video.play().catch(() => {});
+                            startPlaybackWithAd();
                             break;
                     }
                 }
             });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = streamUrl;
-            video.play().catch(() => {});
-            updatePlayIcon(true);
+            startPlaybackWithAd();
         } else {
             video.src = streamUrl;
-            video.play().catch(() => {});
-            updatePlayIcon(true);
+            startPlaybackWithAd();
         }
     }
+
+    // Mid-Roll Monetag Ads Handler during video playback
+    video.addEventListener('timeupdate', () => {
+        if (!isAdMode) return;
+        const current = Math.floor(video.currentTime);
+        // Display mid-roll ads only after 30s of watch time and with at least 30s remaining
+        if (current > 30 && video.duration && (video.duration - current > 30)) {
+            if (current - lastMidrollTime >= MONETAG_MIDROLL_INTERVAL) {
+                lastMidrollTime = current;
+                const wasPlaying = !video.paused;
+                if (wasPlaying) video.pause();
+                showRewardedPopup().then(() => {
+                    if (wasPlaying) video.play().catch(() => {});
+                });
+            }
+        }
+    });
+
+    video.addEventListener('seeked', () => {
+        lastMidrollTime = Math.floor(video.currentTime);
+    });
 
     function playEmbedVideo(surl, title = "TeraBox Video") {
         document.getElementById('no-video-box').style.display = 'none';
@@ -1111,11 +1440,13 @@
     document.getElementById('download-btn').addEventListener('click', function(e) {
         e.preventDefault();
         if (currentStreamUrl) {
-            if (tg && tg.openLink) {
-                tg.openLink(currentStreamUrl);
-            } else {
-                window.open(currentStreamUrl, '_blank');
-            }
+            showRewardedPopup().then(() => {
+                if (tg && tg.openLink) {
+                    tg.openLink(currentStreamUrl);
+                } else {
+                    window.open(currentStreamUrl, '_blank');
+                }
+            });
         }
     });
 
@@ -1159,6 +1490,15 @@
         const urlParams = new URLSearchParams(window.location.search);
         const directSrc = urlParams.get('src');
 
+        if (urlParams.get('zone_id')) {
+            MONETAG_ZONE_ID = urlParams.get('zone_id');
+            initMonetagSdk();
+        }
+
+        if (urlParams.get('ad') === '1' || urlParams.get('mode') === 'ad') {
+            isAdMode = true;
+        }
+
         // Mode 1: Direct stream URL in query params
         if (directSrc) {
             const title = urlParams.get('title') || 'TeraBox Video';
@@ -1169,7 +1509,17 @@
             return;
         }
 
-        const startParam = getTelegramStartParam();
+        let rawParam = getTelegramStartParam();
+        if (rawParam) {
+            if (rawParam.startsWith('ad_')) {
+                isAdMode = true;
+                rawParam = rawParam.substring(3);
+            } else if (rawParam.endsWith('_ad')) {
+                isAdMode = true;
+                rawParam = rawParam.slice(0, -3);
+            }
+        }
+        const startParam = rawParam;
         const tgUser = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
 
         // If no video parameter at all, display empty state
@@ -1183,7 +1533,7 @@
         document.getElementById('loading-box').style.display = 'block';
 
         let userRecord = null;
-        let isVip = false;
+        isVip = false;
         let currentCredits = 0;
         let uData = null;
         let videosDb = {};
@@ -1213,6 +1563,12 @@
                     const liveData = await liveRes.json();
                     if (liveData && liveData.ok) {
                         isVip = liveData.is_paid === 1;
+                        if (liveData.monetag_zone_id) {
+                            setMonetagZone(liveData.monetag_zone_id);
+                        }
+                        if (liveData.monetag_midroll_interval) {
+                            setMonetagMidrollInterval(liveData.monetag_midroll_interval);
+                        }
                         if (typeof liveData.credits === 'number') {
                             baseCredits = liveData.credits;
                             liveStatusFetched = true;
@@ -1253,9 +1609,20 @@
                 } else if (uData && uData._settings && uData._settings.initial_credits) {
                     baseCredits = parseInt(uData._settings.initial_credits, 10) || 10;
                 }
+                if (uData && uData._settings && uData._settings.monetag_zone_id) {
+                    setMonetagZone(uData._settings.monetag_zone_id);
+                }
+                if (uData && uData._settings && uData._settings.monetag_midroll_interval) {
+                    setMonetagMidrollInterval(uData._settings.monetag_midroll_interval);
+                }
             } catch (e) {
                 console.warn("Could not fetch remote databases, using fallback balance:", e);
             }
+        }
+
+        // Strict VIP Protection: Paid users NEVER receive ads regardless of link clicked!
+        if (isVip) {
+            isAdMode = false;
         }
 
         const badgeEl = document.getElementById('user-badge');
@@ -1278,6 +1645,9 @@
         if (isVip) {
             badgeEl.className = "status-badge badge-vip";
             badgeEl.innerText = "💎 VIP (Unlimited)";
+        } else if (isAdMode) {
+            badgeEl.className = "status-badge badge-vip";
+            badgeEl.innerText = "🎬 Watch Now (Ad Supported)";
         } else if (alreadyWatched) {
             badgeEl.className = "status-badge badge-vip";
             badgeEl.innerText = `✅ Unlocked • ${currentCredits} Left`;
@@ -1289,15 +1659,15 @@
             badgeEl.innerText = "⚠️ 0 Credits";
         }
 
-        // Gate: Check if user has no credits AND has not unlocked this video before
-        if (!isVip && !alreadyWatched && currentCredits <= 0) {
+        // Gate: Check if user has no credits AND has not unlocked this video before (Bypassed in Ad Mode)
+        if (!isAdMode && !isVip && !alreadyWatched && currentCredits <= 0) {
             document.getElementById('loading-box').style.display = 'none';
             document.getElementById('paywall-box').style.display = 'block';
             return;
         }
 
-        // Deduct 1 credit ONLY if this is genuinely a new video watch
-        if (!isVip && !alreadyWatched && currentCredits > 0) {
+        // Deduct 1 credit ONLY if this is genuinely a new video watch AND NOT watching with Ads
+        if (!isAdMode && !isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
             currentCredits = Math.max(0, currentCredits - 1);
             badgeEl.className = "status-badge badge-credits";
