@@ -2221,7 +2221,6 @@ def build_credentials_menu() -> Tuple[str, InlineKeyboardMarkup]:
     phone = env.get("TELEGRAM_PHONE", "Not Set")
     dispatch_bot = env.get("DISPATCH_BOT_TOKEN", "Not Set")
     proc_bot = env.get("PROCESSING_BOT", "@LinkConvertTeraAbot")
-    pwd = env.get("BOT_PASSWORD", DEFAULT_BOT_PASSWORD)
 
     session_name = env.get("SESSION_NAME", "telegram_automation")
     session_file = os.path.join(APP_DIR, "sessions", f"{session_name}.session")
@@ -2241,9 +2240,7 @@ def build_credentials_menu() -> Tuple[str, InlineKeyboardMarkup]:
         f"• <b>Phone Number:</b> <code>{phone}</code>\n\n"
         "🤖 <b>Bot Dispatcher & Processing:</b>\n"
         f"• <b>Processing Bot:</b> <code>{proc_bot}</code>\n"
-        f"• <b>Dispatch Bot Token:</b> <code>{masked_token}</code>\n\n"
-        "🔒 <b>Bot Protection:</b>\n"
-        f"• <b>Access Password:</b> <code>{pwd}</code>\n"
+        f"• <b>Dispatch Bot Token:</b> <code>{masked_token}</code>\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "<i>নতুন টেলিগ্রাম অ্যাকাউন্ট কানেক্ট করতে বা তথ্য বদলাতে বাটন চাপুন:</i>"
     )
@@ -2263,9 +2260,6 @@ def build_credentials_menu() -> Tuple[str, InlineKeyboardMarkup]:
     )
     markup.row(
         InlineKeyboardButton("✏️ Edit Dispatch Bot Token", callback_data="act:edit_cred:DISPATCH_BOT_TOKEN")
-    )
-    markup.row(
-        InlineKeyboardButton("🔑 Change Access Password", callback_data="act:change_pwd")
     )
     markup.row(
         InlineKeyboardButton("🔙 Back to Dashboard", callback_data="nav:main")
@@ -3357,12 +3351,26 @@ def send_admin_user_stats(chat_id):
     markup.row(InlineKeyboardButton("❌ Close", callback_data="btn_close_admin_panel"))
     bot.send_message(chat_id, full_text, parse_mode="Markdown", reply_markup=markup)
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("set_") or call.data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"])
+ADMIN_SETTING_KEYS = {
+    "set_admin_id", "set_group_id", "set_init_credits", "set_ref_credits",
+    "set_7_days_price", "set_30_days_price", "set_share_text", "set_backup_link",
+    "set_max_batch_links", "set_monetag_zone", "set_monetag_interval"
+}
+
+@bot.callback_query_handler(func=lambda call: (call.data in ADMIN_SETTING_KEYS) or call.data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"])
 def handle_admin_callbacks(call):
     if not is_admin(call.from_user.id):
+        try:
+            bot.answer_callback_query(call.id, "Access Denied!", show_alert=True)
+        except Exception:
+            pass
         return
 
     if call.data == "btn_admin_lang":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         bot.send_message(
             call.message.chat.id,
             get_txt(call.from_user.id, "select_lang_prompt"),
@@ -3373,12 +3381,20 @@ def handle_admin_callbacks(call):
 
     if call.data == "btn_close_admin_panel":
         try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
+        try:
             bot.delete_message(call.message.chat.id, call.message.message_id)
         except Exception:
             bot.edit_message_text("❌ Panel closed.", chat_id=call.message.chat.id, message_id=call.message.message_id)
         return
 
     if call.data == "cancel_admin_input":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         bot.clear_step_handler_by_chat_id(call.message.chat.id)
         try:
             bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -3389,6 +3405,10 @@ def handle_admin_callbacks(call):
         return
 
     if call.data == "btn_user_list":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         send_admin_user_stats(call.message.chat.id)
         return
     
@@ -3397,6 +3417,10 @@ def handle_admin_callbacks(call):
         return
     
     if call.data == "btn_broadcast":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         msg = bot.send_message(
             call.message.chat.id, 
             "📢 **Je Message-ti sobar kache Broadcast korte chan ta likhe pathan:**", 
@@ -3407,6 +3431,10 @@ def handle_admin_callbacks(call):
         return
 
     if call.data == "btn_find_id":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         msg = bot.send_message(
             call.message.chat.id, 
             "🔗 **Group/Channel-er Public Link ba Username pathan:**\n\n"
@@ -3419,6 +3447,10 @@ def handle_admin_callbacks(call):
         return
 
     if call.data == "btn_add_paid":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         msg = bot.send_message(
             call.message.chat.id, 
             "👤 **User-ke Paid status dite User ID & Days din:**\nFormat: `<User_ID> <Days>`\nExample: `123456789 30`", 
@@ -3429,6 +3461,10 @@ def handle_admin_callbacks(call):
         return
 
     if call.data == "btn_add_credits":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         msg = bot.send_message(
             call.message.chat.id,
             "➕ **User Credit Add korte User ID & Amount din:**\n\n"
@@ -3442,6 +3478,10 @@ def handle_admin_callbacks(call):
         return
 
     if call.data == "btn_deduct_credits":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         msg = bot.send_message(
             call.message.chat.id,
             "➖ **User Credit Deduct/Komate User ID & Amount din:**\n\n"
@@ -3455,6 +3495,10 @@ def handle_admin_callbacks(call):
         return
 
     if call.data == "btn_set_credits":
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         msg = bot.send_message(
             call.message.chat.id,
             "✏️ **User Credit Set korte User ID & Exact Amount din:**\n\n"
@@ -3482,6 +3526,10 @@ def handle_admin_callbacks(call):
     }
     
     if call.data in key_map:
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
         setting_key, prompt_msg = key_map[call.data]
         msg = bot.send_message(
             call.message.chat.id, 
@@ -4591,13 +4639,22 @@ def safe_edit_message(call, text: str, reply_markup: InlineKeyboardMarkup, parse
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=reply_markup, parse_mode=parse_mode)
         return True
     except Exception as e:
-        if "message is not modified" in str(e).lower():
+        err = str(e).lower()
+        if "message is not modified" in err:
+            try:
+                bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=reply_markup)
+            except Exception:
+                pass
             return True
         try:
             bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=reply_markup)
             return True
         except Exception:
-            pass
+            try:
+                bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=reply_markup)
+                return True
+            except Exception:
+                pass
         return False
 
 
@@ -4794,6 +4851,8 @@ def handle_controller_callbacks(call):
     elif data.startswith("tgl:"):
         _, key, next_val = data.split(":")
         update_env({key: next_val})
+        if mgr.engine and hasattr(mgr.engine, "config"):
+            mgr.engine.config[key.lower()] = (next_val.lower() == "true")
         bot.answer_callback_query(call.id, f"Updated {key} to {next_val}")
         t, m = build_settings_menu()
         safe_edit_message(call, t, m)
@@ -5377,7 +5436,7 @@ def master_callback_router(call):
     if data.startswith("reply_to_"):
         handle_reply_to_user(call)
         return
-    elif data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"] or (data.startswith("set_") and not data.startswith("set_lang_")):
+    elif data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"] or (data in ADMIN_SETTING_KEYS):
         handle_admin_callbacks(call)
         return
     elif data.startswith("sched:") or data == "nav:scheduler":
@@ -5386,7 +5445,7 @@ def master_callback_router(call):
     elif data.startswith("act:quick_add_src:") or data.startswith("act:quick_set_out:"):
         handle_quick_actions(call)
         return
-    elif data.startswith("nav:") or data.startswith("act:") or data.startswith("tgl_"):
+    elif data.startswith("nav:") or data.startswith("act:") or data.startswith("tgl_") or data.startswith("tgl:"):
         handle_controller_callbacks(call)
         return
     else:
