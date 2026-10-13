@@ -597,6 +597,17 @@
         <p id="loading-desc" style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">Checking credits and preparing video player</p>
     </div>
 
+    <!-- Blocked / Stopped User Card (Restart Bot Prompt) -->
+    <div id="restart-bot-box" class="card-notice" style="display:none;">
+        <h3 id="restart-box-title">🔄 বটটি রিস্টার্ট করুন</h3>
+        <p id="restart-box-desc">আপনি বটটি ব্লক বা স্টপ করে রেখেছেন। ভিডিও দেখতে ও সকল ফিচার ব্যবহার করতে প্রথমে বটটি রিস্টার্ট (/start) করুন।</p>
+        <div class="action-btn-group">
+            <button class="btn-action btn-vip-upgrade" id="btn-restart-bot">
+                🚀 বট রিস্টার্ট করুন (/start)
+            </button>
+        </div>
+    </div>
+
     <!-- Unregistered User Card (Join Bot Prompt) -->
     <div id="join-bot-box" class="card-notice">
         <h3 id="join-box-title">🔒 Membership Required</h3>
@@ -780,6 +791,9 @@
             join_title: "🔒 মেম্বারশিপ আবশ্যক",
             join_desc: "ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।",
             open_bot_btn: "🚀 @leadox_bot ওপেন করে ফ্রি ক্রেডিট পান",
+            restart_title: "🔄 বটটি রিস্টার্ট করুন",
+            restart_desc: "আপনি বটটি ব্লক বা স্টপ করে রেখেছেন। ভিডিও দেখতে ও সকল ফিচার ব্যবহার করতে প্রথমে বটটি রিস্টার্ট (/start) করুন।",
+            restart_btn: "🚀 বট রিস্টার্ট করুন (/start)",
             paywall_title: "⚡ ক্রেডিট শেষ হয়ে গেছে!",
             paywall_desc: "আপনার অ্যাকাউন্টের ফ্রি ক্রেডিট শেষ হয়ে গেছে। আনলিমিটেড ভিডিও দেখতে VIP সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট পান।",
             buy_vip_btn: "💎 VIP সাবস্ক্রিপশন নিন (50 / 150 BDT)",
@@ -821,6 +835,9 @@
             join_title: "🔒 Membership Required",
             join_desc: "To stream this video, please join our Telegram bot first and collect free credits.",
             open_bot_btn: "🚀 Open @leadox_bot & Get Free Credits",
+            restart_title: "🔄 Please Restart the Bot",
+            restart_desc: "You have stopped or blocked the bot. To watch videos and use all features, please restart (/start) the bot first.",
+            restart_btn: "🚀 Restart Bot (/start)",
             paywall_title: "⚡ Credits Exhausted!",
             paywall_desc: "You have run out of free credits. Upgrade to VIP for unlimited streaming or invite friends for free credits.",
             buy_vip_btn: "💎 Upgrade to VIP (50 / 150 BDT)",
@@ -862,6 +879,9 @@
             join_title: "🔒 सदस्यता आवश्यक",
             join_desc: "वीडियो चलाने के लिए पहले हमारे टेलीग्राम बॉट से जुड़ें और मुफ़्त क्रेडिट प्राप्त करें।",
             open_bot_btn: "🚀 @leadox_bot खोलें और मुफ़्त क्रेडिट पाएं",
+            restart_title: "🔄 बॉट को रीस्टार्ट करें",
+            restart_desc: "आपने बॉट को ब्लॉक या बंद कर दिया है। वीडियो देखने और सभी सुविधाओं का उपयोग करने के लिए कृपया पहले बॉट को रीस्टार्ट (/start) करें।",
+            restart_btn: "🚀 बॉट रीस्टार्ट करें (/start)",
             paywall_title: "⚡ क्रेडिट समाप्त!",
             paywall_desc: "आपके मुफ़्त क्रेडिट समाप्त हो गए हैं। असीमित वीडियो के लिए VIP सदस्यता लें या दोस्तों को आमंत्रित करें।",
             buy_vip_btn: "💎 VIP अपग्रेड करें (50 / 150 BDT)",
@@ -902,6 +922,10 @@
         const joinTitle = document.getElementById('join-box-title'); if (joinTitle) joinTitle.innerText = t.join_title;
         const joinDesc = document.getElementById('join-box-desc'); if (joinDesc) joinDesc.innerText = t.join_desc;
         const openBotBtn = document.getElementById('btn-open-bot'); if (openBotBtn) openBotBtn.innerText = t.open_bot_btn;
+
+        const restartTitle = document.getElementById('restart-box-title'); if (restartTitle) restartTitle.innerText = t.restart_title;
+        const restartDesc = document.getElementById('restart-box-desc'); if (restartDesc) restartDesc.innerText = t.restart_desc;
+        const restartBtn = document.getElementById('btn-restart-bot'); if (restartBtn) restartBtn.innerText = t.restart_btn;
 
         const payTitle = document.getElementById('paywall-box-title'); if (payTitle) payTitle.innerText = t.paywall_title;
         const payDesc = document.getElementById('paywall-box-desc'); if (payDesc) payDesc.innerText = t.paywall_desc;
@@ -1717,10 +1741,21 @@
     });
 
     document.getElementById('btn-open-bot').addEventListener('click', () => {
-        const link = `https://t.me/${BOT_USERNAME}?start=new_user`;
+        const botUser = window.CURRENT_BOT_USERNAME || BOT_USERNAME;
+        const link = `https://t.me/${botUser}?start=new_user`;
         if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
         else window.open(link, '_blank');
     });
+
+    const btnRestartBot = document.getElementById('btn-restart-bot');
+    if (btnRestartBot) {
+        btnRestartBot.addEventListener('click', () => {
+            const botUser = window.CURRENT_BOT_USERNAME || BOT_USERNAME;
+            const link = `https://t.me/${botUser}?start=restart`;
+            if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
+            else window.open(link, '_blank');
+        });
+    }
 
     document.getElementById('btn-buy-vip').addEventListener('click', () => {
         const link = `https://t.me/${BOT_USERNAME}?start=buy_vip`;
@@ -1837,6 +1872,20 @@
                 if (liveRes.ok) {
                     const liveData = await liveRes.json();
                     if (liveData && liveData.ok) {
+                        if (liveData.is_blocked || !liveData.exists) {
+                            if (liveData.bot_username) {
+                                window.CURRENT_BOT_USERNAME = liveData.bot_username;
+                            }
+                            if (liveData.lang && (liveData.lang === 'bn' || liveData.lang === 'en' || liveData.lang === 'hi')) {
+                                applyPlayerLanguage(liveData.lang);
+                                localStorage.setItem('bot_lang_' + userIdStr, liveData.lang);
+                                localStorage.setItem('player_lang', liveData.lang);
+                            }
+                            document.getElementById('loading-box').style.display = 'none';
+                            document.getElementById('restart-bot-box').style.display = 'block';
+                            return;
+                        }
+
                         isVip = liveData.is_paid === 1;
                         if (liveData.lang && (liveData.lang === 'bn' || liveData.lang === 'en' || liveData.lang === 'hi')) {
                             applyPlayerLanguage(liveData.lang);
@@ -1881,8 +1930,18 @@
                     if (usersRes.ok) uData = await usersRes.json();
                 }
 
-                if (uData && userIdStr && uData[userIdStr]) {
+                if (uData && userIdStr) {
+                    if (!uData[userIdStr]) {
+                        document.getElementById('loading-box').style.display = 'none';
+                        document.getElementById('restart-bot-box').style.display = 'block';
+                        return;
+                    }
                     userRecord = uData[userIdStr];
+                    if (userRecord.is_blocked) {
+                        document.getElementById('loading-box').style.display = 'none';
+                        document.getElementById('restart-bot-box').style.display = 'block';
+                        return;
+                    }
                     isVip = userRecord.is_paid === 1;
                     const parsedCr = parseInt(userRecord.credits, 10);
                     if (!isNaN(parsedCr)) baseCredits = parsedCr;
