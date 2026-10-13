@@ -1717,8 +1717,9 @@ class AutomationEngine:
         self.log("INFO", f"🤝 Auto-Accept Join Request worker running in parallel on {len(self.auto_join_entities)} target(s)...")
         while self._is_running:
             try:
-                if self.config.get("auto_accept_join_requests", False) and self.auto_join_entities:
-                    for peer in list(self.auto_join_entities):
+                if self.config.get("auto_accept_join_requests", False):
+                    targets = self.auto_join_entities if self.auto_join_entities else self.source_entities
+                    for peer in list(targets):
                         if not self._is_running:
                             break
                         try:
@@ -1799,21 +1800,21 @@ class AutomationEngine:
             self.log("INFO", f"🎯 Output Channels synced: forwarding to {len(self.output_entities)} destination(s).")
 
     async def _sync_auto_join(self) -> None:
-        if self.config.get("auto_accept_join_requests", False):
-            aj_raw = self.config.get("auto_join_chats", "").strip()
-            aj_items = [c.strip() for c in re.split(r"[,\n]+", aj_raw) if c.strip()]
-            resolved = []
-            if not aj_items:
-                resolved = list(self.source_entities)
-            else:
-                for s in aj_items:
-                    ent = await self._resolve_single_chat(s)
-                    if ent:
-                        resolved.append(ent)
-            self.auto_join_entities = resolved
-            self.log("INFO", f"🤝 Auto-Accept Join targets synced: {len(self.auto_join_entities)} chat(s) monitored.")
-            if not self._auto_join_task or self._auto_join_task.done():
-                self._auto_join_task = asyncio.create_task(self._auto_join_worker_loop())
+        aj_raw = self.config.get("auto_join_chats", "").strip()
+        aj_items = [c.strip() for c in re.split(r"[,\n]+", aj_raw) if c.strip()]
+        resolved = []
+        if not aj_items:
+            resolved = list(self.source_entities)
+        else:
+            for s in aj_items:
+                ent = await self._resolve_single_chat(s)
+                if ent:
+                    resolved.append(ent)
+        self.auto_join_entities = resolved
+        is_on = self.config.get("auto_accept_join_requests", False)
+        self.log("INFO", f"🤝 Auto-Accept Join targets synced: {len(self.auto_join_entities)} chat(s) configured (Status: {'ON' if is_on else 'OFF'}).")
+        if not self._auto_join_task or self._auto_join_task.done():
+            self._auto_join_task = asyncio.create_task(self._auto_join_worker_loop())
 
     def _is_chat_in_sources(self, peer_or_id: Any) -> bool:
         if not peer_or_id or not self.source_entities:
