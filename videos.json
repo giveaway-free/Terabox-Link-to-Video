@@ -86,5 +86,13 @@
     "res": "1080p",
     "dur": "01:01",
     "type": "Video"
+  },
+  "1IRoBR88I-X-qU5lplUsZsA": {
+    "stream_url": "https://plain-sky-ade1.raneze.workers.dev/fast_stream?token=jq3APAXLx3a3sUuvX8oKckgFmj_K45J11Drvt2LJLIF18woeZ77XqwF1Sk-NsfMM4VzQho9ycNym0HrthwwZ3qzduLiHqjcfz9_yXgFwXMBaZyJfS2fX0HkWTDL1tSmzUlDHxZ1QKPowtVMgirHU5-YwozM7PoIChgNv1uS_YEi66Og15qrqwmD3gZQcvr1IbyfvOk5J1v3kDu_uj2I1eTdX39W4FANE5YnmnWmKoRTR0cOyK3eNglr6vdITIzhssaVSob3ECpRDcTTvOY3YItCoXIGhIbxKOYcibr1Q72fZMXaGv32EBrL_Fp4Z9Yjc4H6T7X7P5aNHhr_JVDp2t7FKvZzNuRf21VtUXOyl8P4enQ.m3u8",
+    "title": "IMG_8528.MP4",
+    "size": "14.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "02:51",
+    "type": "Video"
   }
 }
