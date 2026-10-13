@@ -1318,5 +1318,13 @@
     "res": "Auto (Adaptive)",
     "dur": "23:58",
     "type": "Video"
+  },
+  "1ptOHiPdLlYklXamKAzbtsw": {
+    "stream_url": "https://iteraplay.tera-api17.workers.dev/fast_stream?token=xUixSmDdCBbgrdlDOFycs_p00zXu2OcONOcsya5x83u-saPRqNs1hgt0U00e0dL5oPaAiFj_6m0dF2-qQFBSrPJB2pcd3mvkgaLoJ_jUNcQJMmxZzmT6xAP_Rtlf5jzKpFp2QQWALggizYGPKAT7X4PxJeoWQ8il3xjj2cY7QY7ZKrhM6WblPiNGjTuZ71nhaWiFLzBCWQPsnxW0WuMF1shCPbgZBqgzeONEMYME1c9IyowbZNvBPA7czOUDgyOuTCxLkXMZkB0lTikRDNN-Dn4Ym4PsG2HXCqyCDTppjZm5Z5MFPsx97AM9TMHfwgEupZlfznvErAW0MiXCwlJOprT8U8FFCdeCTfdH3Vf7Z7al_OsuPkagqCCdXwbJ6g.m3u8",
+    "title": "3-snapchat-364527776.mp4",
+    "size": "3.3 MB",
+    "res": "1080p",
+    "dur": "00:07",
+    "type": "Video"
   }
 }
