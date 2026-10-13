@@ -1941,7 +1941,7 @@ def build_settings_menu() -> Tuple[str, InlineKeyboardMarkup]:
     )
     markup.row(
         InlineKeyboardButton(f"🎬 Free Btn: {sw_tb_free}", callback_data=f"tgl:BUTTON_TERABOX_FREE_ENABLED:{next_tb_free}"),
-        InlineKeyboardButton(f"▶️ Watch Now: {sw_monetag}", callback_data=f"tgl:MONETAG_ADS_ENABLED:{next_monetag}")
+        InlineKeyboardButton(f"💰 Monetag Ads: {sw_monetag}", callback_data=f"tgl:MONETAG_ADS_ENABLED:{next_monetag}")
     )
     markup.row(
         InlineKeyboardButton(f"📜 Past Posts: {sw_hist}", callback_data=f"tgl:PROCESS_HISTORICAL_MESSAGES:{next_hist}"),
@@ -2074,8 +2074,7 @@ def build_translation_menu() -> Tuple[str, InlineKeyboardMarkup]:
 def build_btn_texts_menu() -> Tuple[str, InlineKeyboardMarkup]:
     env = read_env()
     btn_free = env.get("BUTTON_TERABOX_FREE_TEXT", "🎬 Watch Video (Free)")
-    btn_paid = env.get("BUTTON_TERABOX_PAID_TEXT", "⚡ Play Video (Paid)")
-    btn_watch_now = env.get("BUTTON_WATCH_NOW_TEXT", "▶️ Watch Now")
+    btn_paid = env.get("BUTTON_TERABOX_PAID_TEXT", "▶️ Play Video")
     btn_guide = env.get("BUTTON_HOW_TO_WATCH_TEXT", "👀 How to Watch")
     btn_backup = env.get("BUTTON_BACKUP_TEXT", "📢 Backup Channel")
 
@@ -2086,11 +2085,10 @@ def build_btn_texts_menu() -> Tuple[str, InlineKeyboardMarkup]:
     text = (
         "🔘 <b>Custom Inline Button Labels</b>\n\n"
         f"• <b>Status:</b> {status_text}\n"
-        f"1. <b>Free Button:</b> <code>{btn_free}</code>\n"
-        f"2. <b>Paid Button:</b> <code>{btn_paid}</code>\n"
-        f"3. <b>Watch Now (Ad) Button:</b> <code>{btn_watch_now}</code>\n"
-        f"4. <b>Guide Button:</b> <code>{btn_guide}</code>\n"
-        f"5. <b>Backup Button:</b> <code>{btn_backup}</code>\n\n"
+        f"1. <b>Free Button:</b> <code>{html.escape(btn_free)}</code>\n"
+        f"2. <b>Play Video Button:</b> <code>{html.escape(btn_paid)}</code>\n"
+        f"3. <b>Guide Button:</b> <code>{html.escape(btn_guide)}</code>\n"
+        f"4. <b>Backup Button:</b> <code>{html.escape(btn_backup)}</code>\n\n"
         "<i>Click below to edit any button label:</i>"
     )
 
@@ -2100,10 +2098,7 @@ def build_btn_texts_menu() -> Tuple[str, InlineKeyboardMarkup]:
     )
     markup.row(
         InlineKeyboardButton("✏️ Edit Free Label", callback_data="act:edit_btn:BUTTON_TERABOX_FREE_TEXT"),
-        InlineKeyboardButton("✏️ Edit Paid Label", callback_data="act:edit_btn:BUTTON_TERABOX_PAID_TEXT")
-    )
-    markup.row(
-        InlineKeyboardButton("✏️ Edit Watch Now Label", callback_data="act:edit_btn:BUTTON_WATCH_NOW_TEXT")
+        InlineKeyboardButton("✏️ Edit Play Video Label", callback_data="act:edit_btn:BUTTON_TERABOX_PAID_TEXT")
     )
     markup.row(
         InlineKeyboardButton("✏️ Edit Guide Label", callback_data="act:edit_btn:BUTTON_HOW_TO_WATCH_TEXT"),
@@ -3361,24 +3356,25 @@ def admin_settings_panel(message):
         m_int_lbl = f"{m_int}s"
 
     text = (
-        "⚙️ **Admin Control Panel**\n\n"
-        f"👑 **Admin ID:** `{get_setting('admin_id')}`\n"
-        f"👥 **Track Group ID:** `{get_setting('required_group_id')}`\n"
-        f"1. **Signup Free Credits:** {get_setting('initial_credits')}\n"
-        f"2. **Referral Bonus:** {get_setting('refer_credits')} Credits\n"
-        f"3. **7-Day Plan Price:** {get_setting('paid_7_days')}\n"
-        f"4. **30-Day Plan Price:** {get_setting('paid_30_days')}\n"
-        f"5. **Custom Share Text:**\n`{custom_share}`\n"
-        f"6. **Backup Channel Link:**\n`{backup_link}`\n"
-        f"7. **Max Batch Links (per post):** {get_setting('max_batch_links') or '5'}\n"
-        f"8. **Monetag Zone ID:** `{m_zone}`\n"
-        f"9. **Monetag Ads Interval (Time):** `{m_int_lbl}` ({m_int}s)\n\n"
-        "Nicher numbered buttons theke option select korun:"
+        "⚙️ <b>Admin Control Panel</b>\n\n"
+        f"👑 <b>Admin ID:</b> <code>{html.escape(str(get_setting('admin_id') or ''))}</code>\n"
+        f"👥 <b>Track Group ID:</b> <code>{html.escape(str(get_setting('required_group_id') or ''))}</code>\n"
+        f"1. <b>Signup Free Credits:</b> <code>{html.escape(str(get_setting('initial_credits') or '5'))}</code>\n"
+        f"2. <b>Referral Bonus:</b> <code>{html.escape(str(get_setting('refer_credits') or '2'))} Credits</code>\n"
+        f"3. <b>7-Day Plan Price:</b> <code>{html.escape(str(get_setting('paid_7_days') or '100 BDT'))}</code>\n"
+        f"4. <b>30-Day Plan Price:</b> <code>{html.escape(str(get_setting('paid_30_days') or '300 BDT'))}</code>\n"
+        f"5. <b>Custom Share Text:</b>\n<code>{html.escape(str(get_setting('custom_share_text') or 'N/A'))}</code>\n"
+        f"6. <b>Backup Channel Link:</b>\n<code>{html.escape(str(get_setting('backup_channel_link') or 'N/A'))}</code>\n"
+        f"7. <b>Max Batch Links (per post):</b> <code>{html.escape(str(get_setting('max_batch_links') or '5'))}</code>\n"
+        f"8. <b>Monetag Zone ID:</b> <code>{html.escape(str(m_zone))}</code>\n"
+        f"9. <b>Monetag Ads Interval (Time):</b> <code>{html.escape(str(m_int_lbl))}</code> (<code>{m_int}s</code>)\n\n"
+        "<i>Nicher numbered buttons theke option select korun:</i>"
     )
     try:
-        bot.send_message(message.chat.id, text, parse_mode="Markdown", reply_markup=admin_settings_inline())
+        bot.send_message(message.chat.id, text, parse_mode="HTML", reply_markup=admin_settings_inline())
     except Exception:
-        bot.send_message(message.chat.id, text, reply_markup=admin_settings_inline())
+        clean_text = re.sub(r'<[^>]+>', '', text)
+        bot.send_message(message.chat.id, clean_text, reply_markup=admin_settings_inline())
     auto_delete_after(message.chat.id, message.message_id, 5)
 
 def send_admin_user_stats(chat_id):
@@ -4472,7 +4468,7 @@ def handle_admin_text(message):
         key = meta.get("key")
         if key:
             update_env({key: text_val})
-            bot.reply_to(message, f"✅ <b>Button label updated:</b> <code>{text_val}</code>", parse_mode="HTML")
+            bot.reply_to(message, f"✅ <b>Button label updated:</b> <code>{html.escape(text_val)}</code>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_btn_texts_menu()
         bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
@@ -4763,7 +4759,8 @@ def safe_edit_message(call, text: str, reply_markup: InlineKeyboardMarkup, parse
                 pass
             return True
         try:
-            bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=reply_markup)
+            clean_plain_text = re.sub(r'<[^>]+>', '', text)
+            bot.edit_message_text(clean_plain_text, call.message.chat.id, call.message.message_id, reply_markup=reply_markup)
             return True
         except Exception:
             try:
@@ -5467,20 +5464,14 @@ def _async_extract_and_send(message, raw_url: str, extract_fn):
 
     env = read_env()
     btn_free = env.get("BUTTON_TERABOX_FREE_TEXT", "🎬 Watch Video (Free)")
-    btn_paid = env.get("BUTTON_TERABOX_PAID_TEXT", "⚡ Play Video (Paid)")
-    btn_watch_now = env.get("BUTTON_WATCH_NOW_TEXT", "▶️ Watch Now")
+    btn_paid = env.get("BUTTON_TERABOX_PAID_TEXT", "▶️ Play Video")
     btn_guide = env.get("BUTTON_HOW_TO_WATCH_TEXT", "👀 How to Watch")
     btn_backup = env.get("BUTTON_BACKUP_TEXT", "📢 Backup Channel")
-
-    watch_now_link = f"https://t.me/leadox_bot?startapp=ad_{vid_id}"
 
     markup = InlineKeyboardMarkup()
     markup.row(
         InlineKeyboardButton(btn_free, url=raw_url),
         InlineKeyboardButton(btn_paid, url=bot_deep_link)
-    )
-    markup.row(
-        InlineKeyboardButton(btn_watch_now, url=watch_now_link)
     )
     markup.row(
         InlineKeyboardButton(btn_backup, url="https://t.me/your_channel"),
