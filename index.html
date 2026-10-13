@@ -1880,7 +1880,7 @@
         let videosDb = {};
         const BOT_BACKEND_URL = "https://terabox-link-to-video-1.onrender.com";
         let liveStatusFetched = false;
-        let baseCredits = 10;
+        let baseCredits = 0;
         let serverAlreadyWatched = false;
 
         let restartGuardActive = false;
@@ -1906,8 +1906,7 @@
                     try {
                         const qV = sParam ? `&video_id=${encodeURIComponent(sParam)}` : '';
                         const rCheck = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${uId}${qV}&_t=${Date.now()}`, {
-                            cache: 'no-store',
-                            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+                            cache: 'no-store'
                         });
                         if (rCheck.ok) {
                             const dCheck = await rCheck.json();
@@ -1921,7 +1920,7 @@
                     if (!unblocked) {
                         try {
                             const ghCheck = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`, {
-                                headers: { 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+                                headers: { 'Accept': 'application/vnd.github.v3+json' },
                                 cache: 'no-store'
                             });
                             if (ghCheck.ok) {
@@ -1934,6 +1933,18 @@
                                 }
                             }
                         } catch (_) {}
+
+                        if (!unblocked) {
+                            try {
+                                const rawCheck = await fetch(`${USERS_DB_URL}?_t=${Date.now()}`, { cache: 'no-store' });
+                                if (rawCheck.ok) {
+                                    const parsedUsers = await rawCheck.json();
+                                    if (parsedUsers && parsedUsers[uId] && !parsedUsers[uId].is_blocked) {
+                                        unblocked = true;
+                                    }
+                                }
+                            } catch (_) {}
+                        }
                     }
 
                     if (unblocked) {
@@ -1995,15 +2006,11 @@
         if (userIdStr) {
             try {
                 const liveCtrl = new AbortController();
-                const liveTimeout = setTimeout(() => liveCtrl.abort(), 6000);
+                const liveTimeout = setTimeout(() => liveCtrl.abort(), 2000);
                 const queryVid = startParam ? `&video_id=${encodeURIComponent(startParam)}` : '';
                 const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}${queryVid}&_t=${Date.now()}`, {
                     signal: liveCtrl.signal,
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache'
-                    }
+                    cache: 'no-store'
                 });
                 clearTimeout(liveTimeout);
                 if (liveRes.ok) {
@@ -2054,7 +2061,7 @@
             try {
                 try {
                     const apiRes = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`, {
-                        headers: { 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+                        headers: { 'Accept': 'application/vnd.github.v3+json' },
                         cache: 'no-store'
                     });
                     if (apiRes.ok) {
@@ -2067,8 +2074,7 @@
 
                 if (!uData) {
                     const usersRes = await fetch(`${USERS_DB_URL}?_t=${Date.now()}`, { 
-                        cache: 'no-store',
-                        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+                        cache: 'no-store'
                     });
                     if (usersRes.ok) uData = await usersRes.json();
                 }
@@ -2081,12 +2087,14 @@
                     userRecord = uData[userIdStr];
                     isVip = userRecord.is_paid === 1;
                     const parsedCr = parseInt(userRecord.credits, 10);
-                    if (!isNaN(parsedCr)) baseCredits = parsedCr;
+                    baseCredits = isNaN(parsedCr) ? 0 : parsedCr;
                     if (userRecord.lang && (userRecord.lang === 'bn' || userRecord.lang === 'en' || userRecord.lang === 'hi')) {
                         applyPlayerLanguage(userRecord.lang);
                         localStorage.setItem('bot_lang_' + userIdStr, userRecord.lang);
                         localStorage.setItem('player_lang', userRecord.lang);
                     }
+                } else if (!uData && userIdStr) {
+                    baseCredits = 0;
                 }
             } catch (e) {
                 console.warn("Could not fetch remote databases, using fallback:", e);
@@ -2119,8 +2127,6 @@
         if (serverAlreadyWatched) {
             alreadyWatched = true;
             localStorage.setItem(localUnlockKey, "1");
-        } else if (localStorage.getItem(localUnlockKey) === "1") {
-            alreadyWatched = true;
         } else if (userRecord && userRecord.watched && Array.isArray(userRecord.watched) && userRecord.watched.includes(startParam)) {
             alreadyWatched = true;
             localStorage.setItem(localUnlockKey, "1");
@@ -2139,8 +2145,10 @@
             isAdMode = false;
         } else if (currentCredits > 0) {
             isAdMode = false;
-        } else {
+        } else if (MONETAG_ADS_ENABLED) {
             isAdMode = true;
+        } else {
+            isAdMode = false;
         }
 
         function updateBadgeStatus() {
@@ -2156,8 +2164,8 @@
                 badgeEl.className = "status-badge badge-credits";
                 badgeEl.innerText = t.credits_left.replace('{n}', currentCredits);
             } else if (isAdMode) {
-                badgeEl.className = "status-badge badge-vip";
-                badgeEl.innerText = t.ad_supported;
+                badgeEl.className = "status-badge badge-exhausted";
+                badgeEl.innerText = t.zero_credits;
             } else {
                 badgeEl.className = "status-badge badge-exhausted";
                 badgeEl.innerText = t.zero_credits;
