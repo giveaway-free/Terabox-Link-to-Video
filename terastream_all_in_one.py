@@ -5708,6 +5708,26 @@ def start_render_health_server():
                     self.wfile.write(b'{"ok": false, "error": "unauthorized_or_missing"}')
                 return
 
+            if parsed.path == "/api/set_language":
+                qs = parse_qs(parsed.query)
+                uid = qs.get("user_id", [None])[0]
+                lang_code = qs.get("lang", [None])[0]
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                if uid and lang_code and lang_code in ["bn", "en", "hi"]:
+                    try:
+                        uid_int = int(uid)
+                        set_user_lang(uid_int, lang_code)
+                        threading.Thread(target=sync_users_json, daemon=True).start()
+                        self.wfile.write(json.dumps({"ok": True, "user_id": uid_int, "lang": lang_code}).encode("utf-8"))
+                    except Exception as err:
+                        self.wfile.write(json.dumps({"ok": False, "error": str(err)}).encode("utf-8"))
+                else:
+                    self.wfile.write(b'{"ok": false, "error": "invalid_params"}')
+                return
+
             self.send_response(200)
             self.send_header("Content-type", "text/plain")
             self.send_header("Access-Control-Allow-Origin", "*")
