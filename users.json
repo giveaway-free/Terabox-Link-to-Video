@@ -35,8 +35,8 @@
     "credits": 0,
     "is_paid": 0,
     "paid_expiry": null,
-    "lang": "bn",
-    "is_blocked": true,
+    "lang": "en",
+    "is_blocked": false,
     "watched": [
       "12eFFk6vNOiSBJDl8W9hURw",
       "17-8zWQcBMXHUquYPXtuC_w",
