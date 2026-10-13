@@ -598,5 +598,13 @@
     "res": "Auto (Adaptive)",
     "dur": "01:23",
     "type": "Video"
+  },
+  "1-w3SRlCChPbM4iHRtWm25w": {
+    "stream_url": "https://iteraplay.tera-api59.workers.dev/fast_stream?token=qVpBn0shjj61xJGgKgKEdGGhPAce-c8SbGUeOKjdMwtH0Qtsrx1JcHICnsX2YpowtZiMUkvwLbFI3fmK2MzGzQ_O1YUd5No5T79lDgETaFe2g-jBd0qEhbzcoLiwkHXhHFgsX9WCYSMGuzGHdb64r0cl4JWIpIUxzucdrdNCI0LZto-r9JjXCoSJM5DXWhEQKI7pQI5mecCZf6qyhkX1lWb2GyMQ9kX8O7tY_BKLAfiWzroiQ-5hxIcaVYoRQdEJuYmFpmUqCCIE0l5ogdPabwBd6hxCnA8ljjMBC58PxdZBllk_ISPgESW9XJmrmJczRnJiZ5W9jcQmyUECHTYkC02k--6YvFLGB6mwNUnbRV1475AAxemPqw.m3u8",
+    "title": "VN20250830_115831.mp4",
+    "size": "66.7 MB",
+    "res": "1080p",
+    "dur": "01:50",
+    "type": "Video"
   }
 }
