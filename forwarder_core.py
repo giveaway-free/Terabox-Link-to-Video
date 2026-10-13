@@ -2611,24 +2611,24 @@ class AutomationEngine:
             return text, None
 
         # Switches: check if TeraBox Free button and Monetag Watch Now button are enabled
-        tb_free_enabled = self.config.get("button_terabox_free_enabled", True)
-        if isinstance(tb_free_enabled, str):
-            tb_free_enabled = tb_free_enabled.lower() == "true"
-        elif tb_free_enabled is None:
-            tb_free_enabled = True
+        # Live in-memory engine config (updated by admin dashboard) has highest priority
+        tb_free_enabled = True
+        if "button_terabox_free_enabled" in self.config and self.config["button_terabox_free_enabled"] is not None:
+            v = self.config["button_terabox_free_enabled"]
+            tb_free_enabled = (v.lower() == "true") if isinstance(v, str) else bool(v)
+        else:
+            env_tb_free = os.getenv("BUTTON_TERABOX_FREE_ENABLED")
+            if env_tb_free is not None:
+                tb_free_enabled = env_tb_free.lower() == "true"
 
-        monetag_enabled = self.config.get("monetag_ads_enabled", True)
-        if isinstance(monetag_enabled, str):
-            monetag_enabled = monetag_enabled.lower() == "true"
-        elif monetag_enabled is None:
-            monetag_enabled = True
-
-        env_tb_free = os.getenv("BUTTON_TERABOX_FREE_ENABLED")
-        if env_tb_free is not None:
-            tb_free_enabled = env_tb_free.lower() == "true"
-        env_monetag = os.getenv("MONETAG_ADS_ENABLED")
-        if env_monetag is not None:
-            monetag_enabled = env_monetag.lower() == "true"
+        monetag_enabled = True
+        if "monetag_ads_enabled" in self.config and self.config["monetag_ads_enabled"] is not None:
+            v = self.config["monetag_ads_enabled"]
+            monetag_enabled = (v.lower() == "true") if isinstance(v, str) else bool(v)
+        else:
+            env_monetag = os.getenv("MONETAG_ADS_ENABLED")
+            if env_monetag is not None:
+                monetag_enabled = env_monetag.lower() == "true"
 
         # Build native inline keyboard buttons according to active switches
         buttons: List[List[Any]] = []
