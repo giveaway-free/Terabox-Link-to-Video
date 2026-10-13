@@ -582,8 +582,11 @@
             <span>👤</span>
             <span id="user-display-name">User</span>
         </div>
-        <div id="user-badge" class="status-badge badge-credits">
-            ⚡ Checking...
+        <div style="display:flex;align-items:center;gap:8px;">
+            <button id="btn-player-lang" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-color);color:var(--text-main);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">🌐 বাং</button>
+            <div id="user-badge" class="status-badge badge-credits">
+                ⚡ Checking...
+            </div>
         </div>
     </div>
 
@@ -596,8 +599,8 @@
 
     <!-- Unregistered User Card (Join Bot Prompt) -->
     <div id="join-bot-box" class="card-notice">
-        <h3>🔒 Membership Required</h3>
-        <p>ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।</p>
+        <h3 id="join-box-title">🔒 Membership Required</h3>
+        <p id="join-box-desc">ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।</p>
         <div class="action-btn-group">
             <button class="btn-action btn-vip-upgrade" id="btn-open-bot">
                 🚀 Open @leadox_bot & Get Free Credits
@@ -607,8 +610,8 @@
 
     <!-- Paywall Card (Credits Finished) -->
     <div id="paywall-box" class="card-notice">
-        <h3>⚡ Credits Exhausted!</h3>
-        <p>আপনার অ্যাকাউন্টের ফ্রি ক্রেডিট শেষ হয়ে গেছে। আনলিমিটেড ভিডিও দেখতে VIP সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট পান।</p>
+        <h3 id="paywall-box-title">⚡ Credits Exhausted!</h3>
+        <p id="paywall-box-desc">আপনার অ্যাকাউন্টের ফ্রি ক্রেডিট শেষ হয়ে গেছে। আনলিমিটেড ভিডিও দেখতে VIP সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট পান।</p>
         <div class="action-btn-group">
             <button class="btn-action btn-vip-upgrade" id="btn-buy-vip">
                 💎 Upgrade to VIP (50 / 150 BDT)
@@ -621,8 +624,8 @@
 
     <!-- Default Empty Box -->
     <div id="no-video-box" class="no-video">
-        <h3>🎬 TeraStream Mini Player</h3>
-        <p>Please open a video link from the channel button to stream.</p>
+        <h3 id="no-video-title">🎬 TeraStream Mini Player</h3>
+        <p id="no-video-desc">Please open a video link from the channel button to stream.</p>
     </div>
 
     <!-- Fallback Embed Player Iframe -->
@@ -706,19 +709,19 @@
 
     <div class="grid-info" id="grid-info">
         <div class="card">
-            <div class="card-label">📦 SIZE</div>
+            <div class="card-label" id="lbl-size">📦 SIZE</div>
             <div class="card-value" id="info-size">--</div>
         </div>
         <div class="card">
-            <div class="card-label">⏱️ DURATION</div>
+            <div class="card-label" id="lbl-dur">⏱️ DURATION</div>
             <div class="card-value" id="info-dur">--</div>
         </div>
         <div class="card">
-            <div class="card-label">⚡ RESOLUTION</div>
+            <div class="card-label" id="lbl-res">⚡ RESOLUTION</div>
             <div class="card-value" id="info-res">Auto</div>
         </div>
         <div class="card">
-            <div class="card-label">📂 TYPE</div>
+            <div class="card-label" id="lbl-type">📂 TYPE</div>
             <div class="card-value" id="info-type">Video</div>
         </div>
     </div>
@@ -740,6 +743,118 @@
     const SINGLE_VIDEO_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/data/v/";
     const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
+
+    // ==========================================
+    // MULTI-LANGUAGE (I18N) LOCALIZATION ENGINE
+    // ==========================================
+    const I18N = {
+        bn: {
+            size: "📦 সাইজ",
+            dur: "⏱️ সময়",
+            res: "⚡ রেজোলিউশন",
+            type: "📂 টাইপ",
+            download: "⬇️ ডিরেক্ট ডাউনলোড",
+            checking: "⚡ যাচাই করা হচ্ছে...",
+            vip: "💎 VIP (আনলিমিটেড)",
+            ad_supported: "🎬 Watch Now (অ্যাড সমর্থিত)",
+            unlocked: "✅ আনলকড • {n} টি বাকি",
+            credits_left: "⚡ {n} টি ক্রেডিট বাকি",
+            zero_credits: "⚠️ ০ ক্রেডিট",
+            loading_title: "ভিডিও প্রস্তুত হচ্ছে...",
+            loading_desc: "সার্ভার থেকে ভিডিও স্ট্রিম বিশ্লেষণ করা হচ্ছে...",
+            ad_sponsor_title: "📺 Sponsored Video Ad",
+            ad_sponsor_loading: "বিজ্ঞাপন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...",
+            ad_sponsor_desc: "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন (স্কিপ বা ক্লিক করে ব্যাক করবেন না)...",
+            ad_warn_title: "⚠️ অ্যাড সম্পূর্ণ দেখুন",
+            ad_warn_desc: "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি।",
+            ad_warn_auto: "🔄 স্বয়ংক্রিয়ভাবে পুনরায় বিজ্ঞাপন চালু হচ্ছে...",
+            ad_warn_skip: "ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।",
+            join_title: "🔒 মেম্বারশিপ আবশ্যক",
+            join_desc: "ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।",
+            open_bot_btn: "🚀 @leadox_bot ওপেন করে ফ্রি ক্রেডিট পান",
+            paywall_title: "⚡ ক্রেডিট শেষ হয়ে গেছে!",
+            paywall_desc: "আপনার অ্যাকাউন্টের ফ্রি ক্রেডিট শেষ হয়ে গেছে। আনলিমিটেড ভিডিও দেখতে VIP সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট পান।",
+            buy_vip_btn: "💎 VIP সাবস্ক্রিপশন নিন (50 / 150 BDT)",
+            refer_btn: "👥 বন্ধুদের ইনভাইট করুন (+2 ক্রেডিট ফ্রি)",
+            no_video_title: "🎬 TeraStream Mini Player",
+            no_video_desc: "ভিডিও স্ট্রিম করতে চ্যানেল থেকে ভিডিও লিংকে ক্লিক করুন。"
+        },
+        en: {
+            size: "📦 SIZE",
+            dur: "⏱️ DURATION",
+            res: "⚡ RESOLUTION",
+            type: "📂 TYPE",
+            download: "⬇️ Direct Download",
+            checking: "⚡ Checking...",
+            vip: "💎 VIP (Unlimited)",
+            ad_supported: "🎬 Watch Now (Ad Supported)",
+            unlocked: "✅ Unlocked • {n} Left",
+            credits_left: "⚡ {n} Credits Left",
+            zero_credits: "⚠️ 0 Credits",
+            loading_title: "Preparing Video...",
+            loading_desc: "Analyzing video stream from server...",
+            ad_sponsor_title: "📺 Sponsored Video Ad",
+            ad_sponsor_loading: "Loading advertisement, please wait...",
+            ad_sponsor_desc: "Please watch the sponsored ad completely to start video (do not skip)...",
+            ad_warn_title: "⚠️ Watch Full Ad",
+            ad_warn_desc: "Ad was not watched completely due to click or back button.",
+            ad_warn_auto: "🔄 Automatically reloading advertisement...",
+            ad_warn_skip: "You must watch the full ad without skipping to play video.",
+            join_title: "🔒 Membership Required",
+            join_desc: "To stream this video, please join our Telegram bot first and collect free credits.",
+            open_bot_btn: "🚀 Open @leadox_bot & Get Free Credits",
+            paywall_title: "⚡ Credits Exhausted!",
+            paywall_desc: "You have run out of free credits. Upgrade to VIP for unlimited streaming or invite friends for free credits.",
+            buy_vip_btn: "💎 Upgrade to VIP (50 / 150 BDT)",
+            refer_btn: "👥 Invite Friends (+2 Free Credits)",
+            no_video_title: "🎬 TeraStream Mini Player",
+            no_video_desc: "Please open a video link from the channel button to stream."
+        }
+    };
+
+    let currentLang = "bn";
+    function initLanguage() {
+        const uParams = new URLSearchParams(window.location.search);
+        const qLang = uParams.get('lang');
+        if (qLang && (qLang.toLowerCase() === 'en' || qLang.toLowerCase() === 'bn')) {
+            currentLang = qLang.toLowerCase();
+        } else {
+            const sLang = localStorage.getItem('player_lang');
+            if (sLang && (sLang === 'en' || sLang === 'bn')) currentLang = sLang;
+        }
+        applyPlayerLanguage(currentLang);
+    }
+
+    function applyPlayerLanguage(lang) {
+        currentLang = (lang === 'en') ? 'en' : 'bn';
+        localStorage.setItem('player_lang', currentLang);
+        const t = I18N[currentLang];
+        
+        const lblSize = document.getElementById('lbl-size'); if (lblSize) lblSize.innerText = t.size;
+        const lblDur = document.getElementById('lbl-dur'); if (lblDur) lblDur.innerText = t.dur;
+        const lblRes = document.getElementById('lbl-res'); if (lblRes) lblRes.innerText = t.res;
+        const lblType = document.getElementById('lbl-type'); if (lblType) lblType.innerText = t.type;
+        const dlBtn = document.getElementById('download-btn'); if (dlBtn) dlBtn.innerText = t.download;
+
+        const joinTitle = document.getElementById('join-box-title'); if (joinTitle) joinTitle.innerText = t.join_title;
+        const joinDesc = document.getElementById('join-box-desc'); if (joinDesc) joinDesc.innerText = t.join_desc;
+        const openBotBtn = document.getElementById('btn-open-bot'); if (openBotBtn) openBotBtn.innerText = t.open_bot_btn;
+
+        const payTitle = document.getElementById('paywall-box-title'); if (payTitle) payTitle.innerText = t.paywall_title;
+        const payDesc = document.getElementById('paywall-box-desc'); if (payDesc) payDesc.innerText = t.paywall_desc;
+        const buyVipBtn = document.getElementById('btn-buy-vip'); if (buyVipBtn) buyVipBtn.innerText = t.buy_vip_btn;
+        const referBtn = document.getElementById('btn-refer-earn'); if (referBtn) referBtn.innerText = t.refer_btn;
+
+        const noVidTitle = document.getElementById('no-video-title'); if (noVidTitle) noVidTitle.innerText = t.no_video_title;
+        const noVidDesc = document.getElementById('no-video-desc'); if (noVidDesc) noVidDesc.innerText = t.no_video_desc;
+
+        const btnLang = document.getElementById('btn-player-lang');
+        if (btnLang) btnLang.innerText = currentLang === 'bn' ? '🌐 বাং' : '🌐 EN';
+    }
+
+    function togglePlayerLanguage() {
+        applyPlayerLanguage(currentLang === 'bn' ? 'en' : 'bn');
+    }
 
     // ==========================================
     // ==========================================
@@ -1487,6 +1602,15 @@
 
     // Main Dispatcher Logic
     async function initMiniApp() {
+        initLanguage();
+        const langBtn = document.getElementById('btn-player-lang');
+        if (langBtn) {
+            langBtn.onclick = () => {
+                togglePlayerLanguage();
+                updateBadgeStatus();
+            };
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const directSrc = urlParams.get('src');
 
@@ -1642,22 +1766,28 @@
 
         currentCredits = Math.max(0, baseCredits);
 
-        if (isVip) {
-            badgeEl.className = "status-badge badge-vip";
-            badgeEl.innerText = "💎 VIP (Unlimited)";
-        } else if (isAdMode) {
-            badgeEl.className = "status-badge badge-vip";
-            badgeEl.innerText = "🎬 Watch Now (Ad Supported)";
-        } else if (alreadyWatched) {
-            badgeEl.className = "status-badge badge-vip";
-            badgeEl.innerText = `✅ Unlocked • ${currentCredits} Left`;
-        } else if (currentCredits > 0) {
-            badgeEl.className = "status-badge badge-credits";
-            badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
-        } else {
-            badgeEl.className = "status-badge badge-exhausted";
-            badgeEl.innerText = "⚠️ 0 Credits";
+        function updateBadgeStatus() {
+            if (!badgeEl) return;
+            const t = I18N[currentLang];
+            if (isVip) {
+                badgeEl.className = "status-badge badge-vip";
+                badgeEl.innerText = t.vip;
+            } else if (isAdMode) {
+                badgeEl.className = "status-badge badge-vip";
+                badgeEl.innerText = t.ad_supported;
+            } else if (alreadyWatched) {
+                badgeEl.className = "status-badge badge-vip";
+                badgeEl.innerText = t.unlocked.replace('{n}', currentCredits);
+            } else if (currentCredits > 0) {
+                badgeEl.className = "status-badge badge-credits";
+                badgeEl.innerText = t.credits_left.replace('{n}', currentCredits);
+            } else {
+                badgeEl.className = "status-badge badge-exhausted";
+                badgeEl.innerText = t.zero_credits;
+            }
         }
+        window.updateBadgeStatus = updateBadgeStatus;
+        updateBadgeStatus();
 
         // Gate: Check if user has no credits AND has not unlocked this video before (Bypassed in Ad Mode)
         if (!isAdMode && !isVip && !alreadyWatched && currentCredits <= 0) {
