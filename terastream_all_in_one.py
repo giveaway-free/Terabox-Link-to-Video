@@ -1747,7 +1747,8 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
         InlineKeyboardButton("🧪 Test TeraBox Link", callback_data="nav:test_link")
     )
     markup.row(
-        InlineKeyboardButton("🔄 Refresh Dashboard", callback_data="nav:main")
+        InlineKeyboardButton("🔄 Refresh Dashboard", callback_data="nav:main"),
+        InlineKeyboardButton("🔙 Back to Dashboard", callback_data="act:back_dashboard")
     )
 
     return text, markup
@@ -4609,7 +4610,25 @@ def handle_controller_callbacks(call):
     data = call.data
 
     # Navigation
-    if data == "nav:main":
+    if data in ["act:back_dashboard", "nav:back_dashboard"]:
+        clear_admin_state(call.from_user.id)
+        try:
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+        except Exception:
+            try:
+                bot.edit_message_text("✅ <b>Channel Controller Closed.</b>", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="HTML")
+            except Exception:
+                pass
+        welcome_txt = (
+            f"👑 <b>Admin Dashboard</b>\n\n"
+            f"⚡ System is active and running.\n"
+            f"নিচের মেনু বাটনগুলো থেকে যেকোনো অপশন ব্যবহার করতে পারেন:"
+        )
+        bot.send_message(call.message.chat.id, welcome_txt, parse_mode="HTML", reply_markup=main_keyboard(call.from_user.id))
+        bot.answer_callback_query(call.id, "🔙 Back to Dashboard")
+        return
+
+    elif data == "nav:main":
         clear_admin_state(call.from_user.id)
         t, m = build_main_dashboard()
         safe_edit_message(call, t, m)
