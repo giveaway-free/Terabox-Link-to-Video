@@ -2456,25 +2456,39 @@ def language_selection_markup(referrer_id=None):
     return markup
 
 def is_account_button(text):
-    return any(k in text for k in ["My Account", "Account Overview", "আমার অ্যাকাউন্ট"])
+    if not text: return False
+    return any(k.lower() in text.lower() for k in ["my account", "account overview", "account", "আমার অ্যাকাউন্ট", "অ্যাকাউন্ট", "अकाउंट"])
 
 def is_refer_button(text):
-    return any(k in text for k in ["Refer & Earn", "রেফার", "रेफर"])
+    if not text: return False
+    return any(k.lower() in text.lower() for k in ["refer & earn", "refer", "invite & earn", "invite", "রেফার", "ইনভাইট", "रेफर"])
 
 def is_buy_button(text):
-    return any(k in text for k in ["Buy Subscription", "সাবস্ক্রিপশন", "सब्सक्रिप्शन"])
+    if not text: return False
+    return any(k.lower() in text.lower() for k in ["buy subscription", "upgrade vip", "buy vip", "vip", "subscription", "plan", "plans", "সাবস্ক্রিপশন", "প্ল্যান", "সব্সक्रिप्शन"])
 
 def is_backup_button(text):
-    return any(k in text for k in ["Backup Channel", "ব্যাকআপ", "बैकअप"])
+    if not text: return False
+    return any(k.lower() in text.lower() for k in ["backup channel", "join backup channel", "backup", "ব্যাকআপ", "बैकअप"])
 
 def is_contact_button(text):
-    return any(k in text for k in ["Contact Admin", "যোগাযোগ", "संपर्क"])
+    if not text: return False
+    return any(k.lower() in text.lower() for k in ["contact admin", "contact", "যোগাযোগ", "সম্পর্ক", "संपर्क"])
 
 def is_lang_button(text):
-    return any(k in text for k in ["Language", "ভাষা", "भाषा"])
+    if not text: return False
+    return any(k.lower() in text.lower() for k in ["language", "ভাষা", "भाषा"])
 
 def is_user_stats_button(text):
     return any(k in text for k in ["User List & Stats", "User Stats", "ইউজার লিস্ট"])
+
+def is_controller_button(text):
+    if not text: return False
+    return any(k in text for k in ["Channel Controller", "চ্যানেল কন্ট্রোলার", "Forwarder", "ফরওয়ার্ডার"])
+
+def is_scheduler_button(text):
+    if not text: return False
+    return any(k in text for k in ["Post Scheduler", "শিডিউল পোস্ট", "পোস্ট শিডিউলার", "Scheduler"])
 
 def is_menu_navigation(text):
     if not text:
@@ -2490,14 +2504,27 @@ def is_menu_navigation(text):
         is_contact_button(t) or
         is_lang_button(t) or
         is_user_stats_button(t) or
-        "Admin Settings" in t
+        is_controller_button(t) or
+        is_scheduler_button(t) or
+        "Admin Settings" in t or
+        "অ্যাডমিন সেটিংস" in t
     )
 
 def dispatch_menu_command(message):
     bot.clear_step_handler_by_chat_id(message.chat.id)
     t = (message.text or "").strip()
-    if "Admin Settings" in t:
+    if "Admin Settings" in t or "অ্যাডমিন সেটিংস" in t:
         admin_settings_panel(message)
+    elif is_controller_button(t) or t in ['/controller', '/forwarder', '/panel', '/dashboard']:
+        if is_admin(message.from_user.id):
+            clear_admin_state(message.from_user.id)
+            text, markup = build_main_dashboard()
+            bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="HTML")
+    elif is_scheduler_button(t) or t in ['/scheduler', '/schedule']:
+        if is_admin(message.from_user.id):
+            clear_admin_state(message.from_user.id)
+            text, markup = build_scheduler_menu()
+            bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="HTML")
     elif is_user_stats_button(t):
         if is_admin(message.from_user.id):
             send_admin_user_stats(message.chat.id)
@@ -2515,6 +2542,9 @@ def dispatch_menu_command(message):
         language_menu_prompt(message)
     elif t.startswith('/start'):
         send_welcome(message)
+    elif t.startswith('/admin'):
+        if is_admin(message.from_user.id):
+            admin_settings_panel(message)
     elif t.startswith('/lang') or t.startswith('/language'):
         change_language_command(message)
 
@@ -2960,6 +2990,281 @@ def handle_direct_video_watch(message, vid_id):
         parse_mode="Markdown"
     )
 
+
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    user_id = message.from_user.id
+    username = message.from_user.username or message.from_user.first_name or "User"
+    
+    command_args = message.text.split()
+    if len(command_args) > 1 and command_args[1].startswith("v_"):
+        vid_id = command_args[1][2:]
+        handle_direct_video_watch(message, vid_id)
+        return
+
+    # Direct button routing for Upgrade VIP and Invite
+    if len(command_args) > 1:
+        deep_cmd = command_args[1].lower()
+        if deep_cmd in ["buy_vip", "plan", "vip", "buy", "upgrade", "update_plan", "plans"]:
+            if not get_user(user_id):
+                register_user(user_id, username)
+            buy_info(message)
+            return
+        if deep_cmd in ["refer", "invite", "ref", "invite_friends"]:
+            if not get_user(user_id):
+                register_user(user_id, username)
+            refer_info(message)
+            return
+
+    referrer_id = None
+    if len(command_args) > 1 and command_args[1].isdigit():
+        referrer_id = int(command_args[1])
+        if referrer_id == user_id:
+            referrer_id = None
+
+    # Prompt language selection for all users (including Admin)
+    prompt_text = (
+        "🌐 **ভাষা নির্বাচন করুন / Choose Your Language / भाषा चुनें**\n\n"
+        "বটটি ব্যবহার করতে আপনার পছন্দের ভাষা নির্বাচন করুন:\n"
+        "Please select your language to proceed:\n"
+        "कृपया आगे बढ़ने के लिए अपनी भाषा चुनें:"
+    )
+    bot.reply_to(message, prompt_text, parse_mode="Markdown", reply_markup=language_selection_markup(referrer_id))
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("set_lang_"))
+def handle_set_language(call):
+    user_id = call.from_user.id
+    username = call.from_user.username or call.from_user.first_name or "User"
+    
+    # Format: set_lang_{code} or set_lang_{code}_{referrer_id}
+    parts = call.data.split("_")
+    lang_code = parts[2] if len(parts) > 2 else "bn"
+    if lang_code not in ["bn", "en", "hi"]:
+        lang_code = "bn"
+        
+    referrer_id = None
+    if len(parts) > 3 and parts[3].isdigit():
+        referrer_id = int(parts[3])
+        if referrer_id == user_id:
+            referrer_id = None
+            
+    # Set user language
+    set_user_lang(user_id, lang_code)
+    
+    notice = get_txt(user_id, "lang_selected_notice")
+    bot.answer_callback_query(call.id, notice)
+    
+    try:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+    except Exception:
+        pass
+
+    if is_admin(user_id):
+        user = get_user(user_id)
+        if not user:
+            register_user(user_id, username, referrer_id, lang=lang_code)
+        welcome_txt = (
+            f"👑 **Welcome Admin {clean_text_for_markdown(username)}!**\n\n"
+            f"⚡ System is active and running.\n"
+            f"Tap **✦ ⚙️ Admin Settings ✦** below to manage the bot."
+        )
+        bot.send_message(call.message.chat.id, f"{notice}\n\n{welcome_txt}", parse_mode="Markdown", reply_markup=main_keyboard(user_id))
+        return
+
+    user = get_user(user_id)
+    init_credits = get_setting("initial_credits") or 5
+    
+    if not user:
+        register_user(user_id, username, referrer_id, lang=lang_code)
+        user = get_user(user_id)
+        if referrer_id:
+            if is_user_in_chat(user_id):
+                ref_bonus = int(get_setting("refer_credits") or 2)
+                update_credits(referrer_id, ref_bonus)
+                
+                conn = sqlite3.connect('users.db')
+                conn.cursor().execute('UPDATE users SET ref_claimed = 1 WHERE user_id = ?', (user_id,))
+                conn.commit()
+                conn.close()
+
+                try:
+                    ref_msg = get_txt(referrer_id, "ref_bonus_received", ref_bonus=ref_bonus)
+                    bot.send_message(referrer_id, ref_msg)
+                except Exception:
+                    pass
+                
+                welcome_txt = get_txt(user_id, "welcome_new", username=username, init_credits=init_credits)
+            else:
+                welcome_txt = get_txt(user_id, "welcome_referral_locked", username=username)
+                try:
+                    bot.delete_message(call.message.chat.id, call.message.message_id)
+                except Exception:
+                    pass
+                bot.send_message(call.message.chat.id, welcome_txt, parse_mode="Markdown", reply_markup=build_premium_refer_markup(user_id, referrer_id))
+                return
+        else:
+            welcome_txt = get_txt(user_id, "welcome_new", username=username, init_credits=init_credits)
+    else:
+        # Existing user who picked/changed language
+        set_user_lang(user_id, lang_code)
+        welcome_txt = get_txt(user_id, "welcome_returning", username=username)
+        
+    notice = get_txt(user_id, "lang_selected_notice")
+    bot.answer_callback_query(call.id, notice)
+    
+    try:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+    except Exception:
+        pass
+        
+    bot.send_message(call.message.chat.id, f"{notice}\n\n{welcome_txt}", parse_mode="Markdown", reply_markup=main_keyboard(user_id))
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("verify_join_"))
+def handle_verify_join(call):
+    user_id = call.from_user.id
+    referrer_id = int(call.data.split("_")[-1])
+    
+    user = get_user(user_id)
+    if not user:
+        bot.answer_callback_query(call.id, "User not found!")
+        return
+
+    if len(user) > 6 and user[6] == 1:
+        bot.answer_callback_query(call.id, get_txt(user_id, "verify_already_claimed"), show_alert=True)
+        return
+
+    if is_user_in_chat(user_id):
+        ref_bonus = int(get_setting("refer_credits") or 2)
+        update_credits(referrer_id, ref_bonus)
+
+        conn = sqlite3.connect('users.db')
+        conn.cursor().execute('UPDATE users SET ref_claimed = 1 WHERE user_id = ?', (user_id,))
+        conn.commit()
+        conn.close()
+
+        bot.answer_callback_query(call.id, get_txt(user_id, "verify_success_alert"), show_alert=True)
+        bot.send_message(call.message.chat.id, get_txt(user_id, "verify_success_msg"), reply_markup=main_keyboard(user_id))
+        try:
+            bot.send_message(referrer_id, get_txt(referrer_id, "ref_bonus_received", ref_bonus=ref_bonus))
+        except Exception:
+            pass
+    else:
+        bot.answer_callback_query(call.id, get_txt(user_id, "verify_failed"), show_alert=True)
+
+# --- AUTOMATIC CHANNEL / GROUP REFERRAL TRACKING ---
+@bot.chat_member_handler()
+def handle_chat_member_update(update):
+    try:
+        new_status = update.new_chat_member.status
+        old_status = update.old_chat_member.status
+        if new_status in ['member', 'administrator', 'creator'] and old_status not in ['member', 'administrator', 'creator']:
+            new_user_id = update.new_chat_member.user.id
+            referrer_id = None
+            
+            # 1. Match from invite_link name (e.g. ref_12345678)
+            if update.invite_link and update.invite_link.name and update.invite_link.name.startswith("ref_"):
+                try:
+                    referrer_id = int(update.invite_link.name.split("ref_")[-1])
+                except Exception:
+                    pass
+            
+            # 2. Match from cached ref_links table in DB
+            if not referrer_id and update.invite_link and update.invite_link.invite_link:
+                conn = sqlite3.connect('users.db')
+                c = conn.cursor()
+                c.execute('SELECT user_id FROM ref_links WHERE invite_link = ?', (update.invite_link.invite_link,))
+                row = c.fetchone()
+                conn.close()
+                if row:
+                    referrer_id = row[0]
+                    
+            if referrer_id and referrer_id != new_user_id:
+                conn = sqlite3.connect('users.db')
+                c = conn.cursor()
+                c.execute('SELECT ref_claimed FROM users WHERE user_id = ?', (new_user_id,))
+                user_row = c.fetchone()
+                
+                already_claimed = False
+                if not user_row:
+                    uname = update.new_chat_member.user.username or update.new_chat_member.user.first_name or "User"
+                    init_credits = int(get_setting("initial_credits") or 5)
+                    c.execute('INSERT OR IGNORE INTO users (user_id, username, credits, is_paid, referred_by, ref_claimed) VALUES (?, ?, ?, 0, ?, 1)', (new_user_id, uname, init_credits, referrer_id))
+                    conn.commit()
+                else:
+                    already_claimed = (user_row[0] == 1)
+                    if not already_claimed:
+                        c.execute('UPDATE users SET ref_claimed = 1, referred_by = ? WHERE user_id = ?', (referrer_id, new_user_id))
+                        conn.commit()
+                conn.close()
+                
+                if not already_claimed:
+                    ref_bonus = int(get_setting("refer_credits") or 2)
+                    update_credits(referrer_id, ref_bonus)
+                    try:
+                        bot.send_message(referrer_id, f"🎉 Apnar referral link bebohar kore user channel/group-e join koray apni +{ref_bonus} Credits bonus peyechen!")
+                    except Exception:
+                        pass
+    except Exception as e:
+        print(f"Chat Member Update Handler Error: {e}")
+
+@bot.chat_join_request_handler()
+def handle_chat_join_request(req):
+    try:
+        new_user_id = req.from_user.id
+        referrer_id = None
+        
+        if req.invite_link and req.invite_link.name and req.invite_link.name.startswith("ref_"):
+            try:
+                referrer_id = int(req.invite_link.name.split("ref_")[-1])
+            except Exception:
+                pass
+                
+        if not referrer_id and req.invite_link and req.invite_link.invite_link:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute('SELECT user_id FROM ref_links WHERE invite_link = ?', (req.invite_link.invite_link,))
+            row = c.fetchone()
+            conn.close()
+            if row:
+                referrer_id = row[0]
+                
+        if referrer_id and referrer_id != new_user_id:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute('SELECT ref_claimed FROM users WHERE user_id = ?', (new_user_id,))
+            user_row = c.fetchone()
+            
+            already_claimed = False
+            if not user_row:
+                uname = req.from_user.username or req.from_user.first_name or "User"
+                init_credits = int(get_setting("initial_credits") or 5)
+                c.execute('INSERT OR IGNORE INTO users (user_id, username, credits, is_paid, referred_by, ref_claimed) VALUES (?, ?, ?, 0, ?, 1)', (new_user_id, uname, init_credits, referrer_id))
+                conn.commit()
+            else:
+                already_claimed = (user_row[0] == 1)
+                if not already_claimed:
+                    c.execute('UPDATE users SET ref_claimed = 1, referred_by = ? WHERE user_id = ?', (referrer_id, new_user_id))
+                    conn.commit()
+            conn.close()
+            
+            if not already_claimed:
+                ref_bonus = int(get_setting("refer_credits") or 2)
+                update_credits(referrer_id, ref_bonus)
+                try:
+                    bot.send_message(referrer_id, f"🎉 Apnar referral link bebohar kore user channel/group-e join request pathanor karone apni +{ref_bonus} Credits bonus peyechen!")
+                except Exception:
+                    pass
+    except Exception as e:
+        print(f"Chat Join Request Handler Error: {e}")
+
+
+
+
+# Aliases for unified router
+set_language_callback = handle_set_language
+verify_join_callback = handle_verify_join
+handle_reply_to_user = handle_reply_button
 
 
 def is_controller_button(text):
@@ -3855,6 +4160,397 @@ def sync_users_json():
         print(f"Error syncing users.json: {e}")
 
 
+def handle_sticker_upload(message):
+    uid = message.from_user.id
+    if not is_user_authenticated(uid):
+        return
+
+    file_id = None
+    if message.sticker:
+        file_id = message.sticker.file_id
+    elif message.photo:
+        file_id = message.photo[-1].file_id
+    elif message.document and (message.document.mime_type or "").startswith("image/"):
+        file_id = message.document.file_id
+
+    if not file_id:
+        return
+
+    bot.send_chat_action(message.chat.id, "upload_document")
+    try:
+        f_info = bot.get_file(file_id)
+        downloaded = bot.download_file(f_info.file_path)
+
+        sticker_dest = os.path.join(APP_DIR, "sticker.webp")
+        with open(sticker_dest, "wb") as f:
+            f.write(downloaded)
+
+        update_env({
+            "STICKER_ENABLED": "True",
+            "STICKER_PATH": sticker_dest
+        })
+        if mgr.engine and hasattr(mgr.engine, "config"):
+            mgr.engine.config["sticker_enabled"] = True
+            mgr.engine.config["sticker_path"] = sticker_dest
+
+        clear_admin_state(uid)
+        bot.reply_to(
+            message,
+            "✅ <b>স্টিকার সফলভাবে সিলেক্ট ও সেভ হয়েছে!</b>\n\n"
+            "এখন থেকে এই নতুন স্টিকারটি সোর্স চ্যানেল থেকে আসা সমস্ত পোস্ট ও মিডিয়াতে স্বয়ংক্রিয়ভাবে ওয়াটারমার্ক হিসেবে ব্যবহার করা হবে।"
+        )
+        t, m = build_sticker_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+    except Exception as e:
+        bot.reply_to(message, f"❌ স্টিকার সেভ করতে সমস্যা হয়েছে: {e}")
+
+@bot.message_handler(func=lambda msg: True, content_types=["text"])
+def handle_admin_text(message):
+    uid = message.from_user.id
+    text_val = message.text.strip()
+
+    if not is_admin(uid):
+        return
+
+    state_obj = get_admin_state(uid)
+    text_val = message.text.strip()
+
+    # Check if engine is waiting for 2FA or login auth
+    if mgr.auth_future and not mgr.auth_future.done():
+        if mgr.provide_auth_input(text_val):
+            bot.reply_to(message, "✅ <b>Auth input forwarded to engine.</b>")
+            return
+
+    if not state_obj:
+        # If admin simply sends a TeraBox link without prompt, test it!
+        if any(d in text_val.lower() for d in DEFAULT_TERABOX_DOMAINS):
+            test_terabox_url(message, text_val)
+            return
+
+        bot.reply_to(
+            message,
+            "💡 Use /admin or /dashboard to open the main control panel.",
+            reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("📱 Open Dashboard", callback_data="nav:main"))
+        )
+        return
+
+    st = state_obj["state"]
+    meta = state_obj.get("meta", {})
+
+    if text_val.lower() in ["/cancel", "cancel", "বাতিল"]:
+        clear_admin_state(message.from_user.id)
+        bot.reply_to(message, "❌ <i>Action canceled.</i>")
+        t, m = build_main_dashboard()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+        return
+
+    if st == "WAIT_ADD_SOURCE":
+        env = read_env()
+        raw = env.get("SOURCE_CHATS", "")
+        sources = [s.strip() for s in raw.split(",") if s.strip()]
+        if text_val not in sources:
+            sources.append(text_val)
+            update_env({"SOURCE_CHATS": ", ".join(sources)})
+            bot.reply_to(message, f"✅ <b>Added source channel:</b> <code>{text_val}</code>")
+        else:
+            bot.reply_to(message, "⚠️ Channel is already in source list.")
+        clear_admin_state(message.from_user.id)
+        t, m = build_sources_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_SET_OUTPUT":
+        update_env({"OUTPUT_CHANNEL": text_val})
+        bot.reply_to(message, f"✅ <b>Output channel updated to:</b> <code>{text_val}</code>")
+        clear_admin_state(message.from_user.id)
+        t, m = build_output_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_EDIT_BTN":
+        key = meta.get("key")
+        if key:
+            update_env({key: text_val})
+            bot.reply_to(message, f"✅ <b>Button label updated:</b> <code>{text_val}</code>")
+        clear_admin_state(message.from_user.id)
+        t, m = build_btn_texts_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_EDIT_MONETAG_ZONE":
+        new_zone = re.sub(r"[^\d]", "", text_val.strip())
+        if not new_zone:
+            bot.reply_to(message, "⚠️ Invalid Zone ID. Please enter numeric digits only, e.g. <code>12016303</code>.")
+            return
+        update_env({"MONETAG_ZONE_ID": new_zone})
+        bot.reply_to(message, f"✅ <b>Monetag Ads Zone ID updated to:</b> <code>{new_zone}</code>\n<i>Syncing Mini App player on GitHub Pages...</i>")
+        clear_admin_state(message.from_user.id)
+        threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_zone": new_zone}, daemon=True).start()
+        t, m = build_monetag_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_EDIT_MONETAG_INTERVAL":
+        raw = text_val.lower().strip()
+        sec = 0
+        if raw.endswith("m") or raw.endswith("min") or raw.endswith("minute") or raw.endswith("minutes"):
+            num_part = re.sub(r"[^\d]", "", raw)
+            if num_part:
+                sec = int(num_part) * 60
+        else:
+            num_part = re.sub(r"[^\d]", "", raw)
+            if num_part:
+                sec = int(num_part)
+
+        if sec < 10:
+            bot.reply_to(message, "⚠️ Invalid interval. Minimum interval is 10 seconds. Examples: <code>180</code> or <code>3m</code>.")
+            return
+
+        update_env({"MONETAG_MIDROLL_INTERVAL": sec})
+        bot.reply_to(message, f"✅ <b>Video mid-roll ads interval updated to:</b> <code>{sec}s</code>\n<i>Syncing Mini App player on GitHub Pages...</i>")
+        clear_admin_state(message.from_user.id)
+        threading.Thread(target=sync_monetag_to_github_pages, kwargs={"new_interval": sec}, daemon=True).start()
+        t, m = build_monetag_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_SET_DELAY":
+        # expects format "1 - 3" or single integer "2"
+        nums = re.findall(r"\d+", text_val)
+        if len(nums) == 1:
+            d_min = int(nums[0])
+            d_max = int(nums[0])
+        elif len(nums) >= 2:
+            d_min = int(nums[0])
+            d_max = int(nums[1])
+        else:
+            bot.reply_to(message, "⚠️ Invalid format. Send like <code>1 - 3</code> or <code>2</code>.")
+            return
+
+        update_env({
+            "POST_DELAY_MIN_SECONDS": d_min,
+            "POST_DELAY_MAX_SECONDS": d_max,
+            "POST_DELAY_SECONDS": d_max
+        })
+        bot.reply_to(message, f"✅ <b>Post delay set to:</b> <code>{d_min}s - {d_max}s</code>")
+        clear_admin_state(message.from_user.id)
+        t, m = build_timing_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_SET_TIMEOUT":
+        if text_val.isdigit():
+            update_env({"REPLY_TIMEOUT": int(text_val)})
+            bot.reply_to(message, f"✅ <b>Bot response timeout set to:</b> <code>{text_val}s</code>")
+        else:
+            bot.reply_to(message, "⚠️ Please send a valid number of seconds.")
+            return
+        clear_admin_state(message.from_user.id)
+        t, m = build_timing_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_RESOLVE_LINK":
+        clear_admin_state(message.from_user.id)
+        resolve_channel_link(message, text_val)
+
+    elif st == "WAIT_TEST_LINK":
+        clear_admin_state(message.from_user.id)
+        test_terabox_url(message, text_val)
+
+    elif st == "WAIT_TEST_TRANS":
+        clear_admin_state(message.from_user.id)
+        bot.send_chat_action(message.chat.id, "typing")
+        env = read_env()
+        curr_lang = env.get("TRANSLATE_TARGET_LANG", "en").lower()
+        l_info = SUPPORTED_LANGUAGES.get(curr_lang, (curr_lang, ""))
+        try:
+            translated = forwarder_core.MediaProcessor.translate_text(text_val, target_lang=curr_lang)
+            resp = (
+                f"🌐 <b>Translation Output ({l_info[0]}):</b>\n\n"
+                f"<b>Original:</b>\n<code>{text_val}</code>\n\n"
+                f"<b>Translated:</b>\n<code>{translated}</code>"
+            )
+        except Exception as e:
+            resp = f"❌ Translation Error: {e}"
+        bot.reply_to(message, resp, reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("🔙 Back to Translation Menu", callback_data="nav:trans")))
+
+    elif st == "WAIT_EDIT_CRED":
+        key = meta.get("key")
+        if key:
+            update_env({key: text_val})
+            bot.reply_to(message, f"✅ <b>{key} সফলভাবে আপডেট করা হয়েছে:</b> <code>{text_val}</code>\n<i>সতর্কতা: ইঞ্জিন রিস্টার্ট করলে নতুন ক্রেডেনশিয়াল কার্যকর হবে।</i>")
+        clear_admin_state(message.from_user.id)
+        t, m = build_credentials_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_CHANGE_PWD":
+        if len(text_val) < 4:
+            bot.reply_to(message, "⚠️ পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে। অন্য একটি পাসওয়ার্ড দিন:")
+            return
+        update_env({"BOT_PASSWORD": text_val})
+        bot.reply_to(message, f"✅ <b>বট অ্যাক্সেস পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!</b>\nনতুন পাসওয়ার্ড: <code>{text_val}</code>")
+        clear_admin_state(message.from_user.id)
+        t, m = build_credentials_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_TG_PHONE":
+        phone = text_val.replace(" ", "").replace("-", "")
+        if len(phone) < 7:
+            bot.reply_to(message, "⚠️ অনুগ্রহ করে সঠিক কান্ট্রি কোড সহ ফোন নম্বর দিন (যেমন: <code>+8801721007568</code>):")
+            return
+        update_env({"TELEGRAM_PHONE": phone})
+        env = read_env()
+        api_id = env.get("API_ID")
+        api_hash = env.get("API_HASH")
+        status_msg = bot.reply_to(message, "⏳ <i>টেলিগ্রাম সার্ভারে কোড রিকোয়েস্ট পাঠানো হচ্ছে...</i>")
+        try:
+            login_mgr.run(login_mgr._send_code(uid, phone, int(api_id), api_hash))
+            set_admin_state(uid, "WAIT_TG_CODE")
+            bot.edit_message_text(
+                "📩 <b>লগইন ওটিপি (OTP Code) পাঠানো হয়েছে!</b>\n━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"আপনার <code>{phone}</code> নম্বরের টেলিগ্রাম অ্যাপ নোটিফিকেশনে যে কোডটি এসেছে তা এখানে লিখে পাঠান (যেমন: <code>12345</code>):\n\n"
+                "<i>নোট: কোডের মাঝে স্পেস থাকলে স্পেস ছাড়া শুধু সংখ্যাগুলো পাঠাবেন।</i>",
+                message.chat.id,
+                status_msg.message_id,
+                reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+            )
+        except errors.PhoneNumberInvalidError:
+            bot.edit_message_text("❌ <b>ভুল ফোন নম্বর!</b> টেলিগ্রাম অ্যাকাউন্টটি যে নম্বরে খোলা সেটি কান্ট্রি কোড সহ লিখুন:", message.chat.id, status_msg.message_id)
+        except errors.FloodWaitError as fe:
+            clear_admin_state(uid)
+            bot.edit_message_text(f"⚠️ <b>Flood Wait!</b> টেলিগ্রাম রিকোয়েস্ট লিমিট হয়েছে। অনুগ্রহ করে {fe.seconds} সেকেন্ড পর চেষ্টা করুন।", message.chat.id, status_msg.message_id)
+        except Exception as e:
+            bot.edit_message_text(f"❌ <b>কোড পাঠানোর ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id)
+
+    elif st == "WAIT_TG_CODE":
+        clean_code = text_val.replace(" ", "").replace("-", "").strip()
+        status_msg = bot.reply_to(message, "⏳ <i>কোড যাচাই করা হচ্ছে...</i>")
+        try:
+            res = login_mgr.run(login_mgr._submit_code(uid, clean_code))
+            if res["status"] == "ok":
+                me = res["user"]
+                user_display = f"{me.first_name or ''} {me.last_name or ''}".strip() or me.username or str(me.id)
+                clear_admin_state(uid)
+                bot.edit_message_text(
+                    f"🎉 <b>অভিনন্দন! টেলিগ্রাম অ্যাকাউন্ট সফলভাবে লগইন হয়েছে!</b>\n━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"👤 <b>অ্যাকাউন্ট:</b> {user_display}\n"
+                    f"🆔 <b>ইউজার আইডি:</b> <code>{me.id}</code>\n"
+                    f"💾 <b>সেশন ফাইল:</b> <code>sessions/telegram_automation.session</code>\n\n"
+                    "এখন আপনার ক্লাউড সার্ভারে সেশন সক্রিয়! ড্যাশবোর্ড থেকে <b>🔴 Start Engine</b> দিলেই স্বয়ংক্রিয় কাজ শুরু হবে।",
+                    message.chat.id,
+                    status_msg.message_id,
+                    reply_markup=InlineKeyboardMarkup().row(
+                        InlineKeyboardButton("📱 Open Dashboard", callback_data="nav:main"),
+                        InlineKeyboardButton("🔴 Start Engine", callback_data="act:start")
+                    )
+                )
+            elif res["status"] == "2fa_needed":
+                set_admin_state(uid, "WAIT_TG_2FA")
+                bot.edit_message_text(
+                    "🔐 <b>Two-Step Verification (2FA) সক্রিয় আছে!</b>\n━━━━━━━━━━━━━━━━━━━━━━\n"
+                    "আপনার টেলিগ্রাম অ্যাকাউন্টের ক্লাউড পাসওয়ার্ডটি (2FA Password) এখানে লিখে পাঠান:",
+                    message.chat.id,
+                    status_msg.message_id,
+                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+                )
+            elif res["status"] == "invalid_code":
+                bot.edit_message_text(
+                    "❌ <b>ভুল ওটিপি কোড!</b> কোডটি টেলিগ্রাম অ্যাপে দেখে সঠিকভাবে সংখ্যাগুলো লিখে পাঠান (যেমন: <code>12345</code>):",
+                    message.chat.id,
+                    status_msg.message_id,
+                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+                )
+            elif res["status"] == "expired_code":
+                clear_admin_state(uid)
+                bot.edit_message_text(
+                    "⚠️ <b>কোডের মেয়াদ শেষ হয়ে গেছে!</b> অনুগ্রহ করে আবার নতুন করে লগইন শুরু করুন।",
+                    message.chat.id,
+                    status_msg.message_id,
+                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("📲 Login Again", callback_data="act:start_tg_login"))
+                )
+            else:
+                bot.edit_message_text(f"❌ <b>লগইন ব্যর্থ:</b> {res.get('error', 'অজানা ত্রুটি')}", message.chat.id, status_msg.message_id)
+        except Exception as e:
+            bot.edit_message_text(f"❌ <b>ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id)
+
+    elif st == "WAIT_TG_2FA":
+        status_msg = bot.reply_to(message, "⏳ <i>2FA পাসওয়ার্ড যাচাই করা হচ্ছে...</i>")
+        try:
+            res = login_mgr.run(login_mgr._submit_2fa(uid, text_val))
+            if res["status"] == "ok":
+                me = res["user"]
+                user_display = f"{me.first_name or ''} {me.last_name or ''}".strip() or me.username or str(me.id)
+                clear_admin_state(uid)
+                bot.edit_message_text(
+                    f"🎉 <b>অভিনন্দন! 2FA সফল হয়েছে এবং সেশন সংরক্ষিত হয়েছে!</b>\n━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"👤 <b>অ্যাকাউন্ট:</b> {user_display}\n"
+                    f"🆔 <b>ইউজার আইডি:</b> <code>{me.id}</code>\n"
+                    f"💾 <b>সেশন ফাইল:</b> <code>sessions/telegram_automation.session</code>\n\n"
+                    "এখন আপনি ড্যাশবোর্ড থেকে <b>🔴 Start Engine</b> দিয়ে অটোমেশন চালু করতে পারবেন।",
+                    message.chat.id,
+                    status_msg.message_id,
+                    reply_markup=InlineKeyboardMarkup().row(
+                        InlineKeyboardButton("📱 Open Dashboard", callback_data="nav:main"),
+                        InlineKeyboardButton("🔴 Start Engine", callback_data="act:start")
+                    )
+                )
+            elif res["status"] == "invalid_pwd":
+                bot.edit_message_text(
+                    "❌ <b>ভুল 2FA পাসওয়ার্ড!</b> সঠিক টু-স্টেপ পাসওয়ার্ডটি আবার লিখুন:",
+                    message.chat.id,
+                    status_msg.message_id,
+                    reply_markup=InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="act:cancel_tg_login"))
+                )
+            else:
+                bot.edit_message_text(f"❌ <b>2FA ব্যর্থ:</b> {res.get('error', 'অজানা ত্রুটি')}", message.chat.id, status_msg.message_id)
+        except Exception as e:
+            bot.edit_message_text(f"❌ <b>ব্যর্থতা:</b> {e}", message.chat.id, status_msg.message_id)
+
+    elif st == "WAIT_ADD_AJ_CHAT":
+        env = read_env()
+        raw = env.get("AUTO_JOIN_CHATS", "")
+        chats = [c.strip() for c in raw.split(",") if c.strip()]
+        if text_val not in chats:
+            chats.append(text_val)
+            update_env({"AUTO_JOIN_CHATS": ", ".join(chats)})
+            bot.reply_to(message, f"✅ <b>Auto-Join টার্গেট চ্যাট যোগ করা হয়েছে:</b> <code>{text_val}</code>")
+        else:
+            bot.reply_to(message, "⚠️ এই চ্যাটটি ইতোমধ্যেই তালিকায় রয়েছে।")
+        clear_admin_state(message.from_user.id)
+        t, m = build_auto_join_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_SET_AJ_DELAY":
+        if text_val.isdigit():
+            update_env({"AUTO_JOIN_DELAY_SECONDS": int(text_val)})
+            bot.reply_to(message, f"✅ <b>Auto-Join বিলম্ব সময় নির্ধারণ করা হয়েছে:</b> <code>{text_val}s</code>")
+        else:
+            bot.reply_to(message, "⚠️ অনুগ্রহ করে শুধু পূর্ণসংখ্যা সেকেন্ড লিখুন (যেমন: 1 বা 2)।")
+            return
+        clear_admin_state(message.from_user.id)
+        t, m = build_auto_join_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+    elif st == "WAIT_ADD_HJ_CHAT":
+        env = read_env()
+        raw = env.get("HIDE_JOIN_CHATS", "")
+        chats = [c.strip() for c in raw.split(",") if c.strip()]
+        if text_val not in chats:
+            chats.append(text_val)
+            update_env({"HIDE_JOIN_CHATS": ", ".join(chats)})
+            bot.reply_to(message, f"✅ <b>Clean Notification টার্গেট গ্রুপ যোগ করা হয়েছে:</b> <code>{text_val}</code>")
+        else:
+            bot.reply_to(message, "⚠️ এই গ্রুপটি ইতোমধ্যেই তালিকায় রয়েছে।")
+        clear_admin_state(message.from_user.id)
+        t, m = build_hide_join_menu()
+        bot.send_message(message.chat.id, t, reply_markup=m)
+
+
+def safe_edit_message(call, text: str, reply_markup: InlineKeyboardMarkup) -> bool:
+    try:
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=reply_markup)
+        return True
+    except Exception as e:
+        if "message is not modified" in str(e).lower():
+            return True
+        return False
+
+
+
 def handle_controller_callbacks(call):
     if not is_admin(call.from_user.id):
         bot.answer_callback_query(call.id, "Access Denied!", show_alert=True)
@@ -4673,7 +5369,8 @@ def master_message_dispatcher(message):
 
     # 3. Check if admin has state in admin_states
     if is_admin(uid) and get_admin_state(uid):
-        st = get_admin_state(uid)
+        state_dict = get_admin_state(uid)
+        st = state_dict.get("state") if isinstance(state_dict, dict) else state_dict
         if st == "WAIT_SCHED_TIME":
             clear_admin_state(uid)
             parts = txt.split()
