@@ -772,9 +772,11 @@
             ad_sponsor_loading: "বিজ্ঞাপন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...",
             ad_sponsor_desc: "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন (স্কিপ বা ক্লিক করে ব্যাক করবেন না)...",
             ad_warn_title: "⚠️ অ্যাড সম্পূর্ণ দেখুন",
-            ad_warn_desc: "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি।",
-            ad_warn_auto: "🔄 স্বয়ংক্রিয়ভাবে পুনরায় বিজ্ঞাপন চালু হচ্ছে...",
+            ad_warn_desc: "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি। ভিডিও দেখতে পুরো অ্যাডটি দেখুন।",
+            ad_warn_click: "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।",
             ad_warn_skip: "ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।",
+            ad_warn_auto: "🔄 স্বয়ংক্রিয়ভাবে পুনরায় বিজ্ঞাপন চালু হচ্ছে...",
+            ad_error: "বিজ্ঞাপন লোড হতে সমস্যা হয়েছে। পুনরায় চেষ্টা করা হচ্ছে...",
             join_title: "🔒 মেম্বারশিপ আবশ্যক",
             join_desc: "ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।",
             open_bot_btn: "🚀 @leadox_bot ওপেন করে ফ্রি ক্রেডিট পান",
@@ -811,9 +813,11 @@
             ad_sponsor_loading: "Loading advertisement, please wait...",
             ad_sponsor_desc: "Please watch the sponsored ad completely to start video (do not skip)...",
             ad_warn_title: "⚠️ Watch Full Ad",
-            ad_warn_desc: "Ad was not watched completely due to click or back button.",
-            ad_warn_auto: "🔄 Automatically reloading advertisement...",
+            ad_warn_desc: "The ad was not watched completely due to click or back button. Please watch the entire ad to play video.",
+            ad_warn_click: "You clicked or left the ad! You must watch the complete ad to stream video.",
             ad_warn_skip: "You must watch the full ad without skipping to play video.",
+            ad_warn_auto: "🔄 Automatically reloading advertisement...",
+            ad_error: "Ad failed to load. Retrying automatically...",
             join_title: "🔒 Membership Required",
             join_desc: "To stream this video, please join our Telegram bot first and collect free credits.",
             open_bot_btn: "🚀 Open @leadox_bot & Get Free Credits",
@@ -850,9 +854,11 @@
             ad_sponsor_loading: "विज्ञापन लोड हो रहा है, कृपया प्रतीक्षा करें...",
             ad_sponsor_desc: "वीडियो शुरू करने के लिए विज्ञापन पूरा देखें (स्किप न करें)...",
             ad_warn_title: "⚠️ विज्ञापन पूरा देखें",
-            ad_warn_desc: "क्लिक या बैक करने के कारण विज्ञापन पूरा नहीं देखा गया।",
-            ad_warn_auto: "🔄 स्वचालित रूप से पुनः विज्ञापन शुरू हो रहा है...",
+            ad_warn_desc: "विज्ञापन पर क्लिक या बैक करने के कारण विज्ञापन पूरा नहीं देखा गया। वीडियो देखने के लिए पूरा विज्ञापन देखें।",
+            ad_warn_click: "विज्ञापन पर क्लिक करके बैक किया गया! पूरा विज्ञापन देखे बिना वीडियो शुरू नहीं होगा।",
             ad_warn_skip: "वीडियो चलाने के लिए विज्ञापन को बिना स्किप किए पूरा देखना होगा।",
+            ad_warn_auto: "🔄 स्वचालित रूप से पुनः विज्ञापन शुरू हो रहा है...",
+            ad_error: "विज्ञापन लोड करने में समस्या आई। पुनः प्रयास किया जा रहा है...",
             join_title: "🔒 सदस्यता आवश्यक",
             join_desc: "वीडियो चलाने के लिए पहले हमारे टेलीग्राम बॉट से जुड़ें और मुफ़्त क्रेडिट प्राप्त करें।",
             open_bot_btn: "🚀 @leadox_bot खोलें और मुफ़्त क्रेडिट पाएं",
@@ -1152,7 +1158,7 @@
                     console.log("[Monetag] Page visible again.");
                     if (!adCompletedSuccessfully && userLeftPage) {
                         console.warn("[Monetag] User returned after clicking ad/leaving. Triggering auto ad re-show.");
-                        scheduleAutoRetry(800, t.ad_warn_desc);
+                        scheduleAutoRetry(800, t.ad_warn_click);
                     }
                 }
             };
@@ -1161,7 +1167,7 @@
                 const t = I18N[currentLang] || I18N.bn;
                 if (!document.hidden && !adCompletedSuccessfully && userLeftPage) {
                     console.log("[Monetag] Window focused. Triggering auto ad re-show.");
-                    scheduleAutoRetry(800, t.ad_warn_desc);
+                    scheduleAutoRetry(800, t.ad_warn_click);
                 }
             };
 
@@ -1169,7 +1175,7 @@
                 const t = I18N[currentLang] || I18N.bn;
                 if (!document.hidden && !adCompletedSuccessfully && userLeftPage) {
                     console.log("[Monetag] Page shown. Triggering auto ad re-show.");
-                    scheduleAutoRetry(800, t.ad_warn_desc);
+                    scheduleAutoRetry(800, t.ad_warn_click);
                 }
             };
 
@@ -1267,7 +1273,8 @@
                     console.warn("[Monetag] Ad execution exception:", ex);
                     consecutiveFailures++;
                     if (!document.hidden) {
-                        scheduleAutoRetry(1000, "বিজ্ঞাপন লোড হতে সমস্যা হয়েছে। পুনরায় চেষ্টা করা হচ্ছে...");
+                        const t = I18N[currentLang] || I18N.bn;
+                        scheduleAutoRetry(1000, t.ad_error);
                     }
                 }
             }
@@ -1954,8 +1961,7 @@
         if (!isAdMode && !isVip && !alreadyWatched && currentCredits > 0) {
             localStorage.setItem(localUnlockKey, "1");
             currentCredits = Math.max(0, currentCredits - 1);
-            badgeEl.className = "status-badge badge-credits";
-            badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+            updateBadgeStatus();
 
             // Realtime deduction on bot backend server
             if (userIdStr) {
@@ -1964,7 +1970,7 @@
                     .then(d => {
                         if (d && d.ok && typeof d.credits === 'number') {
                             currentCredits = d.credits;
-                            badgeEl.innerText = `⚡ ${currentCredits} Credits Left`;
+                            updateBadgeStatus();
                         }
                     })
                     .catch(() => {});
