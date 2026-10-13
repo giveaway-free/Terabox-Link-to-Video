@@ -283,6 +283,17 @@ init_db()
 
 def restore_users_from_gh():
     try:
+        # Check if local users.db already has accounts. If so, preserve local data!
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT count(*) FROM users")
+        user_count = cursor.fetchone()[0]
+        conn.close()
+        if user_count > 0:
+            print(f"[LOCAL] Local users.db contains {user_count} accounts. Preserving local database.")
+            sync_users_json()
+            return
+
         token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
         hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
         url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data"
@@ -5934,10 +5945,10 @@ if __name__ == '__main__':
     restore_users_from_gh()
     threading.Thread(target=publish_render_status, daemon=True).start()
 
-    if os.environ.get("PORT"):
-        t = threading.Thread(target=start_render_health_server, daemon=True)
-        t.start()
-        push_log("STARTUP", f"Render health server listening on port {os.environ.get('PORT')}")
+    local_port = os.environ.get("PORT", "8080")
+    t = threading.Thread(target=start_render_health_server, daemon=True)
+    t.start()
+    push_log("STARTUP", f"Local API & Mini App Server listening on port {local_port}")
 
     scheduler_service.start()
 
