@@ -1883,6 +1883,33 @@
         let baseCredits = 0;
         let serverAlreadyWatched = false;
 
+        function showCustomAlert(msg) {
+            if (tg && typeof tg.showAlert === 'function') {
+                try {
+                    tg.showAlert(msg);
+                    return;
+                } catch (_) {}
+            }
+            let modal = document.getElementById('custom-alert-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'custom-alert-modal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;backdrop-filter:blur(5px);';
+                modal.innerHTML = `
+                    <div style="background:#18181b;border:1px solid rgba(255,255,255,0.15);border-radius:16px;max-width:320px;width:100%;padding:22px 20px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.7);">
+                        <div id="custom-alert-msg" style="color:#f4f4f5;font-size:14px;line-height:1.6;font-weight:500;margin-bottom:20px;"></div>
+                        <button id="custom-alert-ok" style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('custom-alert-ok').onclick = () => {
+                    modal.style.display = 'none';
+                };
+            }
+            document.getElementById('custom-alert-msg').innerText = msg;
+            modal.style.display = 'flex';
+        }
+
         let restartGuardActive = false;
         function activateRestartBotGuard(uId, sParam) {
             if (restartGuardActive) return;
@@ -1960,7 +1987,7 @@
                     }
 
                     if (interactive) {
-                        alert(t.still_blocked_alert || "বটে এখনো /start দেওয়া হয়নি। দয়া করে বটে গিয়ে Start বাটনে চাপুন।");
+                        showCustomAlert(t.still_blocked_alert || "বটে এখনো /start দেওয়া হয়নি। দয়া করে বটে গিয়ে Start বাটনে চাপুন।");
                     }
                 } catch (err) {
                     console.warn("Recheck status err:", err);
