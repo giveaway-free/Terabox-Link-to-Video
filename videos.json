@@ -46,5 +46,13 @@
     "res": "480p",
     "dur": "02:55",
     "type": "Video"
+  },
+  "1Hz5-4jEzI7Q9WKUDEU4alw": {
+    "stream_url": "https://small-shadow-4b18.losoni.workers.dev/fast_stream?token=BSv0b5zBb4bFl1J1wYJub_gvJrfYJVRs28Zd1M7t7jYG9jCFAgJutAwZFcz30hqqQc6Io3InSrl5mtRRKL4dNnDWhmBO1WuI1oye_DPcoJjGXMcq4_EBXu-CjBaSKhWUrOB7LgI8Hw5jYZzlGhc6eBRRwe7eFIrigXPabex_qnm274Aj2OWueR1ab5WOXGyV1E0fe9cwjCoI8mHtqQ5MNeyKySGyS7tQZfCZP-DFd0js8zpxTykoAOo6KD3dh2nv2q0-sL9xsx-LJV-vRN8Qtvd-zmigK3O72RTuPxJiYpeIiMrLXbI5QQ5-gAGH_rmFWEn4clInqvvZAFhapdHyglZ6sc7ySr6_J9cW1FDqCCy8FGd2Wt6ZBHmZ39pf.m3u8",
+    "title": "2023-02-10-15-53-46(4).mp4",
+    "size": "30.3 MB",
+    "res": "360p",
+    "dur": "02:51",
+    "type": "Video"
   }
 }
