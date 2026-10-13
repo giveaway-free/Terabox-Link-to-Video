@@ -1716,6 +1716,9 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
         )
 
     markup.row(
+        InlineKeyboardButton("⏰ ✦ Post Scheduler (শিডিউল পোস্ট) ✦", callback_data="nav:scheduler")
+    )
+    markup.row(
         InlineKeyboardButton("📡 Source Channels", callback_data="nav:sources"),
         InlineKeyboardButton("🎯 Output Channel", callback_data="nav:output")
     )
@@ -2565,7 +2568,6 @@ def main_keyboard(user_id):
             KeyboardButton("✦ ⚡ Channel Controller ✦")
         )
         markup.row(
-            KeyboardButton("✦ ⏰ Post Scheduler ✦"),
             KeyboardButton(get_txt(user_id, "btn_lang"))
         )
     else:
@@ -2595,11 +2597,7 @@ def admin_settings_inline():
         InlineKeyboardButton("✦ 11. 🔗 Backup Channel Link ✦", callback_data="set_backup_link"),
         InlineKeyboardButton("✦ 12. 🔢 Max Batch Links ✦", callback_data="set_max_batch_links"),
         InlineKeyboardButton("✦ 13. ➕ Add User Credits ✦", callback_data="btn_add_credits"),
-        InlineKeyboardButton("✦ 14. ➖ Deduct User Credits ✦", callback_data="btn_deduct_credits"),
-        InlineKeyboardButton("✦ 15. ⚡ Channel Forwarder Pro ✦", callback_data="nav:main"),
-        InlineKeyboardButton("✦ 16. ⏰ Post Scheduler ✦", callback_data="nav:scheduler"),
-        InlineKeyboardButton("✦ 15. ✏️ Set User Credits ✦", callback_data="btn_set_credits"),
-        InlineKeyboardButton("✦ 16. 💰 Monetag Zone ID ✦", callback_data="set_monetag_zone")
+        InlineKeyboardButton("✦ 14. 💰 Monetag Zone ID ✦", callback_data="set_monetag_zone")
     )
     markup.row(InlineKeyboardButton("❌ Close Panel", callback_data="btn_close_admin_panel"))
     return markup
