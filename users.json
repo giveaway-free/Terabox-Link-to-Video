@@ -8,12 +8,21 @@
     "is_blocked": false,
     "watched": []
   },
+  "999999": {
+    "username": "User_999999",
+    "credits": 5,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "lang": "bn",
+    "is_blocked": false,
+    "watched": []
+  },
   "553826070": {
     "username": "tuserahammed",
     "credits": 0,
     "is_paid": 1,
     "paid_expiry": "2026-10-16 04:38:04",
-    "lang": "en",
+    "lang": "bn",
     "is_blocked": false,
     "watched": [
       "1OindwfKLwqg-ATl1ieKrNA",
@@ -26,7 +35,7 @@
     "credits": 0,
     "is_paid": 0,
     "paid_expiry": null,
-    "lang": "en",
+    "lang": "bn",
     "is_blocked": false,
     "watched": [
       "12eFFk6vNOiSBJDl8W9hURw",
@@ -46,7 +55,7 @@
     "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
-    "lang": "en",
+    "lang": "bn",
     "is_blocked": false,
     "watched": []
   },
@@ -64,7 +73,7 @@
     "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
-    "lang": "en",
+    "lang": "bn",
     "is_blocked": false,
     "watched": []
   },
@@ -138,7 +147,7 @@
     "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
-    "lang": "en",
+    "lang": "bn",
     "is_blocked": false,
     "watched": []
   },
