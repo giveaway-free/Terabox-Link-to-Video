@@ -1737,8 +1737,10 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
             InlineKeyboardButton("🔄 Refresh Status", callback_data="nav:main")
         )
 
+    sched_on = is_schedule_mode_enabled()
+    sched_icon = "🟢" if sched_on else "🔴"
     markup.row(
-        InlineKeyboardButton("✦ ⏰ Post Scheduler ✦", callback_data="nav:scheduler")
+        InlineKeyboardButton(f"✦ {sched_icon} ⏰ Post Scheduler: {'ON' if sched_on else 'OFF'} ✦", callback_data="nav:scheduler")
     )
     markup.row(
         InlineKeyboardButton("📡 Source Channels", callback_data="nav:sources"),
