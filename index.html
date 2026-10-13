@@ -746,7 +746,7 @@
     // MONETAG AD NETWORK CONFIGURATION (ZONE ID: 12016303)
     // ==========================================
     let MONETAG_ZONE_ID = "12016303";
-    let MONETAG_MIDROLL_INTERVAL = 60; // default 3 minutes
+    let MONETAG_MIDROLL_INTERVAL = 180; // default 3 minutes
     let isAdMode = false;
     let isVip = false;
     let lastMidrollTime = 0;
@@ -830,7 +830,7 @@
         }
     }
 
-    // Format 2: Rewarded Interstitial (Mandatory completion - skip or click-back korle again ads ashbe!)
+    // Format 2: Rewarded Interstitial (Mandatory completion - skip or click-back korle auto again ads ashbe!)
     function showRewardedAdWithEnforcement() {
         return new Promise((resolve) => {
             // Paid users or direct mode: bypass ads 100%
@@ -839,125 +839,186 @@
                 return;
             }
 
-            const fnName = 'show_' + MONETAG_ZONE_ID;
             const loadingBox = document.getElementById('loading-box');
             const loadingTitle = document.getElementById('loading-title');
             const loadingDesc = document.getElementById('loading-desc');
-            const MIN_WATCH_TIME_MS = 10000; // Minimum 10 seconds to consider a rewarded video watched
+            const MIN_WATCH_TIME_MS = 10000; // 10 seconds minimum watch duration
 
-            function showIncompleteWarning(msg) {
+            let adCompletedSuccessfully = false;
+            let userLeftPage = false;
+            let adStartTime = 0;
+            let leaveTime = 0;
+            let retryTimer = null;
+            let consecutiveFailures = 0;
+
+            function updateLoadingUI(title, desc) {
                 if (loadingBox) {
                     loadingBox.style.display = 'block';
-                    if (loadingTitle) loadingTitle.innerText = "⚠️ অ্যাড সম্পূর্ণ দেখুন";
-                    if (loadingDesc) {
-                        loadingDesc.innerHTML = `
-                            <div style="font-size:14px;color:#f87171;margin-bottom:12px;font-weight:600;line-height:1.5;">
-                                ${msg || "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি। ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।"}
-                            </div>
-                            <button id="btn-re-watch-ad" style="padding:10px 24px;border-radius:10px;background:linear-gradient(135deg, #6366f1, #4f46e5);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:15px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
-                                ▶️ আবার বিজ্ঞাপন দেখুন
-                            </button>
-                        `;
-                        const reBtn = document.getElementById('btn-re-watch-ad');
-                        if (reBtn) {
-                            reBtn.onclick = () => {
-                                runAdCycle();
-                            };
-                        }
-                    }
+                    if (loadingTitle) loadingTitle.innerText = title;
+                    if (loadingDesc) loadingDesc.innerHTML = desc;
                 }
             }
 
+            function scheduleAutoRetry(delayMs, msg) {
+                if (adCompletedSuccessfully) return;
+
+                if (retryTimer) {
+                    clearTimeout(retryTimer);
+                    retryTimer = null;
+                }
+
+                updateLoadingUI(
+                    "⚠️ অ্যাড সম্পূর্ণ দেখুন",
+                    `<div style="font-size:14px;color:#f87171;margin-bottom:8px;font-weight:600;line-height:1.5;">
+                        ${msg || "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি।"}
+                    </div>
+                    <div style="font-size:13px;color:#818cf8;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;">
+                        <span>🔄 স্বয়ংক্রিয়ভাবে পুনরায় বিজ্ঞাপন চালু হচ্ছে...</span>
+                    </div>`
+                );
+
+                retryTimer = setTimeout(() => {
+                    retryTimer = null;
+                    if (!adCompletedSuccessfully) {
+                        runAdCycle();
+                    }
+                }, delayMs);
+            }
+
+            const onBlur = () => {
+                userLeftPage = true;
+                leaveTime = Date.now();
+                console.log("[Monetag] Page lost focus/blurred (User navigated away/clicked ad).");
+            };
+
+            const onVisibilityChange = () => {
+                if (document.hidden) {
+                    userLeftPage = true;
+                    leaveTime = Date.now();
+                    console.log("[Monetag] Page hidden (User clicked ad / left page).");
+                } else {
+                    // User returned to mini app via back button!
+                    console.log("[Monetag] Page visible again.");
+                    if (!adCompletedSuccessfully && userLeftPage) {
+                        console.warn("[Monetag] User returned after clicking ad/leaving. Triggering auto ad re-show.");
+                        scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                    }
+                }
+            };
+
+            const onFocus = () => {
+                if (!document.hidden && !adCompletedSuccessfully && userLeftPage) {
+                    console.log("[Monetag] Window focused. Triggering auto ad re-show.");
+                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                }
+            };
+
+            const onPageShow = () => {
+                if (!document.hidden && !adCompletedSuccessfully && userLeftPage) {
+                    console.log("[Monetag] Page shown. Triggering auto ad re-show.");
+                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                }
+            };
+
+            function attachListeners() {
+                window.addEventListener('blur', onBlur);
+                window.addEventListener('focus', onFocus);
+                window.addEventListener('pageshow', onPageShow);
+                document.addEventListener('visibilitychange', onVisibilityChange);
+            }
+
+            function detachListeners() {
+                window.removeEventListener('blur', onBlur);
+                window.removeEventListener('focus', onFocus);
+                window.removeEventListener('pageshow', onPageShow);
+                document.removeEventListener('visibilitychange', onVisibilityChange);
+            }
+
             async function runAdCycle() {
+                if (adCompletedSuccessfully) return;
                 if (!isAdMode || isVip) {
+                    adCompletedSuccessfully = true;
+                    detachListeners();
                     if (loadingBox) loadingBox.style.display = 'none';
                     resolve();
                     return;
                 }
 
-                if (loadingBox) {
-                    loadingBox.style.display = 'block';
-                    if (loadingTitle) loadingTitle.innerText = "📺 Sponsored Video Ad";
-                    if (loadingDesc) loadingDesc.innerText = "বিজ্ঞাপন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...";
+                if (consecutiveFailures >= 5) {
+                    console.warn("[Monetag] Multiple consecutive ad failures or blocked. Allowing playback fallback.");
+                    adCompletedSuccessfully = true;
+                    detachListeners();
+                    if (loadingBox) loadingBox.style.display = 'none';
+                    initInAppInterstitial();
+                    resolve();
+                    return;
                 }
+
+                updateLoadingUI("📺 Sponsored Video Ad", "বিজ্ঞাপন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...");
 
                 const sdkFn = await waitForMonetagSdk(8000);
                 if (typeof sdkFn !== 'function') {
                     console.warn("[Monetag] SDK unavailable or blocked. Continuing playback.");
+                    adCompletedSuccessfully = true;
+                    detachListeners();
                     if (loadingBox) loadingBox.style.display = 'none';
                     resolve();
                     return;
                 }
 
-                if (loadingBox && loadingDesc) {
-                    loadingDesc.innerText = "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন (স্কিপ বা ক্লিক করে ব্যাক করবেন না)...";
-                }
+                updateLoadingUI("📺 Sponsored Video Ad", "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন (স্কিপ বা ক্লিক করে ব্যাক করবেন না)...");
 
-                const adStartTime = Date.now();
-                let userLeftPageEarly = false;
-                let leaveTime = 0;
-                let adCompletedSuccessfully = false;
-
-                const onBlur = () => {
-                    userLeftPageEarly = true;
-                    leaveTime = Date.now();
-                };
-                const onVisibilityChange = () => {
-                    if (document.hidden) {
-                        userLeftPageEarly = true;
-                        leaveTime = Date.now();
-                    } else if (!adCompletedSuccessfully && userLeftPageEarly) {
-                        // User clicked ad, went to advertiser page, and now returned via Back button!
-                        console.warn("[Monetag] User returned after clicking ad/leaving page early.");
-                        setTimeout(() => {
-                            if (!adCompletedSuccessfully) {
-                                showIncompleteWarning("বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
-                            }
-                        }, 300);
-                    }
-                };
-
-                window.addEventListener('blur', onBlur);
-                document.addEventListener('visibilitychange', onVisibilityChange);
-
-                function cleanupListeners() {
-                    window.removeEventListener('blur', onBlur);
-                    document.removeEventListener('visibilitychange', onVisibilityChange);
-                }
+                userLeftPage = false;
+                leaveTime = 0;
+                adStartTime = Date.now();
 
                 try {
                     sdkFn()
                         .then(() => {
                             const elapsed = Date.now() - adStartTime;
-                            const leftEarly = userLeftPageEarly && (leaveTime - adStartTime < MIN_WATCH_TIME_MS);
+                            const leftEarly = userLeftPage && (leaveTime - adStartTime < MIN_WATCH_TIME_MS);
 
-                            if (leftEarly || elapsed < MIN_WATCH_TIME_MS) {
-                                // Ad was clicked or closed before watching minimum full duration!
-                                console.warn("[Monetag] Premature resolution (ad click / early close). Elapsed:", elapsed, "ms. Left early:", leftEarly);
-                                cleanupListeners();
-                                showIncompleteWarning("বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি। ভিডিও দেখতে অ্যাডটি পুরো দেখুন।");
+                            if (userLeftPage || leftEarly || elapsed < MIN_WATCH_TIME_MS) {
+                                // Ad was clicked or closed prematurely!
+                                console.warn("[Monetag] Premature completion (ad clicked or early close). Elapsed:", elapsed, "ms. userLeftPage:", userLeftPage);
+                                if (document.hidden) {
+                                    // User is still outside on advertiser site, wait until return
+                                    userLeftPage = true;
+                                } else {
+                                    // User is on page, automatically restart ad after 800ms
+                                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি। ভিডিও দেখতে অ্যাডটি পুরো দেখুন।");
+                                }
                             } else {
-                                // Genuinely watched ad till completion
+                                // Genuinely watched ad till finish!
                                 adCompletedSuccessfully = true;
-                                cleanupListeners();
+                                if (retryTimer) clearTimeout(retryTimer);
+                                detachListeners();
                                 console.log("[Monetag] Rewarded ad genuinely watched completely (" + Math.round(elapsed / 1000) + "s).");
                                 if (loadingBox) loadingBox.style.display = 'none';
+                                // Pre-roll ad complete, activate in-app background interstitials
+                                initInAppInterstitial();
                                 resolve();
                             }
                         })
                         .catch((err) => {
-                            cleanupListeners();
                             console.warn("[Monetag] User closed or skipped ad prematurely:", err);
-                            showIncompleteWarning("ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।");
+                            consecutiveFailures++;
+                            if (document.hidden) {
+                                userLeftPage = true;
+                            } else {
+                                scheduleAutoRetry(800, "ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।");
+                            }
                         });
                 } catch (ex) {
-                    cleanupListeners();
                     console.warn("[Monetag] Ad execution exception:", ex);
-                    if (loadingBox) loadingBox.style.display = 'none';
-                    resolve();
+                    consecutiveFailures++;
+                    if (!document.hidden) {
+                        scheduleAutoRetry(1000, "বিজ্ঞাপন লোড হতে সমস্যা হয়েছে। পুনরায় চেষ্টা করা হচ্ছে...");
+                    }
                 }
             }
 
+            attachListeners();
             runAdCycle();
         });
     }
@@ -1562,8 +1623,6 @@
         // Strict VIP Protection: Paid users NEVER receive ads regardless of link clicked!
         if (isVip) {
             isAdMode = false;
-        } else if (isAdMode) {
-            initInAppInterstitial();
         }
 
         const badgeEl = document.getElementById('user-badge');
