@@ -809,6 +809,37 @@
             refer_btn: "👥 Invite Friends (+2 Free Credits)",
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "Please open a video link from the channel button to stream."
+        },
+        hi: {
+            size: "📦 आकार",
+            dur: "⏱️ अवधि",
+            res: "⚡ रेजोल्यूशन",
+            type: "📂 प्रकार",
+            download: "⬇️ डायरेक्ट डाउनलोड",
+            checking: "⚡ सत्यापन हो रहा है...",
+            vip: "💎 VIP (अनलिमिटेड)",
+            ad_supported: "🎬 Watch Now (विज्ञापन समर्थित)",
+            unlocked: "✅ अनलॉक • {n} शेष",
+            credits_left: "⚡ {n} क्रेडिट शेष",
+            zero_credits: "⚠️ 0 क्रेडिट",
+            loading_title: "वीडियो तैयार हो रहा है...",
+            loading_desc: "सर्वर से वीडियो स्ट्रीम लोड हो रही है...",
+            ad_sponsor_title: "📺 Sponsored Video Ad",
+            ad_sponsor_loading: "विज्ञापन लोड हो रहा है, कृपया प्रतीक्षा करें...",
+            ad_sponsor_desc: "वीडियो शुरू करने के लिए विज्ञापन पूरा देखें (स्किप न करें)...",
+            ad_warn_title: "⚠️ विज्ञापन पूरा देखें",
+            ad_warn_desc: "क्लिक या बैक करने के कारण विज्ञापन पूरा नहीं देखा गया।",
+            ad_warn_auto: "🔄 स्वचालित रूप से पुनः विज्ञापन शुरू हो रहा है...",
+            ad_warn_skip: "वीडियो चलाने के लिए विज्ञापन को बिना स्किप किए पूरा देखना होगा।",
+            join_title: "🔒 सदस्यता आवश्यक",
+            join_desc: "वीडियो चलाने के लिए पहले हमारे टेलीग्राम बॉट से जुड़ें और मुफ़्त क्रेडिट प्राप्त करें।",
+            open_bot_btn: "🚀 @leadox_bot खोलें और मुफ़्त क्रेडिट पाएं",
+            paywall_title: "⚡ क्रेडिट समाप्त!",
+            paywall_desc: "आपके मुफ़्त क्रेडिट समाप्त हो गए हैं। असीमित वीडियो के लिए VIP सदस्यता लें या दोस्तों को आमंत्रित करें।",
+            buy_vip_btn: "💎 VIP अपग्रेड करें (50 / 150 BDT)",
+            refer_btn: "👥 दोस्तों को आमंत्रित करें (+2 मुफ़्त क्रेडिट)",
+            no_video_title: "🎬 TeraStream Mini Player",
+            no_video_desc: "वीडियो स्ट्रीम करने के लिए चैनल के लिंक पर क्लिक करें।"
         }
     };
 
@@ -816,19 +847,30 @@
     function initLanguage() {
         const uParams = new URLSearchParams(window.location.search);
         const qLang = uParams.get('lang');
-        if (qLang && (qLang.toLowerCase() === 'en' || qLang.toLowerCase() === 'bn')) {
+        if (qLang && (qLang.toLowerCase() === 'en' || qLang.toLowerCase() === 'bn' || qLang.toLowerCase() === 'hi')) {
             currentLang = qLang.toLowerCase();
         } else {
             const sLang = localStorage.getItem('player_lang');
-            if (sLang && (sLang === 'en' || sLang === 'bn')) currentLang = sLang;
+            if (sLang && (sLang === 'en' || sLang === 'bn' || sLang === 'hi')) {
+                currentLang = sLang;
+            } else if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+                const tgLang = (window.Telegram.WebApp.initDataUnsafe.user.language_code || '').toLowerCase();
+                if (tgLang.startsWith('bn')) currentLang = 'bn';
+                else if (tgLang.startsWith('hi')) currentLang = 'hi';
+                else if (tgLang.startsWith('en')) currentLang = 'en';
+            }
         }
         applyPlayerLanguage(currentLang);
     }
 
     function applyPlayerLanguage(lang) {
-        currentLang = (lang === 'en') ? 'en' : 'bn';
+        if (lang === 'en' || lang === 'hi' || lang === 'bn') {
+            currentLang = lang;
+        } else {
+            currentLang = 'bn';
+        }
         localStorage.setItem('player_lang', currentLang);
-        const t = I18N[currentLang];
+        const t = I18N[currentLang] || I18N.bn;
         
         const lblSize = document.getElementById('lbl-size'); if (lblSize) lblSize.innerText = t.size;
         const lblDur = document.getElementById('lbl-dur'); if (lblDur) lblDur.innerText = t.dur;
@@ -849,11 +891,15 @@
         const noVidDesc = document.getElementById('no-video-desc'); if (noVidDesc) noVidDesc.innerText = t.no_video_desc;
 
         const btnLang = document.getElementById('btn-player-lang');
-        if (btnLang) btnLang.innerText = currentLang === 'bn' ? '🌐 বাং' : '🌐 EN';
+        if (btnLang) {
+            btnLang.innerText = currentLang === 'bn' ? '🌐 বাং' : (currentLang === 'hi' ? '🌐 हिं' : '🌐 EN');
+        }
     }
 
     function togglePlayerLanguage() {
-        applyPlayerLanguage(currentLang === 'bn' ? 'en' : 'bn');
+        if (currentLang === 'bn') applyPlayerLanguage('en');
+        else if (currentLang === 'en') applyPlayerLanguage('hi');
+        else applyPlayerLanguage('bn');
     }
 
     // ==========================================
