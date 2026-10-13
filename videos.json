@@ -678,5 +678,13 @@
     "res": "480p",
     "dur": "22:35",
     "type": "Video"
+  },
+  "1erJgBTqGaHcsJO0bQryxSA": {
+    "stream_url": "https://empty-flower-742a.fepivo.workers.dev/fast_stream?token=j-ot3kgmLpbTxZwpP_s564AyFDL1q88ppH4cew3bMTANwIsU_U-mPljhuwoq3sY7S6aKfzGbR8__NJeCGNYop7C4avOnD4pqD8mjEzrZjcFZqQ6UkR7vtNtHdrpZPpB1IxWicXuff7Cui4kV-K8H_kzF8qG9xDCA50y7P9oTLbDewPVBrTnOwOl-xajHyNhbMX75QAVjJf1p7For__Jk8j-i-sODMNymO_WGPuTRYiLK7k97eiDPZo5_aSiH5FB4mNyZWY3_6SJOk_OFfZ_0pdSlkgbeDoTEJwOzvPOeto2kG0lchTgFqRtJeKhqDn-FzQflLcnO1Wnd1qImyaqL9tOoq56z0vSKdNq7usD-v6QxfWsB6tKpl6zny8tG.m3u8",
+    "title": "2026-08-24-01-24-14.mp4",
+    "size": "17.5 MB",
+    "res": "360p",
+    "dur": "07:59",
+    "type": "Video"
   }
 }
