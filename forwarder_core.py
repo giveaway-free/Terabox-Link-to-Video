@@ -2727,21 +2727,13 @@ class AutomationEngine:
             bot_deep_link = f"https://t.me/{bot_username}?startapp={vid_id}"
             label_paid = btn_tb_paid_text if len(terabox_links) == 1 else f"{btn_tb_paid_text} {idx + 1}"
 
-            # 3. Watch Now button (Monetag Ad supported free direct play)
-            watch_now_link = f"https://t.me/{bot_username}?startapp=ad_{vid_id}"
-            label_watch_now = btn_tb_watch_now_text if len(terabox_links) == 1 else f"{btn_tb_watch_now_text} {idx + 1}"
-
-            # Row 1: [ Free Button (if enabled) ] [ Paid Button ]
+            # Single Video Row: [ Free Button (if enabled) ] [ Play Video Button ]
             video_row = []
             if tb_free_enabled:
                 video_row.append(Button.url(label_free, u))
             video_row.append(Button.url(label_paid, bot_deep_link))
             if video_row:
                 buttons.append(video_row)
-
-            # Row 2: [ Watch Now (Monetag Ads) ] (if enabled)
-            if monetag_enabled:
-                buttons.append([Button.url(label_watch_now, watch_now_link)])
 
         sub_btns: List[Any] = []
         for u in backup_links:
