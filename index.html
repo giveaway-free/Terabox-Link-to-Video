@@ -762,6 +762,12 @@
             zero_credits: "⚠️ ০ ক্রেডিট",
             loading_title: "ভিডিও প্রস্তুত হচ্ছে...",
             loading_desc: "সার্ভার থেকে ভিডিও স্ট্রিম বিশ্লেষণ করা হচ্ছে...",
+            streaming_title: "ভিডিও স্ট্রিম হচ্ছে...",
+            streaming_desc: "হাই-স্পিড সার্ভারের সাথে সংযোগ স্থাপন করা হচ্ছে...",
+            cloud_desc: "ক্লাউড থেকে দ্রুত স্ট্রিম লিঙ্ক তৈরি করা হচ্ছে...",
+            video_ready_title: "ভিডিও প্রস্তুত",
+            video_ready_desc: "ভিডিও লিঙ্ক প্রস্তুত হয়েছে, দেখতে প্লে বাটনে চাপুন:",
+            play_video_btn: "▶ Play Video",
             ad_sponsor_title: "📺 Sponsored Video Ad",
             ad_sponsor_loading: "বিজ্ঞাপন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...",
             ad_sponsor_desc: "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন (স্কিপ বা ক্লিক করে ব্যাক করবেন না)...",
@@ -777,7 +783,9 @@
             buy_vip_btn: "💎 VIP সাবস্ক্রিপশন নিন (50 / 150 BDT)",
             refer_btn: "👥 বন্ধুদের ইনভাইট করুন (+2 ক্রেডিট ফ্রি)",
             no_video_title: "🎬 TeraStream Mini Player",
-            no_video_desc: "ভিডিও স্ট্রিম করতে চ্যানেল থেকে ভিডিও লিংকে ক্লিক করুন。"
+            no_video_desc: "ভিডিও স্ট্রিম করতে চ্যানেল থেকে ভিডিও লিংকে ক্লিক করুন।",
+            expand_btn: "↗ Expand",
+            close_btn: "✕ Close"
         },
         en: {
             size: "📦 SIZE",
@@ -793,6 +801,12 @@
             zero_credits: "⚠️ 0 Credits",
             loading_title: "Preparing Video...",
             loading_desc: "Analyzing video stream from server...",
+            streaming_title: "Streaming Video...",
+            streaming_desc: "Connecting to high-speed stream...",
+            cloud_desc: "Generating fast stream link from cloud...",
+            video_ready_title: "Video Ready",
+            video_ready_desc: "Video link is ready, press play button to start:",
+            play_video_btn: "▶ Play Video",
             ad_sponsor_title: "📺 Sponsored Video Ad",
             ad_sponsor_loading: "Loading advertisement, please wait...",
             ad_sponsor_desc: "Please watch the sponsored ad completely to start video (do not skip)...",
@@ -808,7 +822,9 @@
             buy_vip_btn: "💎 Upgrade to VIP (50 / 150 BDT)",
             refer_btn: "👥 Invite Friends (+2 Free Credits)",
             no_video_title: "🎬 TeraStream Mini Player",
-            no_video_desc: "Please open a video link from the channel button to stream."
+            no_video_desc: "Please open a video link from the channel button to stream.",
+            expand_btn: "↗ Expand",
+            close_btn: "✕ Close"
         },
         hi: {
             size: "📦 आकार",
@@ -824,6 +840,12 @@
             zero_credits: "⚠️ 0 क्रेडिट",
             loading_title: "वीडियो तैयार हो रहा है...",
             loading_desc: "सर्वर से वीडियो स्ट्रीम लोड हो रही है...",
+            streaming_title: "वीडियो स्ट्रीम हो रहा है...",
+            streaming_desc: "हाई-स्पीड सर्वर से कनेक्ट हो रहा है...",
+            cloud_desc: "क्लाउड से फास्ट स्ट्रीम लिंक जनरेट हो रहा है...",
+            video_ready_title: "वीडियो तैयार है",
+            video_ready_desc: "वीडियो लिंक तैयार है, देखने के लिए प्ले बटन दबाएं:",
+            play_video_btn: "▶ Play Video",
             ad_sponsor_title: "📺 Sponsored Video Ad",
             ad_sponsor_loading: "विज्ञापन लोड हो रहा है, कृपया प्रतीक्षा करें...",
             ad_sponsor_desc: "वीडियो शुरू करने के लिए विज्ञापन पूरा देखें (स्किप न करें)...",
@@ -839,30 +861,13 @@
             buy_vip_btn: "💎 VIP अपग्रेड करें (50 / 150 BDT)",
             refer_btn: "👥 दोस्तों को आमंत्रित करें (+2 मुफ़्त क्रेडिट)",
             no_video_title: "🎬 TeraStream Mini Player",
-            no_video_desc: "वीडियो स्ट्रीम करने के लिए चैनल के लिंक पर क्लिक करें।"
+            no_video_desc: "वीडियो स्ट्रीम करने के लिए चैनल के लिंक पर क्लिक करें।",
+            expand_btn: "↗ बड़ा करें",
+            close_btn: "✕ बंद"
         }
     };
 
     let currentLang = "bn";
-    function initLanguage() {
-        const uParams = new URLSearchParams(window.location.search);
-        const qLang = uParams.get('lang');
-        if (qLang && (qLang.toLowerCase() === 'en' || qLang.toLowerCase() === 'bn' || qLang.toLowerCase() === 'hi')) {
-            currentLang = qLang.toLowerCase();
-        } else {
-            const sLang = localStorage.getItem('player_lang');
-            if (sLang && (sLang === 'en' || sLang === 'bn' || sLang === 'hi')) {
-                currentLang = sLang;
-            } else if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                const tgLang = (window.Telegram.WebApp.initDataUnsafe.user.language_code || '').toLowerCase();
-                if (tgLang.startsWith('bn')) currentLang = 'bn';
-                else if (tgLang.startsWith('hi')) currentLang = 'hi';
-                else if (tgLang.startsWith('en')) currentLang = 'en';
-            }
-        }
-        applyPlayerLanguage(currentLang);
-    }
-
     function applyPlayerLanguage(lang) {
         if (lang === 'en' || lang === 'hi' || lang === 'bn') {
             currentLang = lang;
@@ -870,6 +875,13 @@
             currentLang = 'bn';
         }
         localStorage.setItem('player_lang', currentLang);
+        
+        let tgUid = null;
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+            tgUid = String(window.Telegram.WebApp.initDataUnsafe.user.id);
+            localStorage.setItem('bot_lang_' + tgUid, currentLang);
+        }
+
         const t = I18N[currentLang] || I18N.bn;
         
         const lblSize = document.getElementById('lbl-size'); if (lblSize) lblSize.innerText = t.size;
@@ -877,6 +889,9 @@
         const lblRes = document.getElementById('lbl-res'); if (lblRes) lblRes.innerText = t.res;
         const lblType = document.getElementById('lbl-type'); if (lblType) lblType.innerText = t.type;
         const dlBtn = document.getElementById('download-btn'); if (dlBtn) dlBtn.innerText = t.download;
+
+        const btnPipExpand = document.getElementById('btn-restore-pip'); if (btnPipExpand) btnPipExpand.innerText = t.expand_btn;
+        const btnPipClose = document.getElementById('btn-close-pip'); if (btnPipClose) btnPipClose.innerText = t.close_btn;
 
         const joinTitle = document.getElementById('join-box-title'); if (joinTitle) joinTitle.innerText = t.join_title;
         const joinDesc = document.getElementById('join-box-desc'); if (joinDesc) joinDesc.innerText = t.join_desc;
@@ -894,12 +909,85 @@
         if (btnLang) {
             btnLang.innerText = currentLang === 'bn' ? '🌐 বাং' : (currentLang === 'hi' ? '🌐 हिं' : '🌐 EN');
         }
+
+        const loadingTitle = document.getElementById('loading-title');
+        const loadingBox = document.getElementById('loading-box');
+        if (loadingBox && loadingBox.style.display !== 'none' && loadingTitle) {
+            if (loadingTitle.innerText.includes("Verifying") || loadingTitle.innerText.includes("যাচাই") || loadingTitle.innerText.includes("सत्यापन")) {
+                loadingTitle.innerText = t.checking;
+            }
+        }
+
+        if (typeof window.updateBadgeStatus === 'function') {
+            window.updateBadgeStatus();
+        }
+    }
+
+    function initLanguage() {
+        const uParams = new URLSearchParams(window.location.search);
+        const qLang = uParams.get('lang');
+
+        let tgUserId = null;
+        let tgLangCode = null;
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+            tgUserId = String(window.Telegram.WebApp.initDataUnsafe.user.id);
+            tgLangCode = (window.Telegram.WebApp.initDataUnsafe.user.language_code || '').toLowerCase();
+        }
+
+        if (qLang && (qLang.toLowerCase() === 'en' || qLang.toLowerCase() === 'bn' || qLang.toLowerCase() === 'hi')) {
+            currentLang = qLang.toLowerCase();
+            if (tgUserId) localStorage.setItem('bot_lang_' + tgUserId, currentLang);
+        } else if (tgUserId && localStorage.getItem('bot_lang_' + tgUserId)) {
+            const cachedUserLang = localStorage.getItem('bot_lang_' + tgUserId);
+            if (cachedUserLang === 'en' || cachedUserLang === 'bn' || cachedUserLang === 'hi') {
+                currentLang = cachedUserLang;
+            }
+        } else {
+            const sLang = localStorage.getItem('player_lang');
+            if (sLang && (sLang === 'en' || sLang === 'bn' || sLang === 'hi')) {
+                currentLang = sLang;
+            } else if (tgLangCode) {
+                if (tgLangCode.startsWith('hi')) currentLang = 'hi';
+                else if (tgLangCode.startsWith('en')) currentLang = 'en';
+                else currentLang = 'bn';
+            } else {
+                currentLang = 'bn';
+            }
+        }
+        applyPlayerLanguage(currentLang);
+
+        // Immediate background prefetch of user's bot language from data branch if not passed via URL
+        if (!qLang && tgUserId) {
+            fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
+                headers: { 'Accept': 'application/vnd.github.v3+json' }
+            }).then(r => r.json()).then(j => {
+                if (j && j.content) {
+                    const uData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                    if (uData && uData[tgUserId] && uData[tgUserId].lang) {
+                        const targetLang = uData[tgUserId].lang;
+                        if (targetLang === 'bn' || targetLang === 'en' || targetLang === 'hi') {
+                            applyPlayerLanguage(targetLang);
+                            localStorage.setItem('bot_lang_' + tgUserId, targetLang);
+                        }
+                    }
+                }
+            }).catch(() => {});
+        }
     }
 
     function togglePlayerLanguage() {
         if (currentLang === 'bn') applyPlayerLanguage('en');
         else if (currentLang === 'en') applyPlayerLanguage('hi');
         else applyPlayerLanguage('bn');
+
+        let uId = null;
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+            uId = String(window.Telegram.WebApp.initDataUnsafe.user.id);
+        }
+        if (uId) {
+            localStorage.setItem('bot_lang_' + uId, currentLang);
+            fetch(`https://terabox-link-to-video-1.onrender.com/api/set_language?user_id=${uId}&lang=${currentLang}`).catch(() => {});
+        }
     }
 
     // ==========================================
@@ -1028,13 +1116,14 @@
                     retryTimer = null;
                 }
 
+                const t = I18N[currentLang] || I18N.bn;
                 updateLoadingUI(
-                    "⚠️ অ্যাড সম্পূর্ণ দেখুন",
+                    t.ad_warn_title,
                     `<div style="font-size:14px;color:#f87171;margin-bottom:8px;font-weight:600;line-height:1.5;">
-                        ${msg || "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি।"}
+                        ${msg || t.ad_warn_desc}
                     </div>
                     <div style="font-size:13px;color:#818cf8;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;">
-                        <span>🔄 স্বয়ংক্রিয়ভাবে পুনরায় বিজ্ঞাপন চালু হচ্ছে...</span>
+                        <span>${t.ad_warn_auto}</span>
                     </div>`
                 );
 
@@ -1053,6 +1142,7 @@
             };
 
             const onVisibilityChange = () => {
+                const t = I18N[currentLang] || I18N.bn;
                 if (document.hidden) {
                     userLeftPage = true;
                     leaveTime = Date.now();
@@ -1062,22 +1152,24 @@
                     console.log("[Monetag] Page visible again.");
                     if (!adCompletedSuccessfully && userLeftPage) {
                         console.warn("[Monetag] User returned after clicking ad/leaving. Triggering auto ad re-show.");
-                        scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                        scheduleAutoRetry(800, t.ad_warn_desc);
                     }
                 }
             };
 
             const onFocus = () => {
+                const t = I18N[currentLang] || I18N.bn;
                 if (!document.hidden && !adCompletedSuccessfully && userLeftPage) {
                     console.log("[Monetag] Window focused. Triggering auto ad re-show.");
-                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                    scheduleAutoRetry(800, t.ad_warn_desc);
                 }
             };
 
             const onPageShow = () => {
+                const t = I18N[currentLang] || I18N.bn;
                 if (!document.hidden && !adCompletedSuccessfully && userLeftPage) {
                     console.log("[Monetag] Page shown. Triggering auto ad re-show.");
-                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক করে ব্যাক করা হয়েছে! পুরো অ্যাড না দেখলে ভিডিও চালু হবে না।");
+                    scheduleAutoRetry(800, t.ad_warn_desc);
                 }
             };
 
@@ -1115,7 +1207,8 @@
                     return;
                 }
 
-                updateLoadingUI("📺 Sponsored Video Ad", "বিজ্ঞাপন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...");
+                const t = I18N[currentLang] || I18N.bn;
+                updateLoadingUI(t.ad_sponsor_title, t.ad_sponsor_loading);
 
                 const sdkFn = await waitForMonetagSdk(8000);
                 if (typeof sdkFn !== 'function') {
@@ -1127,7 +1220,7 @@
                     return;
                 }
 
-                updateLoadingUI("📺 Sponsored Video Ad", "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন (স্কিপ বা ক্লিক করে ব্যাক করবেন না)...");
+                updateLoadingUI(t.ad_sponsor_title, t.ad_sponsor_desc);
 
                 userLeftPage = false;
                 leaveTime = 0;
@@ -1147,7 +1240,7 @@
                                     userLeftPage = true;
                                 } else {
                                     // User is on page, automatically restart ad after 800ms
-                                    scheduleAutoRetry(800, "বিজ্ঞাপনে ক্লিক বা ব্যাক করায় অ্যাডটি সম্পূর্ণ দেখা হয়নি। ভিডিও দেখতে অ্যাডটি পুরো দেখুন।");
+                                    scheduleAutoRetry(800, t.ad_warn_desc);
                                 }
                             } else {
                                 // Genuinely watched ad till finish!
@@ -1167,7 +1260,7 @@
                             if (document.hidden) {
                                 userLeftPage = true;
                             } else {
-                                scheduleAutoRetry(800, "ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।");
+                                scheduleAutoRetry(800, t.ad_warn_skip);
                             }
                         });
                 } catch (ex) {
@@ -1507,6 +1600,11 @@
         document.getElementById('info-res').innerText = res;
         document.getElementById('info-dur').innerText = dur;
 
+        applyPlayerLanguage(currentLang);
+        if (typeof window.updateBadgeStatus === 'function') {
+            window.updateBadgeStatus();
+        }
+
         if (window._hlsInstance) {
             window._hlsInstance.destroy();
             window._hlsInstance = null;
@@ -1733,6 +1831,11 @@
                     const liveData = await liveRes.json();
                     if (liveData && liveData.ok) {
                         isVip = liveData.is_paid === 1;
+                        if (liveData.lang && (liveData.lang === 'bn' || liveData.lang === 'en' || liveData.lang === 'hi')) {
+                            applyPlayerLanguage(liveData.lang);
+                            localStorage.setItem('bot_lang_' + userIdStr, liveData.lang);
+                            localStorage.setItem('player_lang', liveData.lang);
+                        }
                         if (liveData.monetag_zone_id) {
                             setMonetagZone(liveData.monetag_zone_id);
                         }
@@ -1776,6 +1879,11 @@
                     isVip = userRecord.is_paid === 1;
                     const parsedCr = parseInt(userRecord.credits, 10);
                     if (!isNaN(parsedCr)) baseCredits = parsedCr;
+                    if (userRecord.lang && (userRecord.lang === 'bn' || userRecord.lang === 'en' || userRecord.lang === 'hi')) {
+                        applyPlayerLanguage(userRecord.lang);
+                        localStorage.setItem('bot_lang_' + userIdStr, userRecord.lang);
+                        localStorage.setItem('player_lang', userRecord.lang);
+                    }
                 } else if (uData && uData._settings && uData._settings.initial_credits) {
                     baseCredits = parseInt(uData._settings.initial_credits, 10) || 10;
                 }
@@ -1927,8 +2035,9 @@
         }
 
         // Fast Path 1B: Quick 1-second retry for freshly committed stream before cloud extractor
-        document.getElementById('loading-title').innerText = "Streaming Video...";
-        document.getElementById('loading-desc').innerText = "Connecting to high-speed stream...";
+        const tNow = I18N[currentLang] || I18N.bn;
+        document.getElementById('loading-title').innerText = tNow.streaming_title;
+        document.getElementById('loading-desc').innerText = tNow.streaming_desc;
         await new Promise(r => setTimeout(r, 800));
         try {
             const retrySingle = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(startParam)}.json?ref=data`, {
@@ -1947,8 +2056,8 @@
         } catch (retryErr) {}
 
         // Path 2: Fetch and play video via Extractor API
-        document.getElementById('loading-title').innerText = "Streaming Video...";
-        document.getElementById('loading-desc').innerText = "Generating fast stream link from cloud...";
+        document.getElementById('loading-title').innerText = tNow.streaming_title;
+        document.getElementById('loading-desc').innerText = tNow.cloud_desc;
 
         const abortCtrl = new AbortController();
         const timeoutId = setTimeout(() => abortCtrl.abort(), 7500);
@@ -1985,11 +2094,11 @@
         }
 
         // Clean UI fallback if video is still extracting
-        document.getElementById('loading-title').innerText = "Video Ready";
+        document.getElementById('loading-title').innerText = tNow.video_ready_title;
         document.getElementById('loading-desc').innerHTML = `
-            <div style="font-size:14px;color:#94a3b8;margin-bottom:12px;">ভিডিও লিঙ্ক প্রস্তুত হচ্ছে, দেখতে প্লে বাটনে চাপুন:</div>
+            <div style="font-size:14px;color:#94a3b8;margin-bottom:12px;">${tNow.video_ready_desc}</div>
             <button onclick="location.reload()" style="padding:10px 24px;border-radius:10px;background:linear-gradient(135deg, #6366f1, #4f46e5);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:15px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
-                ▶ Play Video
+                ${tNow.play_video_btn}
             </button>
         `;
     }
