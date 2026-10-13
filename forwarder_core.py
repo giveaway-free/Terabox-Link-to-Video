@@ -15,6 +15,7 @@ import base64
 from base64 import b64encode, b64decode
 import json
 import random
+import shutil
 import sqlite3
 import asyncio
 import logging
@@ -1816,6 +1817,62 @@ class AutomationEngine:
         if not self._auto_join_task or self._auto_join_task.done():
             self._auto_join_task = asyncio.create_task(self._auto_join_worker_loop())
 
+    def is_queue_mode_active(self) -> bool:
+        if self.config.get("schedule_mode_enabled", False):
+            return True
+        try:
+            db_path = os.path.join(APP_DIR, "users.db")
+            if os.path.exists(db_path):
+                conn = sqlite3.connect(db_path)
+                c = conn.cursor()
+                c.execute("SELECT value FROM settings WHERE key = 'schedule_mode_enabled'")
+                row = c.fetchone()
+                conn.close()
+                return bool(row and str(row[0]).strip() == "1")
+        except Exception:
+            pass
+        return False
+
+    def store_post_in_scheduled_queue(self, media_path: Optional[str], media_type: str, caption: str, raw_caption: str, buttons_json: str, target_chats: str) -> int:
+        try:
+            db_path = os.path.join(APP_DIR, "users.db")
+            sched_dir = os.path.join(APP_DIR, "scheduled_media")
+            os.makedirs(sched_dir, exist_ok=True)
+            saved_media_path = None
+            if media_path and os.path.exists(media_path):
+                ext = os.path.splitext(media_path)[1] or ".bin"
+                filename = f"sched_{int(time.time()*1000)}_{random.randint(100, 999)}{ext}"
+                saved_media_path = os.path.join(sched_dir, filename)
+                shutil.copy2(media_path, saved_media_path)
+
+            conn = sqlite3.connect(db_path)
+            c = conn.cursor()
+            c.execute('''
+                CREATE TABLE IF NOT EXISTS scheduled_queue (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TEXT,
+                    media_path TEXT,
+                    media_type TEXT,
+                    caption TEXT,
+                    raw_caption TEXT,
+                    buttons_json TEXT,
+                    target_chats TEXT,
+                    status TEXT DEFAULT 'pending'
+                )
+            ''')
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            c.execute('''
+                INSERT INTO scheduled_queue (created_at, media_path, media_type, caption, raw_caption, buttons_json, target_chats, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
+            ''', (now_str, saved_media_path, media_type, caption, raw_caption, buttons_json, target_chats))
+            row_id = c.lastrowid
+            conn.commit()
+            conn.close()
+            return row_id
+        except Exception as e:
+            self.log("ERROR", f"Error storing scheduled post in queue: {e}")
+            return 0
+
     def _is_chat_in_sources(self, peer_or_id: Any) -> bool:
         if not peer_or_id or not self.source_entities:
             return False
@@ -3052,7 +3109,7 @@ class AutomationEngine:
 
         send_media = self.config.get("send_media_to_processing_bot", True)
         needs_media_proc = (sticker_enabled or blur_sexual_enabled)
-        is_custom_dispatch = (needs_media_proc or translate_enabled or buttons_enabled or not send_media)
+        is_custom_dispatch = (needs_media_proc or translate_enabled or buttons_enabled or not send_media or self.is_queue_mode_active())
 
         forwarded_count = 0
         destinations = self.output_entities if self.output_entities else ([self.output_entity] if self.output_entity else [])
@@ -3146,6 +3203,61 @@ class AutomationEngine:
                     "is_video": is_video,
                     "raw_caption": raw_cap,
                 })
+
+            # If Post Scheduler (Queue Mode) is ENABLED, store in scheduled queue instead of posting immediately
+            if self.is_queue_mode_active():
+                self.log("SCHEDULER", f"⏰ Queue Mode is ENABLED. Storing {len(processed_items)} post(s) into scheduled queue...")
+                for item in processed_items:
+                    fwd_msg = item["msg"]
+                    caption = item["caption"]
+                    buttons = item.get("buttons")
+                    proc_file = item["proc_file"]
+                    is_vid = item.get("is_video", False)
+                    raw_caption = item.get("raw_caption") or caption
+
+                    raw_btns = []
+                    if buttons:
+                        for row in buttons:
+                            row_list = []
+                            for b in row:
+                                row_list.append({
+                                    "text": getattr(b, "text", "Watch Video"),
+                                    "url": getattr(b, "url", "")
+                                })
+                            if row_list:
+                                raw_btns.append(row_list)
+                    btns_json = json.dumps(raw_btns) if raw_btns else ""
+
+                    media_type = "video" if is_vid else ("photo" if getattr(fwd_msg, "photo", None) else ("document" if fwd_msg.media else "none"))
+                    saved_media_file = proc_file
+
+                    temp_dl = None
+                    if not saved_media_file and fwd_msg.media and not isinstance(fwd_msg.media, types.MessageMediaWebPage):
+                        try:
+                            temp_dl = await self.client.download_media(fwd_msg, file=temp_dir)
+                            saved_media_file = temp_dl
+                        except Exception as dl_err:
+                            self.log("WARNING", f"Could not download media for queue: {dl_err}")
+
+                    targets_str = ",".join(str(getattr(e, "id", "")) for e in destinations if getattr(e, "id", None))
+
+                    row_id = self.store_post_in_scheduled_queue(
+                        media_path=saved_media_file,
+                        media_type=media_type,
+                        caption=caption or "🎬",
+                        raw_caption=raw_caption,
+                        buttons_json=btns_json,
+                        target_chats=targets_str
+                    )
+                    if temp_dl and os.path.exists(temp_dl):
+                        try:
+                            os.remove(temp_dl)
+                        except OSError:
+                            pass
+
+                    self.log("SUCCESS", f"⏰ Post saved to Scheduled Queue (Queue ID #{row_id}). It will ONLY be posted at scheduled time.")
+                    forwarded_count += 1
+                return forwarded_count
 
             for out_ent in destinations:
                 out_name = getattr(out_ent, "title", None) or getattr(out_ent, "username", None) or str(getattr(out_ent, "id", "Output"))
