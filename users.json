@@ -12,7 +12,7 @@
     "credits": 0,
     "is_paid": 1,
     "paid_expiry": "2026-10-16 04:38:04",
-    "lang": "bn",
+    "lang": "en",
     "watched": [
       "1OindwfKLwqg-ATl1ieKrNA",
       "1_7bvP3qftWkHKvUB3RRoUA"
@@ -42,7 +42,7 @@
     "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
-    "lang": "bn",
+    "lang": "en",
     "watched": []
   },
   "5932658058": {
@@ -58,7 +58,7 @@
     "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
-    "lang": "bn",
+    "lang": "en",
     "watched": []
   },
   "6301137758": {
@@ -127,7 +127,7 @@
     "credits": 10,
     "is_paid": 0,
     "paid_expiry": null,
-    "lang": "bn",
+    "lang": "en",
     "watched": []
   },
   "7758628370": {
