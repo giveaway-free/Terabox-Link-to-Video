@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Monetag Ad Network SDK for Telegram Mini App / Web -->
-    <script src="//libtl.com/sdk.js" data-zone="12016303" data-sdk="show_12016303"></script>
+    <script src="https://libtl.com/sdk.js" data-zone="12016303" data-sdk="show_12016303"></script>
     <style>
         :root {
             --bg-color: #0b1120;
@@ -748,8 +748,17 @@
     let MONETAG_ZONE_ID = "12016303";
     const MONETAG_MIDROLL_INTERVAL = 180; // 3 minutes interval
     let isAdMode = false;
+    let isVip = false;
     let lastMidrollTime = 0;
     let isShowingAd = false;
+
+    function setMonetagZone(newZone) {
+        if (!newZone) return;
+        const cleanZone = String(newZone).replace(/[^\d]/g, '').trim();
+        if (!cleanZone || cleanZone === MONETAG_ZONE_ID) return;
+        MONETAG_ZONE_ID = cleanZone;
+        initMonetagSdk();
+    }
 
     function initMonetagSdk() {
         if (!MONETAG_ZONE_ID) return;
@@ -757,7 +766,7 @@
         if (!script) {
             script = document.createElement('script');
             script.id = 'monetag-sdk';
-            script.src = '//libtl.com/sdk.js';
+            script.src = 'https://libtl.com/sdk.js';
             script.setAttribute('data-zone', MONETAG_ZONE_ID);
             script.setAttribute('data-sdk', 'show_' + MONETAG_ZONE_ID);
             document.head.appendChild(script);
@@ -767,12 +776,36 @@
         }
     }
 
+    // Helper: Wait until Monetag SDK is fully downloaded and available on window
+    function waitForMonetagSdk(maxWaitMs = 8000) {
+        return new Promise((resolve) => {
+            const fnName = 'show_' + MONETAG_ZONE_ID;
+            if (typeof window[fnName] === 'function') {
+                resolve(window[fnName]);
+                return;
+            }
+            const startTime = Date.now();
+            const poll = setInterval(() => {
+                if (typeof window[fnName] === 'function') {
+                    clearInterval(poll);
+                    resolve(window[fnName]);
+                } else if (Date.now() - startTime >= maxWaitMs) {
+                    clearInterval(poll);
+                    console.warn("[Monetag] SDK load timed out after " + maxWaitMs + "ms");
+                    resolve(null);
+                }
+            }, 100);
+        });
+    }
+
     // Format 1: In-App Interstitial (Automatic background frequency)
-    function initInAppInterstitial() {
-        const fnName = 'show_' + MONETAG_ZONE_ID;
-        if (typeof window[fnName] === 'function') {
+    // ONLY executed for non-VIP users in Ad Mode!
+    async function initInAppInterstitial() {
+        if (!isAdMode || isVip) return;
+        const sdkFn = await waitForMonetagSdk(8000);
+        if (typeof sdkFn === 'function' && isAdMode && !isVip) {
             try {
-                window[fnName]({
+                sdkFn({
                     type: 'inApp',
                     inAppSettings: {
                         frequency: 2,
@@ -784,52 +817,67 @@
                 });
                 console.log("[Monetag] In-App Interstitial activated successfully.");
             } catch (e) {
-                console.warn("[Monetag] In-App Interstitial trigger note:", e);
+                console.warn("[Monetag] In-App Interstitial notice:", e);
             }
         }
     }
 
-    setTimeout(initInAppInterstitial, 2500);
-    setTimeout(initInAppInterstitial, 5000);
-
     // Format 2: Rewarded Interstitial (Mandatory completion - skip korle again ads ashbe!)
     function showRewardedAdWithEnforcement() {
         return new Promise((resolve) => {
-            const fnName = 'show_' + MONETAG_ZONE_ID;
+            // Paid users or direct mode: bypass ads 100%
+            if (!isAdMode || isVip) {
+                resolve();
+                return;
+            }
 
-            function runAdCycle() {
-                if (typeof window[fnName] !== 'function') {
-                    console.log("[Monetag] SDK not loaded yet. Skipping ad.");
+            const fnName = 'show_' + MONETAG_ZONE_ID;
+            const loadingBox = document.getElementById('loading-box');
+            const loadingTitle = document.getElementById('loading-title');
+            const loadingDesc = document.getElementById('loading-desc');
+
+            async function runAdCycle() {
+                if (!isAdMode || isVip) {
+                    if (loadingBox) loadingBox.style.display = 'none';
                     resolve();
                     return;
                 }
 
-                const loadingBox = document.getElementById('loading-box');
-                const loadingTitle = document.getElementById('loading-title');
-                const loadingDesc = document.getElementById('loading-desc');
-
                 if (loadingBox) {
                     loadingBox.style.display = 'block';
                     if (loadingTitle) loadingTitle.innerText = "📺 Sponsored Video Ad";
-                    if (loadingDesc) loadingDesc.innerText = "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন...";
+                    if (loadingDesc) loadingDesc.innerText = "বিজ্ঞাপন লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...";
+                }
+
+                const sdkFn = await waitForMonetagSdk(8000);
+                if (typeof sdkFn !== 'function') {
+                    console.warn("[Monetag] SDK unavailable or blocked. Continuing playback.");
+                    if (loadingBox) loadingBox.style.display = 'none';
+                    resolve();
+                    return;
+                }
+
+                if (loadingBox && loadingDesc) {
+                    loadingDesc.innerText = "ভিডিও দেখতে বিজ্ঞাপনটি সম্পূর্ণ দেখুন...";
                 }
 
                 try {
-                    window[fnName]()
+                    sdkFn()
                         .then(() => {
-                            // User watched the ad completely till the end!
+                            // User watched ad to completion!
+                            console.log("[Monetag] Rewarded ad watched completely.");
                             if (loadingBox) loadingBox.style.display = 'none';
                             resolve();
                         })
                         .catch((err) => {
-                            // User skipped or closed prematurely: prompt & re-trigger!
+                            // User skipped or closed prematurely: enforce re-watch!
                             console.warn("[Monetag] User closed or skipped ad prematurely:", err);
                             if (loadingBox) {
                                 loadingBox.style.display = 'block';
                                 if (loadingTitle) loadingTitle.innerText = "⚠️ অ্যাড সম্পূর্ণ দেখুন";
                                 if (loadingDesc) {
                                     loadingDesc.innerHTML = `
-                                        <div style="font-size:14px;color:#f87171;margin-bottom:12px;font-weight:600;">
+                                        <div style="font-size:14px;color:#f87171;margin-bottom:12px;font-weight:600;line-height:1.5;">
                                             ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।
                                         </div>
                                         <button id="btn-re-watch-ad" style="padding:10px 24px;border-radius:10px;background:linear-gradient(135deg, #6366f1, #4f46e5);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:15px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
@@ -848,7 +896,8 @@
                             }
                         });
                 } catch (ex) {
-                    console.warn("[Monetag] Ad execution notice:", ex);
+                    console.warn("[Monetag] Ad execution exception:", ex);
+                    if (loadingBox) loadingBox.style.display = 'none';
                     resolve();
                 }
             }
@@ -858,21 +907,17 @@
     }
 
     // Format 3: Rewarded Popup (Used for mid-roll & download click)
-    function showRewardedPopup() {
-        return new Promise((resolve) => {
-            const fnName = 'show_' + MONETAG_ZONE_ID;
-            if (typeof window[fnName] === 'function') {
-                try {
-                    window[fnName]('pop')
-                        .then(() => resolve(true))
-                        .catch(() => resolve(false));
-                } catch (_) {
-                    resolve(false);
-                }
-            } else {
-                resolve(false);
+    async function showRewardedPopup() {
+        if (!isAdMode || isVip) return true;
+        const sdkFn = await waitForMonetagSdk(3000);
+        if (typeof sdkFn === 'function' && isAdMode && !isVip) {
+            try {
+                return await sdkFn('pop').then(() => true).catch(() => false);
+            } catch (_) {
+                return false;
             }
-        });
+        }
+        return false;
     }
 
     let currentStreamUrl = "";
@@ -1371,7 +1416,7 @@
         document.getElementById('loading-box').style.display = 'block';
 
         let userRecord = null;
-        let isVip = false;
+        isVip = false;
         let currentCredits = 0;
         let uData = null;
         let videosDb = {};
@@ -1401,6 +1446,9 @@
                     const liveData = await liveRes.json();
                     if (liveData && liveData.ok) {
                         isVip = liveData.is_paid === 1;
+                        if (liveData.monetag_zone_id) {
+                            setMonetagZone(liveData.monetag_zone_id);
+                        }
                         if (typeof liveData.credits === 'number') {
                             baseCredits = liveData.credits;
                             liveStatusFetched = true;
@@ -1441,9 +1489,19 @@
                 } else if (uData && uData._settings && uData._settings.initial_credits) {
                     baseCredits = parseInt(uData._settings.initial_credits, 10) || 10;
                 }
+                if (uData && uData._settings && uData._settings.monetag_zone_id) {
+                    setMonetagZone(uData._settings.monetag_zone_id);
+                }
             } catch (e) {
                 console.warn("Could not fetch remote databases, using fallback balance:", e);
             }
+        }
+
+        // Strict VIP Protection: Paid users NEVER receive ads regardless of link clicked!
+        if (isVip) {
+            isAdMode = false;
+        } else if (isAdMode) {
+            initInAppInterstitial();
         }
 
         const badgeEl = document.getElementById('user-badge');
@@ -1463,12 +1521,12 @@
 
         currentCredits = Math.max(0, baseCredits);
 
-        if (isAdMode) {
-            badgeEl.className = "status-badge badge-vip";
-            badgeEl.innerText = "🎬 Watch Now (Ad Supported)";
-        } else if (isVip) {
+        if (isVip) {
             badgeEl.className = "status-badge badge-vip";
             badgeEl.innerText = "💎 VIP (Unlimited)";
+        } else if (isAdMode) {
+            badgeEl.className = "status-badge badge-vip";
+            badgeEl.innerText = "🎬 Watch Now (Ad Supported)";
         } else if (alreadyWatched) {
             badgeEl.className = "status-badge badge-vip";
             badgeEl.innerText = `✅ Unlocked • ${currentCredits} Left`;
