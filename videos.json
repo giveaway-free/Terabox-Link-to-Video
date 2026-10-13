@@ -18606,5 +18606,13 @@
     "res": "720p",
     "dur": "04:55",
     "type": "Video"
+  },
+  "1b3rEeSyumB2H2gszOno0OA": {
+    "stream_url": "https://mute-pond-dfe3.ruhexe.workers.dev/fast_stream?token=b4eCGxMTfRThkeSvx94MmHyfdcF-ICIj5pS0_Wxel35bl1TnRf5P2-ykdW_KjFaRho5n0PpWCHQOm6ByBR71rHvIaVqETEUApl8IcneJnmvdFZbJxOyxNsEFtzcAw6VQUUPFCZRBJZqv4NyQIUEwCRZKl6ElvL9Ca6D5YJg9ajcVmDcWIu6YcGcFevUmUNNB5Wr3SlopcIq5JWSBaTptyVLDnP4wNit3aJJrKfGpbsLg2DQvEVPUPq-GnhSQdphNMbF8sY4EGAXl9ygT5ynKFdyp-TlhNzM55vcnvdiE6xCypRiSacNXEOKaVEyoExH-TW3VwhMC6vmE7XOgOdcZrQve78mOFQ43j5TUlSL5kDARt-BEtnEt826mJMMBx2kkH8rl5g.m3u8",
+    "title": "video_20250729_110433_edit.mp4",
+    "size": "493.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "08:14",
+    "type": "Video"
   }
 }
