@@ -65,12 +65,14 @@
   },
   "5656789653": {
     "username": "User_5656789653",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1zaUBLiQ7bye8JeYFnTv6ug"
+    ]
   },
   "5811612194": {
     "username": "Glitch8880",
