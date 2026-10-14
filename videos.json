@@ -23558,5 +23558,13 @@
     "res": "480p",
     "dur": "02:21",
     "type": "Video"
+  },
+  "1kxxIKutAZAIoIGSIGU55dg": {
+    "stream_url": "https://iteraplay.tera-api85.workers.dev/fast_stream?token=2vZLtf6-GnrMMD5APzA-kU6RzW-uB8M1hNw6W7Q_uk0eglHEUws_jjyLir7tGckZ7bNaLL4s2BOTZVWnD7NA-_9Y-Q0u8W3T1OuInAYCn3gxATVrvEdUdpbxr-TEsCoqdYo7OiOrqZ343BSdeBRtSwYr9-teN9za3pldMcqEzV13feauyU9wkg31DbIT5kV75Inxh0bozcj8wuBhy9ySrCZPYK3Jvw0hyirBY7NhU3onpVADk50fd5uPKc2kqIT0SLmutMNCf99H-y-_FXPtQpKMAdQDucy4EkcHsW1Pe34lctMppFzWcxeb1e60bjJ-nx54VR2aQZcDGtVxQHR6UrMW_K0mSzVxS2_351VtPw.m3u8",
+    "title": "NRMILUPD.mp4",
+    "size": "274.2 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "09:07",
+    "type": "Video"
   }
 }
