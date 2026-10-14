@@ -23366,5 +23366,13 @@
     "res": "1080p",
     "dur": "01:20",
     "type": "Video"
+  },
+  "1MBPse-twHDlQD6CcCpa1cQ": {
+    "stream_url": "https://dry-pond-7310.pysywi.workers.dev/fast_stream?token=BHB5oEXD4Ks1-jZfkEyFodT_8m-GhE_b9t3j3CX0AISIVeB5J9blWNijUrDtYfjocZYo9wrwU6j9VinX2Vjp7F4tD6NOe2Y0AyQn6XxxuMAXdm3EHRixMYk-L3fkS1E9ncPoBlPJy0k7e4aQvnVf1A7NEWc31TFTBZ5WePyTQHSyXJoDLlS6LiofZH-p31kRnal00KHgEFg20UpllhO7H_VBmM7wphbAlsag1kXiZQeleZhoxmrDLXjSbIiBfVR0th3VMIGp0lgWTq0ngtaIFJEENF03N25UcqVckjZjE8MEhDqlcadlTCWin88ky14ZxHJGeVsJ2FB-zL-BG7mAdZW-MO5_HVD1wzTmo5P7NLI.m3u8",
+    "title": "720 (1).mp4",
+    "size": "12.0 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:40",
+    "type": "Video"
   }
 }
