@@ -22134,5 +22134,13 @@
     "res": "Auto (Adaptive)",
     "dur": "20:21",
     "type": "Video"
+  },
+  "1h3-CTechaEFv--OV3B5DrQ": {
+    "stream_url": "https://iteraplay.tera-api68.workers.dev/fast_stream?token=m7yxFKjHeKIFYpO1BdJjMEDm9msSnYEMZqevdbBUbwFHE-b6DqdHl1ndMS_LE8J530p2RniSRdk60gHs4apOL-pWxmvoF6gGwV6KzNIG-LGFEvc5uxfhykb-7s4ke-Ac6KKUC7P_Zn1o5-cXzzY3HB3ivEDGa3cjzRubB09_1CH6SkpfpyAtOlZgJPajNUoz46pjzR88pFAISCPfz2JYS-Ag8yLLM8YKbV0tiTJgCLFRyiV49y5PEv46eVu4Yd1Y2n0u-a73mVKNfQe-TbFk3sRq1OSKZuCOCDLc6b8-oY-EkW3wBD7Z3saPmO6UyHrdHP4Dp6ZzSyZ_kdmULSb-FodW5AfZ7cPmcBxV9KShOJU8.m3u8",
+    "title": "teacher(1).mp4",
+    "size": "56.1 MB",
+    "res": "480p",
+    "dur": "13:30",
+    "type": "Video"
   }
 }
