@@ -19574,5 +19574,13 @@
     "res": "720p",
     "dur": "02:40",
     "type": "Video"
+  },
+  "1jo6qvlkQDn6_3qCWQlOL_w": {
+    "stream_url": "https://iteraplay.tera-api65.workers.dev/fast_stream?token=iZW-eQU5WOVCiDmJoepZZcxelwTzgMYNvccF4XIxj9UkRbCAkXJrAlpsK3Kuzne3O3PfcrpLlnFJo4OEf2uoHexv9U7juhMvff2GYz-VAoRLjuAqDZWD0af5w9gIoRR2Ud_pXc0Vv_HY9h2nsz70xrX3s3rP_ZDduZuNzSpE0q5V8myd9h4VZs5M1EB7Rmf26WtcDk5WFk3aO7Xw__7BZApSmgt-53QgQpZsHFP2TSOmkYDegy-X04eiMYlca5s6ELZgrg_FgNa085kA-F5ajYFt-9yRn8FsxrmyL8V4npOH3dOaIspjpYbdzJ_HkAyHsUVKg6LzEahmX0YiueKzmeXhsn_CBoEHoMrCQliVNANmqwjS1cklEAyOk3PoxchwWN3t3ZuYECLCG6BGPDS6XcyecvFDr2PfA4tWw6l5nIbHT8pssSSb5FKwWrTYBP8FVWkdvhsZ3LLkHjxmZjSzEuc2K8zu1SeFfSoyiXqD_opFO9LQ6EJhny6dt8v051qO0VF1Qy8.m3u8",
+    "title": "\u09a8\u09be\u099b\u09a4\u09c7 \u09a8\u09be\u099b\u09a4\u09c7 \u0995\u09b0\u09c7.mp4",
+    "size": "140.4 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "19:42",
+    "type": "Video"
   }
 }
