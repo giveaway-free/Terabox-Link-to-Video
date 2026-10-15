@@ -583,7 +583,7 @@
             <span id="user-display-name">User</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-            <button id="btn-player-lang" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-color);color:var(--text-main);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">🌐 বাং</button>
+            <button id="btn-player-lang" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-color);color:var(--text-main);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">🌐 EN</button>
             <div id="user-badge" class="status-badge badge-credits">
                 ⚡ Checking...
             </div>
@@ -600,7 +600,7 @@
     <!-- Strict Multi-Condition Membership & Security Gate Card -->
     <div id="membership-gate-box" class="card-notice" style="display:none;">
         <h3 id="gate-box-title">🔒 Membership Verification Required</h3>
-        <p id="gate-box-desc">ভিডিওটি প্লে করতে নিচের প্রয়োজনীয় চ্যানেল ও বটে যুক্ত থাকা বাধ্যতামূলক:</p>
+        <p id="gate-box-desc">To play this video, joining the required channels and bot below is mandatory:</p>
         
         <div style="margin: 18px 0; display: flex; flex-direction: column; gap: 10px; text-align: left;">
             <!-- Target Channel Item -->
@@ -608,8 +608,8 @@
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span id="gate-icon-target" style="font-size: 18px;">❌</span>
                     <div>
-                        <div id="gate-name-target" style="font-weight: 600; font-size: 13px; color: #fff;">মেইন চ্যানেল (Main Channel)</div>
-                        <div id="gate-status-target" style="font-size: 11px; color: #ef4444;">যুক্ত নেই (Not Joined)</div>
+                        <div id="gate-name-target" style="font-weight: 600; font-size: 13px; color: #fff;">Main Channel</div>
+                        <div id="gate-status-target" style="font-size: 11px; color: #ef4444;">Not Joined</div>
                     </div>
                 </div>
                 <a id="gate-btn-target" href="https://t.me/dgppv1" target="_blank" class="btn-action" style="padding: 6px 14px; font-size: 12px; text-decoration: none; width: auto; background: #6366f1; color: #fff; border-radius: 8px;">
@@ -622,8 +622,8 @@
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span id="gate-icon-backup" style="font-size: 18px;">❌</span>
                     <div>
-                        <div id="gate-name-backup" style="font-weight: 600; font-size: 13px; color: #fff;">ব্যাকআপ চ্যানেল (Backup Channel)</div>
-                        <div id="gate-status-backup" style="font-size: 11px; color: #ef4444;">যুক্ত নেই (Not Joined)</div>
+                        <div id="gate-name-backup" style="font-weight: 600; font-size: 13px; color: #fff;">Backup Channel</div>
+                        <div id="gate-status-backup" style="font-size: 11px; color: #ef4444;">Not Joined</div>
                     </div>
                 </div>
                 <a id="gate-btn-backup" href="#" target="_blank" class="btn-action" style="padding: 6px 14px; font-size: 12px; text-decoration: none; width: auto; background: #6366f1; color: #fff; border-radius: 8px;">
@@ -636,8 +636,8 @@
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span id="gate-icon-bot" style="font-size: 18px;">❌</span>
                     <div>
-                        <div id="gate-name-bot" style="font-weight: 600; font-size: 13px; color: #fff;">টেলিগ্রাম বট (Telegram Bot)</div>
-                        <div id="gate-status-bot" style="font-size: 11px; color: #ef4444;">স্টার্ট করা নেই বা ব্লক (Not Started)</div>
+                        <div id="gate-name-bot" style="font-weight: 600; font-size: 13px; color: #fff;">Telegram Bot</div>
+                        <div id="gate-status-bot" style="font-size: 11px; color: #ef4444;">Not Started / Blocked</div>
                     </div>
                 </div>
                 <a id="gate-btn-bot" href="#" target="_blank" class="btn-action" style="padding: 6px 14px; font-size: 12px; text-decoration: none; width: auto; background: #6366f1; color: #fff; border-radius: 8px;">
@@ -648,21 +648,21 @@
 
         <div class="action-btn-group">
             <button class="btn-action btn-vip-upgrade" id="btn-verify-membership">
-                🔄 যাচাই করুন (Verify Membership)
+                🔄 Verify Membership
             </button>
         </div>
     </div>
 
     <!-- Blocked / Stopped User Card (Restart Bot Prompt) -->
     <div id="restart-bot-box" class="card-notice" style="display:none;">
-        <h3 id="restart-box-title">🔄 বটটি রিস্টার্ট করুন</h3>
-        <p id="restart-box-desc">আপনি বটটি ব্লক বা স্টপ করে রেখেছেন। ভিডিও দেখতে ও সকল ফিচার ব্যবহার করতে প্রথমে বটটি রিস্টার্ট (/start) করুন।</p>
+        <h3 id="restart-box-title">🔄 Please Restart the Bot</h3>
+        <p id="restart-box-desc">You have stopped or blocked the bot. To watch videos and use all features, please restart (/start) the bot first.</p>
         <div class="action-btn-group">
             <button class="btn-action btn-vip-upgrade" id="btn-restart-bot">
-                🚀 বট রিস্টার্ট করুন (/start)
+                🚀 Restart Bot (/start)
             </button>
             <button class="btn-action btn-secondary" id="btn-check-restart" style="margin-top: 8px;">
-                🔄 রিস্টার্ট করেছি (যাচাই করুন)
+                🔄 I've Restarted (Verify Now)
             </button>
         </div>
     </div>
@@ -670,10 +670,10 @@
     <!-- Unregistered User Card (Join Bot Prompt) -->
     <div id="join-bot-box" class="card-notice" style="display:none;">
         <h3 id="join-box-title">🔒 Membership Required</h3>
-        <p id="join-box-desc">ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।</p>
+        <p id="join-box-desc">To stream this video, please join our Telegram bot first and collect free credits.</p>
         <div class="action-btn-group">
             <button class="btn-action btn-vip-upgrade" id="btn-open-bot">
-                🚀 Open @Terastream_pro_bot & Get Free Credits
+                🚀 Open Bot & Get Free Credits
             </button>
         </div>
     </div>
@@ -681,13 +681,13 @@
     <!-- Paywall Card (Credits Finished) -->
     <div id="paywall-box" class="card-notice">
         <h3 id="paywall-box-title">⚡ Credits Exhausted!</h3>
-        <p id="paywall-box-desc">আপনার অ্যাকাউন্টের ফ্রি ক্রেডিট শেষ হয়ে গেছে। আনলিমিটেড ভিডিও দেখতে VIP সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট পান।</p>
+        <p id="paywall-box-desc">You have run out of free credits. Upgrade to VIP for unlimited streaming or invite friends for free credits.</p>
         <div class="action-btn-group">
             <button class="btn-action btn-vip-upgrade" id="btn-buy-vip">
                 💎 Upgrade to VIP (50 / 150 BDT)
             </button>
             <button class="btn-action btn-secondary" id="btn-refer-earn">
-                👥 Invite Friends (+2 Credits Free)
+                👥 Invite Friends (+2 Free Credits)
             </button>
         </div>
     </div>
@@ -818,6 +818,8 @@
     // ==========================================
     // MULTI-LANGUAGE (I18N) LOCALIZATION ENGINE
     // ==========================================
+    // MULTI-LANGUAGE (I18N) LOCALIZATION ENGINE
+    // ==========================================
     const I18N = {
         bn: {
             size: "📦 সাইজ",
@@ -848,9 +850,31 @@
             ad_warn_skip: "ভিডিও চালু করতে বিজ্ঞাপনটি স্কিপ না করে পুরো দেখতে হবে।",
             ad_warn_auto: "🔄 স্বয়ংক্রিয়ভাবে পুনরায় বিজ্ঞাপন চালু হচ্ছে...",
             ad_error: "বিজ্ঞাপন লোড হতে সমস্যা হয়েছে। পুনরায় চেষ্টা করা হচ্ছে...",
+
+            // Membership Gate & Security
+            gate_box_title: "🔒 মেম্বারশিপ ভেরিফিকেশন আবশ্যক",
+            gate_box_desc: "ভিডিওটি প্লে করতে নিচের প্রয়োজনীয় চ্যানেল ও বটে যুক্ত থাকা বাধ্যতামূলক:",
+            gate_name_target: "মেইন চ্যানেল (Main Channel)",
+            gate_name_backup: "ব্যাকআপ চ্যানেল (Backup Channel)",
+            gate_name_bot: "টেলিগ্রাম বট (Telegram Bot)",
+            gate_status_joined: "যুক্ত আছেন (Joined)",
+            gate_status_not_joined: "যুক্ত নেই (Not Joined)",
+            gate_status_active: "সক্রিয় আছেন (Active)",
+            gate_status_not_active: "স্টার্ট করা নেই বা ব্লক (Not Started)",
+            gate_btn_join: "📢 Join",
+            gate_btn_joined: "✅ Joined",
+            gate_btn_start: "🤖 Start",
+            gate_btn_active: "✅ Active",
+            gate_verify_btn: "🔄 যাচাই করুন (Verify Membership)",
+            gate_verifying: "⚡ যাচাই করা হচ্ছে...",
+            gate_missing_alert: "⚠️ এখনও পূরণ হয়নি: {items}। দয়া করে সবগুলো পূরণ করে আবার চাপুন।",
+            gate_lbl_target: "মেইন চ্যানেল",
+            gate_lbl_backup: "ব্যাকআপ চ্যানেল",
+            gate_lbl_bot: "টেলিগ্রাম বটে /start",
+
             join_title: "🔒 মেম্বারশিপ আবশ্যক",
             join_desc: "ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।",
-            open_bot_btn: "🚀 @leadox_bot ওপেন করে ফ্রি ক্রেডিট পান",
+            open_bot_btn: "🚀 @{bot} ওপেন করে ফ্রি ক্রেডিট পান",
             restart_title: "🔄 বটটি রিস্টার্ট করুন",
             restart_desc: "আপনি বটটি ব্লক বা স্টপ করে রেখেছেন। ভিডিও দেখতে ও সকল ফিচার ব্যবহার করতে প্রথমে বটটি রিস্টার্ট (/start) করুন।",
             restart_btn: "🚀 বট রিস্টার্ট করুন (/start)",
@@ -896,9 +920,31 @@
             ad_warn_skip: "You must watch the full ad without skipping to play video.",
             ad_warn_auto: "🔄 Automatically reloading advertisement...",
             ad_error: "Ad failed to load. Retrying automatically...",
+
+            // Membership Gate & Security
+            gate_box_title: "🔒 Membership Verification Required",
+            gate_box_desc: "To play this video, joining the required channels and bot below is mandatory:",
+            gate_name_target: "Main Channel",
+            gate_name_backup: "Backup Channel",
+            gate_name_bot: "Telegram Bot",
+            gate_status_joined: "Joined",
+            gate_status_not_joined: "Not Joined",
+            gate_status_active: "Active",
+            gate_status_not_active: "Not Started / Blocked",
+            gate_btn_join: "📢 Join",
+            gate_btn_joined: "✅ Joined",
+            gate_btn_start: "🤖 Start",
+            gate_btn_active: "✅ Active",
+            gate_verify_btn: "🔄 Verify Membership",
+            gate_verifying: "⚡ Verifying...",
+            gate_missing_alert: "⚠️ Still required: {items}. Please complete all of them and try again.",
+            gate_lbl_target: "Main Channel",
+            gate_lbl_backup: "Backup Channel",
+            gate_lbl_bot: "Telegram Bot /start",
+
             join_title: "🔒 Membership Required",
             join_desc: "To stream this video, please join our Telegram bot first and collect free credits.",
-            open_bot_btn: "🚀 Open @leadox_bot & Get Free Credits",
+            open_bot_btn: "🚀 Open @{bot} & Get Free Credits",
             restart_title: "🔄 Please Restart the Bot",
             restart_desc: "You have stopped or blocked the bot. To watch videos and use all features, please restart (/start) the bot first.",
             restart_btn: "🚀 Restart Bot (/start)",
@@ -944,9 +990,31 @@
             ad_warn_skip: "वीडियो चलाने के लिए विज्ञापन को बिना स्किप किए पूरा देखना होगा।",
             ad_warn_auto: "🔄 स्वचालित रूप से पुनः विज्ञापन शुरू हो रहा है...",
             ad_error: "विज्ञापन लोड करने में समस्या आई। पुनः प्रयास किया जा रहा है...",
+
+            // Membership Gate & Security
+            gate_box_title: "🔒 सदस्यता सत्यापन आवश्यक",
+            gate_box_desc: "वीडियो चलाने के लिए नीचे दिए गए आवश्यक चैनलों और बॉट से जुड़ना अनिवार्य है:",
+            gate_name_target: "मुख्य चैनल (Main Channel)",
+            gate_name_backup: "बैकअप चैनल (Backup Channel)",
+            gate_name_bot: "टेलीग्राम बॉट (Telegram Bot)",
+            gate_status_joined: "जुड़े हुए हैं (Joined)",
+            gate_status_not_joined: "नहीं जुड़े हैं (Not Joined)",
+            gate_status_active: "सक्रिय हैं (Active)",
+            gate_status_not_active: "शुरू नहीं हुआ या ब्लॉक (Not Started)",
+            gate_btn_join: "📢 Join",
+            gate_btn_joined: "✅ Joined",
+            gate_btn_start: "🤖 Start",
+            gate_btn_active: "✅ Active",
+            gate_verify_btn: "🔄 सदस्यता सत्यापित करें (Verify)",
+            gate_verifying: "⚡ सत्यापन हो रहा है...",
+            gate_missing_alert: "⚠️ अभी भी आवश्यक है: {items}। कृपया सभी को पूरा करें और पुनः प्रयास करें।",
+            gate_lbl_target: "मुख्य चैनल",
+            gate_lbl_backup: "बैकअप चैनल",
+            gate_lbl_bot: "टेलीग्राम बॉट /start",
+
             join_title: "🔒 सदस्यता आवश्यक",
             join_desc: "वीडियो चलाने के लिए पहले हमारे टेलीग्राम बॉट से जुड़ें और मुफ़्त क्रेडिट प्राप्त करें।",
-            open_bot_btn: "🚀 @leadox_bot खोलें और मुफ़्त क्रेडिट पाएं",
+            open_bot_btn: "🚀 @{bot} खोलें और मुफ़्त क्रेडिट पाएं",
             restart_title: "🔄 बॉट को रीस्टार्ट करें",
             restart_desc: "आपने बॉट को ब्लॉक या बंद कर दिया है। वीडियो देखने और सभी सुविधाओं का उपयोग करने के लिए कृपया पहले बॉট को रीस्टार्ट (/start) करें।",
             restart_btn: "🚀 बॉट रीस्टार्ट करें (/start)",
@@ -965,12 +1033,12 @@
         }
     };
 
-    let currentLang = "bn";
+    let currentLang = "en";
     function applyPlayerLanguage(lang) {
         if (lang === 'en' || lang === 'hi' || lang === 'bn') {
             currentLang = lang;
         } else {
-            currentLang = 'bn';
+            currentLang = 'en';
         }
         localStorage.setItem('player_lang', currentLang);
         
@@ -980,7 +1048,7 @@
             localStorage.setItem('bot_lang_' + tgUid, currentLang);
         }
 
-        const t = I18N[currentLang] || I18N.bn;
+        const t = I18N[currentLang] || I18N.en;
         
         const lblSize = document.getElementById('lbl-size'); if (lblSize) lblSize.innerText = t.size;
         const lblDur = document.getElementById('lbl-dur'); if (lblDur) lblDur.innerText = t.dur;
@@ -991,9 +1059,24 @@
         const btnPipExpand = document.getElementById('btn-restore-pip'); if (btnPipExpand) btnPipExpand.innerText = t.expand_btn;
         const btnPipClose = document.getElementById('btn-close-pip'); if (btnPipClose) btnPipClose.innerText = t.close_btn;
 
+        // Gate Elements Localization
+        const gateBoxTitle = document.getElementById('gate-box-title'); if (gateBoxTitle) gateBoxTitle.innerText = t.gate_box_title;
+        const gateBoxDesc = document.getElementById('gate-box-desc'); if (gateBoxDesc) gateBoxDesc.innerText = t.gate_box_desc;
+        const gateNameTarget = document.getElementById('gate-name-target'); if (gateNameTarget) gateNameTarget.innerText = t.gate_name_target;
+        const gateNameBackup = document.getElementById('gate-name-backup'); if (gateNameBackup) gateNameBackup.innerText = t.gate_name_backup;
+        const gateNameBot = document.getElementById('gate-name-bot'); if (gateNameBot) gateNameBot.innerText = t.gate_name_bot;
+        const btnVerifyMem = document.getElementById('btn-verify-membership');
+        if (btnVerifyMem && !btnVerifyMem.disabled) {
+            btnVerifyMem.innerText = t.gate_verify_btn;
+        }
+
         const joinTitle = document.getElementById('join-box-title'); if (joinTitle) joinTitle.innerText = t.join_title;
         const joinDesc = document.getElementById('join-box-desc'); if (joinDesc) joinDesc.innerText = t.join_desc;
-        const openBotBtn = document.getElementById('btn-open-bot'); if (openBotBtn) openBotBtn.innerText = t.open_bot_btn;
+        const openBotBtn = document.getElementById('btn-open-bot');
+        if (openBotBtn) {
+            const bUname = window.CURRENT_BOT_USERNAME || "Terastream_pro_bot";
+            openBotBtn.innerText = (t.open_bot_btn || "🚀 Open @{bot} & Get Free Credits").replace("{bot}", bUname).replace("@leadox_bot", "@" + bUname);
+        }
 
         const restartTitle = document.getElementById('restart-box-title'); if (restartTitle) restartTitle.innerText = t.restart_title;
         const restartDesc = document.getElementById('restart-box-desc'); if (restartDesc) restartDesc.innerText = t.restart_desc;
@@ -1021,6 +1104,11 @@
             }
         }
 
+        // Live refresh of membership gate UI if active
+        if (window.lastGateStatus && typeof window.updateGateUI === 'function') {
+            try { window.updateGateUI(window.lastGateStatus); } catch (_) {}
+        }
+
         if (typeof window.updateBadgeStatus === 'function') {
             window.updateBadgeStatus();
         }
@@ -1040,41 +1128,52 @@
         if (qLang && (qLang.toLowerCase() === 'en' || qLang.toLowerCase() === 'bn' || qLang.toLowerCase() === 'hi')) {
             currentLang = qLang.toLowerCase();
             if (tgUserId) localStorage.setItem('bot_lang_' + tgUserId, currentLang);
-        } else if (tgUserId && localStorage.getItem('bot_lang_' + tgUserId)) {
-            const cachedUserLang = localStorage.getItem('bot_lang_' + tgUserId);
-            if (cachedUserLang === 'en' || cachedUserLang === 'bn' || cachedUserLang === 'hi') {
-                currentLang = cachedUserLang;
-            }
+            localStorage.setItem('player_lang', currentLang);
         } else {
+            const cachedUserLang = tgUserId ? localStorage.getItem('bot_lang_' + tgUserId) : null;
             const sLang = localStorage.getItem('player_lang');
-            if (sLang && (sLang === 'en' || sLang === 'bn' || sLang === 'hi')) {
+
+            if (cachedUserLang && (cachedUserLang === 'en' || cachedUserLang === 'bn' || cachedUserLang === 'hi')) {
+                currentLang = cachedUserLang;
+            } else if (sLang && (sLang === 'en' || sLang === 'bn' || sLang === 'hi')) {
                 currentLang = sLang;
             } else if (tgLangCode) {
                 if (tgLangCode.startsWith('hi')) currentLang = 'hi';
-                else if (tgLangCode.startsWith('en')) currentLang = 'en';
-                else currentLang = 'bn';
+                else if (tgLangCode.startsWith('bn')) currentLang = 'bn';
+                else currentLang = 'en';
             } else {
-                currentLang = 'bn';
+                currentLang = 'en';
             }
         }
         applyPlayerLanguage(currentLang);
 
-        // Immediate background prefetch of user's bot language from data branch if not passed via URL
+        // Immediate background prefetch of user's bot language from bot backend & GitHub
         if (!qLang && tgUserId) {
-            fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
-                headers: { 'Accept': 'application/vnd.github.v3+json' }
-            }).then(r => r.json()).then(j => {
-                if (j && j.content) {
-                    const uData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
-                    if (uData && uData[tgUserId] && uData[tgUserId].lang) {
-                        const targetLang = uData[tgUserId].lang;
-                        if (targetLang === 'bn' || targetLang === 'en' || targetLang === 'hi') {
-                            applyPlayerLanguage(targetLang);
-                            localStorage.setItem('bot_lang_' + tgUserId, targetLang);
+            fetch(`https://terabox-link-to-video-1.onrender.com/api/user_status?user_id=${tgUserId}&_t=${Date.now()}`)
+                .then(r => r.json())
+                .then(b => {
+                    if (b && b.ok && b.lang && (b.lang === 'en' || b.lang === 'bn' || b.lang === 'hi')) {
+                        if (currentLang !== b.lang) {
+                            applyPlayerLanguage(b.lang);
                         }
                     }
-                }
-            }).catch(() => {});
+                }).catch(() => {
+                    fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
+                        headers: { 'Accept': 'application/vnd.github.v3+json' }
+                    }).then(r => r.json()).then(j => {
+                        if (j && j.content) {
+                            const uData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                            if (uData && uData[tgUserId] && uData[tgUserId].lang) {
+                                const targetLang = uData[tgUserId].lang;
+                                if (targetLang === 'bn' || targetLang === 'en' || targetLang === 'hi') {
+                                    if (currentLang !== targetLang) {
+                                        applyPlayerLanguage(targetLang);
+                                    }
+                                }
+                            }
+                        }
+                    }).catch(() => {});
+                });
         }
     }
 
@@ -2131,34 +2230,44 @@
             document.getElementById('membership-gate-box').style.display = 'block';
 
             function updateGateUI(status) {
+                if (!status) return;
+                window.lastGateStatus = status;
+                const t = I18N[currentLang] || I18N.en;
                 const botUname = status.botUsername || window.CURRENT_BOT_USERNAME || "Terastream_pro_bot";
                 const targetL = status.targetLink || TARGET_CHANNEL_LINK;
                 const backupL = status.backupLink || BACKUP_CHANNEL_LINK;
 
-                // 1. Target Channel UI
+                // 1. Update Card Headers and Item Names
+                const gateBoxTitle = document.getElementById('gate-box-title'); if (gateBoxTitle) gateBoxTitle.innerText = t.gate_box_title;
+                const gateBoxDesc = document.getElementById('gate-box-desc'); if (gateBoxDesc) gateBoxDesc.innerText = t.gate_box_desc;
+                const gateNameTarget = document.getElementById('gate-name-target'); if (gateNameTarget) gateNameTarget.innerText = t.gate_name_target;
+                const gateNameBackup = document.getElementById('gate-name-backup'); if (gateNameBackup) gateNameBackup.innerText = t.gate_name_backup;
+                const gateNameBot = document.getElementById('gate-name-bot'); if (gateNameBot) gateNameBot.innerText = t.gate_name_bot;
+
+                // 2. Target Channel UI
                 const iconTarget = document.getElementById('gate-icon-target');
                 const statTarget = document.getElementById('gate-status-target');
                 const btnTarget = document.getElementById('gate-btn-target');
                 if (status.targetJoined) {
                     iconTarget.innerText = "✅";
-                    statTarget.innerText = "যুক্ত আছেন (Joined)";
+                    statTarget.innerText = t.gate_status_joined;
                     statTarget.style.color = "#10b981";
-                    btnTarget.innerText = "✅ Joined";
+                    btnTarget.innerText = t.gate_btn_joined;
                     btnTarget.style.background = "#059669";
                     btnTarget.style.pointerEvents = "none";
                     btnTarget.style.opacity = "0.7";
                 } else {
                     iconTarget.innerText = "❌";
-                    statTarget.innerText = "যুক্ত নেই (Not Joined)";
+                    statTarget.innerText = t.gate_status_not_joined;
                     statTarget.style.color = "#ef4444";
-                    btnTarget.innerText = "📢 Join";
+                    btnTarget.innerText = t.gate_btn_join;
                     btnTarget.style.background = "#6366f1";
                     btnTarget.style.pointerEvents = "auto";
                     btnTarget.style.opacity = "1";
                     btnTarget.href = targetL;
                 }
 
-                // 2. Backup Channel UI
+                // 3. Backup Channel UI
                 const itemBackup = document.getElementById('gate-item-backup');
                 const iconBackup = document.getElementById('gate-icon-backup');
                 const statBackup = document.getElementById('gate-status-backup');
@@ -2167,17 +2276,17 @@
                     itemBackup.style.display = "flex";
                     if (status.backupJoined) {
                         iconBackup.innerText = "✅";
-                        statBackup.innerText = "যুক্ত আছেন (Joined)";
+                        statBackup.innerText = t.gate_status_joined;
                         statBackup.style.color = "#10b981";
-                        btnBackup.innerText = "✅ Joined";
+                        btnBackup.innerText = t.gate_btn_joined;
                         btnBackup.style.background = "#059669";
                         btnBackup.style.pointerEvents = "none";
                         btnBackup.style.opacity = "0.7";
                     } else {
                         iconBackup.innerText = "❌";
-                        statBackup.innerText = "যুক্ত নেই (Not Joined)";
+                        statBackup.innerText = t.gate_status_not_joined;
                         statBackup.style.color = "#ef4444";
-                        btnBackup.innerText = "📢 Join";
+                        btnBackup.innerText = t.gate_btn_join;
                         btnBackup.style.background = "#6366f1";
                         btnBackup.style.pointerEvents = "auto";
                         btnBackup.style.opacity = "1";
@@ -2187,29 +2296,35 @@
                     itemBackup.style.display = "none";
                 }
 
-                // 3. Bot Status UI
+                // 4. Bot Status UI
                 const iconBot = document.getElementById('gate-icon-bot');
                 const statBot = document.getElementById('gate-status-bot');
                 const btnBot = document.getElementById('gate-btn-bot');
                 if (status.botActive) {
                     iconBot.innerText = "✅";
-                    statBot.innerText = "সক্রিয় আছেন (Active)";
+                    statBot.innerText = t.gate_status_active;
                     statBot.style.color = "#10b981";
-                    btnBot.innerText = "✅ Active";
+                    btnBot.innerText = t.gate_btn_active;
                     btnBot.style.background = "#059669";
                     btnBot.style.pointerEvents = "none";
                     btnBot.style.opacity = "0.7";
                 } else {
                     iconBot.innerText = "❌";
-                    statBot.innerText = "স্টার্ট করা নেই বা ব্লক (Not Started)";
+                    statBot.innerText = t.gate_status_not_active;
                     statBot.style.color = "#ef4444";
-                    btnBot.innerText = "🤖 Start";
+                    btnBot.innerText = t.gate_btn_start;
                     btnBot.style.background = "#6366f1";
                     btnBot.style.pointerEvents = "auto";
                     btnBot.style.opacity = "1";
                     btnBot.href = `https://t.me/${botUname}?start=v_${sParam || 'app'}`;
                 }
+
+                const btnVerify = document.getElementById('btn-verify-membership');
+                if (btnVerify && !btnVerify.disabled) {
+                    btnVerify.innerText = t.gate_verify_btn;
+                }
             }
+            window.updateGateUI = updateGateUI;
 
             updateGateUI(curStatus);
 
@@ -2217,10 +2332,10 @@
             async function recheckGateStatus(interactive = false) {
                 if (isVerifying) return;
                 const btnVerify = document.getElementById('btn-verify-membership');
-                const t = I18N[currentLang] || I18N.bn;
+                const t = I18N[currentLang] || I18N.en;
                 if (interactive && btnVerify) {
                     btnVerify.disabled = true;
-                    btnVerify.innerText = t.gate_verifying || "⚡ যাচাই করা হচ্ছে...";
+                    btnVerify.innerText = t.gate_verifying || "⚡ Verifying...";
                 }
                 isVerifying = true;
                 try {
@@ -2231,8 +2346,8 @@
                         cleanupGate();
                         document.getElementById('membership-gate-box').style.display = 'none';
                         document.getElementById('loading-box').style.display = 'block';
-                        document.getElementById('loading-title').innerText = t.unlocked_success || "✅ আনলক সফল! ভিডিও লোড হচ্ছে...";
-                        document.getElementById('loading-desc').innerText = t.loading_desc || "ভিডিও প্রস্তুত হচ্ছে...";
+                        document.getElementById('loading-title').innerText = t.unlocked_success || "✅ Unlocked! Loading video...";
+                        document.getElementById('loading-desc').innerText = t.loading_desc || "Preparing video stream...";
                         setTimeout(() => {
                             initMiniApp(true);
                         }, 400);
@@ -2241,10 +2356,11 @@
 
                     if (interactive) {
                         const missingParts = [];
-                        if (!newStatus.targetJoined) missingParts.push("মেইন চ্যানেল");
-                        if (!newStatus.backupJoined) missingParts.push("ব্যাকআপ চ্যানেল");
-                        if (!newStatus.botActive) missingParts.push("টেলিগ্রাম বটে /start");
-                        showCustomAlert("⚠️ এখনও পূরণ হয়নি: " + missingParts.join(", ") + "। দয়া করে সবগুলো পূরণ করে আবার চাপুন।");
+                        if (!newStatus.targetJoined) missingParts.push(t.gate_lbl_target);
+                        if (!newStatus.backupJoined) missingParts.push(t.gate_lbl_backup);
+                        if (!newStatus.botActive) missingParts.push(t.gate_lbl_bot);
+                        const alertTpl = t.gate_missing_alert || "⚠️ Still required: {items}. Please complete all of them and try again.";
+                        showCustomAlert(alertTpl.replace("{items}", missingParts.join(", ")));
                     }
                 } catch (err) {
                     console.warn("Recheck gate err:", err);
@@ -2252,7 +2368,7 @@
                     isVerifying = false;
                     if (interactive && btnVerify) {
                         btnVerify.disabled = false;
-                        btnVerify.innerText = t.gate_verify_btn || "🔄 যাচাই করুন (Verify Membership)";
+                        btnVerify.innerText = t.gate_verify_btn || "🔄 Verify Membership";
                     }
                 }
             }
@@ -2278,6 +2394,7 @@
 
             function cleanupGate() {
                 gateActive = false;
+                window.updateGateUI = null;
                 clearInterval(poller);
                 window.removeEventListener('focus', onResume);
                 document.removeEventListener('visibilitychange', onVisibility);
