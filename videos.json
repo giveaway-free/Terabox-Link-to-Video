@@ -28766,5 +28766,13 @@
     "res": "1080p",
     "dur": "02:45",
     "type": "Video"
+  },
+  "17Fid5QJcWcdTv3lYfIAsZA": {
+    "stream_url": "https://iteraplay.tera-api70.workers.dev/fast_stream?token=0Fs0DUcYsKWb-uSZv7delUmTaWDlPtH-mAC8aujIaZST-D5wFd0eKk8wi2jL7yx0Hx-mPSMcBjnPAobAIExfharkdBIn_AUOGJhzqXDWVXWTuITDQGqx7e6dcR-L165uxnRUROvFuf8N2h5WDKO3pMGBWUHvXBiAI62Yb3k_JRgTNlJzfqzkcRJa1dE4taRcdyUVJMI74ptiEVutoEHTzzReeHsE9yzGC7KSjdBnI2uutiWWhO1o-dle8lc4KkaAGNDP0TjczdcuxFRlDMxZLYYBcwmvT3aedxdIzJVChdxjmqbbkGOOQwTySO-XmjWzJ1ytDsYgsqv9iXSjcvOiLhyPdvXFsQv8B2V-i2Oodlmevlw1rZLJC-0QldWf-WCtZw.m3u8",
+    "title": "VID_20220901_103245_525(1).mp4",
+    "size": "7.0 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:58",
+    "type": "Video"
   }
 }
