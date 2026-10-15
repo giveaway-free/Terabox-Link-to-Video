@@ -31414,5 +31414,13 @@
     "res": "480p",
     "dur": "02:24",
     "type": "Video"
+  },
+  "1nEfyOz6NClK3KpKOqcO4cg": {
+    "stream_url": "https://iteraplay.tera-api95.workers.dev/fast_stream?token=ZoM6rK4s4JduF3zrqLLkP7D4D4nh_px4wDzL3WlM8Hq4C6FL0c5ZYU-cE94Nhz3mvnFPvg6lYf0DQx8fH8kvXksaUBGeyX0BqHmb7F3UY_p2S5kT-LnDu2sPekn5F-tFknTEU2-fcfXiXMUM-y87R20Hz2oWnPqggXGhGrbrAi3hU8FUkSTmUdyvspB86DknXikqiG8kWcYIQuUv0_C6czuqd41VTlA3bUHVZgGCs0fVU2NdTtkhIqSavjUluidfLAWaDlLV-Nhn0q4VT5UfQ6aqNrThvy_3Btl4e3TB5E0ddqQmYXD9JfIG9m07TkYTOKlZV4xUaOEibRgelbHOvxjr3SuL_hsRtC4W15zIVzuwc-Q9gJQjajrrAUnUKQ.m3u8",
+    "title": "2026-04-25-13-02-07(19).mp4",
+    "size": "56.5 MB",
+    "res": "1080p",
+    "dur": "06:25",
+    "type": "Video"
   }
 }
