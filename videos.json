@@ -40022,5 +40022,13 @@
     "res": "360p",
     "dur": "00:24",
     "type": "Video"
+  },
+  "1uzfFkekuR84BdHxyQqhrRw": {
+    "stream_url": "https://iteraplay.tera-api86.workers.dev/fast_stream?token=WNFhF5NRqDfGqBDwPR3fZZxUkouC4KiR0WjQr8ThTlYVnm_ZidYVRpXRmkKEzh4U6Le2L4dVgeoQhzPAT1Eh-ZZO3Hg8Zt3cUoWtdGkAlRgh7EEACqThjftHrdwqmG5PktVk7eQdhK8feeyt9_by29mfepNtojBDC8AtvM1M3PxAjvgFs3myKfMjCuyckVcBSeKna5x5mUcPsZo2fhWyBkZCr0XaJf-VdQxW8L7Tu89tBYy6Q25JJ2kP1Z9FNnfUdI2KJqkv57D71kypuD9XCtRS0MNqTTS-EN4WCDJm-g51r5Z1zfknB641-J3pZJ3ibQ0L_fL8rxbarxxpMoBheh-xQDIlljIpBos1Azfp-YY_pjQ.m3u8",
+    "title": "NSUA1080P.mp4",
+    "size": "217.5 MB",
+    "res": "1080p",
+    "dur": "30:32",
+    "type": "Video"
   }
 }
