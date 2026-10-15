@@ -26190,5 +26190,13 @@
     "res": "480p",
     "dur": "00:45",
     "type": "Video"
+  },
+  "12ToLucx1AXxn7dZY4pLb3g": {
+    "stream_url": "https://iteraplay.tera-api90.workers.dev/fast_stream?token=vcwG2y7aG4gAPz19OKZr4NsxWL_CeV7X1dWjfc9wFmaES_apQTmRD6anQJNqMh8wgjK3THrKQqN4gFVkUP4oZH3EBsGTa4yqb1-SKVP03cxY_Qpis4HkYnqRR9Hd7YXa3XHTxftTn7EtwMcvsVvE5KL-bp-18biWYWR4c4IP7ZpiGt4chp4ivsqE7eZZ7hPPnFEPLD3Ym_OGDmB3rWUhNWcZE6lcsW72-gmWT7ZtvRiawygb-HcZj8KULstNZTICx9rgoxS0OT1ksqicAnXnBQWiJtIVYDkRX6SQ0GEq3MlaOHemr-2jaJ6_SvXAA2eh6n_m2NsvagPAIDQaQkNnrMsMLUwkSQCUgqIkz80yuq4.m3u8",
+    "title": "NSUA1080P.mp4",
+    "size": "217.5 MB",
+    "res": "1080p",
+    "dur": "30:32",
+    "type": "Video"
   }
 }
