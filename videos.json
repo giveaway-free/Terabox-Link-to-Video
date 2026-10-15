@@ -35830,5 +35830,13 @@
     "res": "480p",
     "dur": "02:31",
     "type": "Video"
+  },
+  "1PikGDOLpOeiwd62elTrgyw": {
+    "stream_url": "https://iteraplay.tera-api15.workers.dev/fast_stream?token=E4kh12eL5_H3UCLiry0ohSSo37WTVBRyJxLJHsfRHN2QXdRon6bqDWwvW-EB4cI7sWbKjx5d1X5LQXADtVPaD2CNzqX8pNj8FMO1WLP5X0O08C2B33JMbwfSWaQ6EVJalMm-t2MFE5Uhw9QNqfLat2ds_gcvLzc_3K6uMEgVuK0e8vQMXIf8-waAjvbLudW_angrlIOKXsSKGiaDp-QI8KhTE6xfDPFp39PEYwv7NhGMpeXeWepSXZx7mbLMgnQhLIvrjLhszHLEG_pSNYLwgQc4ihshgqt4D6sScE2Ww0ZlYKLaaCJIZX5e5Eo4-gTVWlIQDOeQ9_iI3Hea19kxYcFHkZrKvF4sqbW2-sY3nE3YYw.m3u8",
+    "title": "NRNEWWITGIR.mp4",
+    "size": "123.4 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "16:43",
+    "type": "Video"
   }
 }
