@@ -37766,5 +37766,13 @@
     "res": "480p",
     "dur": "00:27",
     "type": "Video"
+  },
+  "1dvMukVfahgeBxN7q4PNBDw": {
+    "stream_url": "https://iteraplay.tera-api89.workers.dev/fast_stream?token=0SQ3WURM_wEWhKlSI2sYMFyFnca4HhbeX1bR6qTkFwa3QmOQAxNI3fkVzDBoxQuGkrwIYKEtrOzflAkjW5bju6kbcYc-vu-cujMhM4HmWeKLsHOtxiDH5CJYZ0oYrEPw7o4DD6sANKyNYX2FDm0dFrSM4_C5jFTb6Cc0cIUx6IW25ALCL0ceRzYqzilQmohqwl4mrybBrwzS-nNfHyVBkl2Vp7jy9PBu64-hRA7gFGZ0IzghOb6VnVSvusAOCfLaOrCigpgPIwVGVvGvAvxfjsLbb9wu53mhmlTKzFlO_riiYn8ob_-Rka-heh0bY4Ga77x7PWqzWnMdzTe3-cxjdwsBmUKTqaBY2gd6LP_gDw_7iro2x9SR01hKZEnKS7f5.m3u8",
+    "title": "2023-12-07-15-03-04(4).mp4",
+    "size": "10.9 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:19",
+    "type": "Video"
   }
 }
