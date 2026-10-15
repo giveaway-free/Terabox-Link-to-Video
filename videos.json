@@ -40302,5 +40302,13 @@
     "res": "480p",
     "dur": "04:56",
     "type": "Video"
+  },
+  "1m3q6I4i5nS8aBAg1WFrphA": {
+    "stream_url": "https://iteraplay.tera-api60.workers.dev/fast_stream?token=u7VV6EXBR-Id3tqaMZ2kNHCWj0u36Bgp74pn65Ss5qS1pvtFmqHS91J3zrXAt-AvnFPvJhpi41_cPm9O_aq0bG6Kj9Y2lT6gT2MQI8PFHGzOL_4xM4XKUikIK73C1PsOuTRNYQr_s8031v3gu-Q60DtM_JgoK8i_MRAj7qYTVkWQN7rrv-kFD_QFRFOzeKQErveNfLw2KKsNQvdzsXXdtSX7JOOX_QibB6TrYxTdfDXTBHZxc3KBK0gaIzQlq8N8jBCaYBLcUZ3l9y5H4_L7eDvlRJ1RW1WafuarhrfJeBreuVJOivWPRkApKxZbcYovLASf_kl3iDvhO-F62Ln3lTZwrvbiYG2r2CQ9bWSc3JRt2J0W2uX5CoG8nFwGvRslnwxbHoMyyTs9EHhgWHUPNas.m3u8",
+    "title": "Classroom 2.mp4 at Streamtape.com.mp4",
+    "size": "6.2 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:55",
+    "type": "Video"
   }
 }
