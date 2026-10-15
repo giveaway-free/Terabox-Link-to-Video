@@ -37398,5 +37398,13 @@
     "res": "480p",
     "dur": "00:10",
     "type": "Video"
+  },
+  "1DSx1zcM7adwTjxlZCSIEkA": {
+    "stream_url": "https://iteraplay.tera-api21.workers.dev/fast_stream?token=Ptj1wQXW_DTV5iNPl6ytw_Jx4BruUiBH1jPmX7TNLgPEoc3QMVEKWx7LbE32bhtTM-ED40q52od1IuJsVTzrQn0RWJRi81bcVaf4Yy8fmek_TAZ-d1m4BaOx8K8mCl5j-ClEEY1ru7AjCTERkOxoTmeH_MamSDtJ1nevpePTowBNLSh0qQ19yZWkCvWvqYCbWltrcg5Ne-U6Hhszg5vVrSQwpIcXCzIZULNPM70J-TqO0v9JtVwAdGVTWMeHfsljZZywcZ_tJ6FBiFZ0pivAv7D0qVJzET_C3sS0Jhy0lPif_nTdUsyIDw8GhB0WoCDsszMJ-MO8dlWinb27L-D2Q73aGUQHzfONzh0igYMmKW3TehD1nbY5DTqjJQA8kbC4.m3u8",
+    "title": "2023-11-23-19-48-46(2).mp4",
+    "size": "26.4 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "02:29",
+    "type": "Video"
   }
 }
