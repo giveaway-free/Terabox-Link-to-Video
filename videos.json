@@ -35350,5 +35350,13 @@
     "res": "360p",
     "dur": "01:34",
     "type": "Video"
+  },
+  "1f7EQHUEehk7F_lUf1WwB2g": {
+    "stream_url": "https://iteraplay.tera-api64.workers.dev/fast_stream?token=1Z9I1xxuVszE9QgHwj7VvoDs_tykVcfF-xH2F2UfLn8PaGS7sMh_nPoPIdmPDOcdsG4v-67zHo5WyijpD-V5_0Il2eKZXSGz-lrX2L6Nu1RZ2eyYNutgl_9Qc2tTs6nDfFMXVYu-iq7WWVN_dtyXM9-yWr3VENyp50qUDSvvqFe0snUnUr_y7nRNyW5mQIk6eUgZ4Xjtn4Z5J6qLoOY7niIjYlkmWXZGdApwUS8xXDc5kj1Mhk1AE91-0Q4ussWAJkcZMWNDRJn1msaPBLW5IpjqqVLLBnvWgtoIJcCyIHdbV370dY_lwZPbYFZH9oKQ3vbC3hyPEfML0tXO0j9dRNxuzHX46bWSI7SfKLevgcmY34Z6YvJkaa_ffpDQIUai.m3u8",
+    "title": "2025-10-17-21-20-03(9).mp4",
+    "size": "9.2 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:36",
+    "type": "Video"
   }
 }
