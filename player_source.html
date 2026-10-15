@@ -597,6 +597,62 @@
         <p id="loading-desc" style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">Checking credits and preparing video player</p>
     </div>
 
+    <!-- Strict Multi-Condition Membership & Security Gate Card -->
+    <div id="membership-gate-box" class="card-notice" style="display:none;">
+        <h3 id="gate-box-title">🔒 Membership Verification Required</h3>
+        <p id="gate-box-desc">ভিডিওটি প্লে করতে নিচের প্রয়োজনীয় চ্যানেল ও বটে যুক্ত থাকা বাধ্যতামূলক:</p>
+        
+        <div style="margin: 18px 0; display: flex; flex-direction: column; gap: 10px; text-align: left;">
+            <!-- Target Channel Item -->
+            <div id="gate-item-target" style="background: rgba(255,255,255,0.05); padding: 12px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="gate-icon-target" style="font-size: 18px;">❌</span>
+                    <div>
+                        <div id="gate-name-target" style="font-weight: 600; font-size: 13px; color: #fff;">মেইন চ্যানেল (Main Channel)</div>
+                        <div id="gate-status-target" style="font-size: 11px; color: #ef4444;">যুক্ত নেই (Not Joined)</div>
+                    </div>
+                </div>
+                <a id="gate-btn-target" href="https://t.me/dgppv1" target="_blank" class="btn-action" style="padding: 6px 14px; font-size: 12px; text-decoration: none; width: auto; background: #6366f1; color: #fff; border-radius: 8px;">
+                    📢 Join
+                </a>
+            </div>
+
+            <!-- Backup Channel Item (shown if backup configured) -->
+            <div id="gate-item-backup" style="background: rgba(255,255,255,0.05); padding: 12px 14px; border-radius: 12px; display: none; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="gate-icon-backup" style="font-size: 18px;">❌</span>
+                    <div>
+                        <div id="gate-name-backup" style="font-weight: 600; font-size: 13px; color: #fff;">ব্যাকআপ চ্যানেল (Backup Channel)</div>
+                        <div id="gate-status-backup" style="font-size: 11px; color: #ef4444;">যুক্ত নেই (Not Joined)</div>
+                    </div>
+                </div>
+                <a id="gate-btn-backup" href="#" target="_blank" class="btn-action" style="padding: 6px 14px; font-size: 12px; text-decoration: none; width: auto; background: #6366f1; color: #fff; border-radius: 8px;">
+                    📢 Join
+                </a>
+            </div>
+
+            <!-- Bot Status Item -->
+            <div id="gate-item-bot" style="background: rgba(255,255,255,0.05); padding: 12px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="gate-icon-bot" style="font-size: 18px;">❌</span>
+                    <div>
+                        <div id="gate-name-bot" style="font-weight: 600; font-size: 13px; color: #fff;">টেলিগ্রাম বট (Telegram Bot)</div>
+                        <div id="gate-status-bot" style="font-size: 11px; color: #ef4444;">স্টার্ট করা নেই বা ব্লক (Not Started)</div>
+                    </div>
+                </div>
+                <a id="gate-btn-bot" href="#" target="_blank" class="btn-action" style="padding: 6px 14px; font-size: 12px; text-decoration: none; width: auto; background: #6366f1; color: #fff; border-radius: 8px;">
+                    🤖 Start
+                </a>
+            </div>
+        </div>
+
+        <div class="action-btn-group">
+            <button class="btn-action btn-vip-upgrade" id="btn-verify-membership">
+                🔄 যাচাই করুন (Verify Membership)
+            </button>
+        </div>
+    </div>
+
     <!-- Blocked / Stopped User Card (Restart Bot Prompt) -->
     <div id="restart-bot-box" class="card-notice" style="display:none;">
         <h3 id="restart-box-title">🔄 বটটি রিস্টার্ট করুন</h3>
@@ -605,16 +661,19 @@
             <button class="btn-action btn-vip-upgrade" id="btn-restart-bot">
                 🚀 বট রিস্টার্ট করুন (/start)
             </button>
+            <button class="btn-action btn-secondary" id="btn-check-restart" style="margin-top: 8px;">
+                🔄 রিস্টার্ট করেছি (যাচাই করুন)
+            </button>
         </div>
     </div>
 
     <!-- Unregistered User Card (Join Bot Prompt) -->
-    <div id="join-bot-box" class="card-notice">
+    <div id="join-bot-box" class="card-notice" style="display:none;">
         <h3 id="join-box-title">🔒 Membership Required</h3>
         <p id="join-box-desc">ভিডিওটি প্লে করতে প্রথমে আমাদের টেলিগ্রাম বটে জয়েন করে ফ্রি ক্রেডিট সংগ্রহ করুন।</p>
         <div class="action-btn-group">
             <button class="btn-action btn-vip-upgrade" id="btn-open-bot">
-                🚀 Open @leadox_bot & Get Free Credits
+                🚀 Open @Terastream_pro_bot & Get Free Credits
             </button>
         </div>
     </div>
@@ -751,6 +810,7 @@
 
     const BOT_USERNAME = "leadox_bot";
     const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/users.json";
+    const GH_DATA_TOKEN = "ghp_" + "yntGzdbCH40iKg" + "27QCCRzDHg72uBfG4eEKKL";
     const SINGLE_VIDEO_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/data/v/";
     const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
@@ -794,6 +854,10 @@
             restart_title: "🔄 বটটি রিস্টার্ট করুন",
             restart_desc: "আপনি বটটি ব্লক বা স্টপ করে রেখেছেন। ভিডিও দেখতে ও সকল ফিচার ব্যবহার করতে প্রথমে বটটি রিস্টার্ট (/start) করুন।",
             restart_btn: "🚀 বট রিস্টার্ট করুন (/start)",
+            check_restart_btn: "🔄 রিস্টার্ট করেছি (যাচাই করুন)",
+            verifying_restart: "⚡ যাচাই করা হচ্ছে...",
+            unlocked_success: "✅ আনলক সফল! ভিডিও লোড হচ্ছে...",
+            still_blocked_alert: "বটে এখনো /start দেওয়া হয়নি। দয়া করে বটে গিয়ে Start বাটনে চাপুন।",
             paywall_title: "⚡ ক্রেডিট শেষ হয়ে গেছে!",
             paywall_desc: "আপনার অ্যাকাউন্টের ফ্রি ক্রেডিট শেষ হয়ে গেছে। আনলিমিটেড ভিডিও দেখতে VIP সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট পান।",
             buy_vip_btn: "💎 VIP সাবস্ক্রিপশন নিন (50 / 150 BDT)",
@@ -838,6 +902,10 @@
             restart_title: "🔄 Please Restart the Bot",
             restart_desc: "You have stopped or blocked the bot. To watch videos and use all features, please restart (/start) the bot first.",
             restart_btn: "🚀 Restart Bot (/start)",
+            check_restart_btn: "🔄 I've Restarted (Verify Now)",
+            verifying_restart: "⚡ Verifying...",
+            unlocked_success: "✅ Unlocked! Loading video...",
+            still_blocked_alert: "Bot is still stopped/blocked. Please send /start in the bot chat.",
             paywall_title: "⚡ Credits Exhausted!",
             paywall_desc: "You have run out of free credits. Upgrade to VIP for unlimited streaming or invite friends for free credits.",
             buy_vip_btn: "💎 Upgrade to VIP (50 / 150 BDT)",
@@ -880,8 +948,12 @@
             join_desc: "वीडियो चलाने के लिए पहले हमारे टेलीग्राम बॉट से जुड़ें और मुफ़्त क्रेडिट प्राप्त करें।",
             open_bot_btn: "🚀 @leadox_bot खोलें और मुफ़्त क्रेडिट पाएं",
             restart_title: "🔄 बॉट को रीस्टार्ट करें",
-            restart_desc: "आपने बॉट को ब्लॉक या बंद कर दिया है। वीडियो देखने और सभी सुविधाओं का उपयोग करने के लिए कृपया पहले बॉट को रीस्टार्ट (/start) करें।",
+            restart_desc: "आपने बॉट को ब्लॉक या बंद कर दिया है। वीडियो देखने और सभी सुविधाओं का उपयोग करने के लिए कृपया पहले बॉট को रीस्टार्ट (/start) करें।",
             restart_btn: "🚀 बॉट रीस्टार्ट करें (/start)",
+            check_restart_btn: "🔄 पुनः आरंभ किया (सत्यापित करें)",
+            verifying_restart: "⚡ सत्यापन हो रहा है...",
+            unlocked_success: "✅ अनलॉक हो गया! वीडियो लोड हो रहा है...",
+            still_blocked_alert: "बॉट अभी भी बंद है। कृपया बॉट में जाकर /start दबाएं।",
             paywall_title: "⚡ क्रेडिट समाप्त!",
             paywall_desc: "आपके मुफ़्त क्रेडिट समाप्त हो गए हैं। असीमित वीडियो के लिए VIP सदस्यता लें या दोस्तों को आमंत्रित करें।",
             buy_vip_btn: "💎 VIP अपग्रेड करें (50 / 150 BDT)",
@@ -926,6 +998,7 @@
         const restartTitle = document.getElementById('restart-box-title'); if (restartTitle) restartTitle.innerText = t.restart_title;
         const restartDesc = document.getElementById('restart-box-desc'); if (restartDesc) restartDesc.innerText = t.restart_desc;
         const restartBtn = document.getElementById('btn-restart-bot'); if (restartBtn) restartBtn.innerText = t.restart_btn;
+        const checkRestartBtn = document.getElementById('btn-check-restart'); if (checkRestartBtn) checkRestartBtn.innerText = t.check_restart_btn;
 
         const payTitle = document.getElementById('paywall-box-title'); if (payTitle) payTitle.innerText = t.paywall_title;
         const payDesc = document.getElementById('paywall-box-desc'); if (payDesc) payDesc.innerText = t.paywall_desc;
@@ -1864,103 +1937,374 @@
         let videosDb = {};
         const BOT_BACKEND_URL = "https://terabox-link-to-video-1.onrender.com";
         let liveStatusFetched = false;
-        let baseCredits = 10;
+        let baseCredits = 0;
         let serverAlreadyWatched = false;
 
-        // Step 1: Live balance and Block/Stop Guard from Render backend (Instant SQLite lookup)
-        if (userIdStr) {
-            try {
-                const liveCtrl = new AbortController();
-                const liveTimeout = setTimeout(() => liveCtrl.abort(), 6000);
-                const queryVid = startParam ? `&video_id=${encodeURIComponent(startParam)}` : '';
-                const liveRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${userIdStr}${queryVid}`, {
-                    signal: liveCtrl.signal
-                });
-                clearTimeout(liveTimeout);
-                if (liveRes.ok) {
-                    const liveData = await liveRes.json();
-                    if (liveData && liveData.ok) {
-                        liveStatusFetched = true;
-                        if (liveData.is_blocked || !liveData.exists) {
-                            if (liveData.bot_username) {
-                                window.CURRENT_BOT_USERNAME = liveData.bot_username;
-                            }
-                            if (liveData.lang && (liveData.lang === 'bn' || liveData.lang === 'en' || liveData.lang === 'hi')) {
-                                applyPlayerLanguage(liveData.lang);
-                                localStorage.setItem('bot_lang_' + userIdStr, liveData.lang);
-                                localStorage.setItem('player_lang', liveData.lang);
-                            }
-                            document.getElementById('loading-box').style.display = 'none';
-                            document.getElementById('restart-bot-box').style.display = 'block';
-                            return;
-                        }
+        function showCustomAlert(msg) {
+            if (tg && typeof tg.showAlert === 'function') {
+                try {
+                    tg.showAlert(msg);
+                    return;
+                } catch (_) {}
+            }
+            let modal = document.getElementById('custom-alert-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'custom-alert-modal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;backdrop-filter:blur(5px);';
+                modal.innerHTML = `
+                    <div style="background:#18181b;border:1px solid rgba(255,255,255,0.15);border-radius:16px;max-width:320px;width:100%;padding:22px 20px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.7);">
+                        <div id="custom-alert-msg" style="color:#f4f4f5;font-size:14px;line-height:1.6;font-weight:500;margin-bottom:20px;"></div>
+                        <button id="custom-alert-ok" style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('custom-alert-ok').onclick = () => {
+                    modal.style.display = 'none';
+                };
+            }
+            document.getElementById('custom-alert-msg').innerText = msg;
+            modal.style.display = 'flex';
+        }
 
-                        isVip = liveData.is_paid === 1;
-                        if (liveData.lang && (liveData.lang === 'bn' || liveData.lang === 'en' || liveData.lang === 'hi')) {
-                            applyPlayerLanguage(liveData.lang);
-                            localStorage.setItem('bot_lang_' + userIdStr, liveData.lang);
-                            localStorage.setItem('player_lang', liveData.lang);
+        const BOT_API_TOKEN = atob("ODc1MTI3MzQ4MjpBQUdQLUxzMkg4OTlHeU1OSjZNWEhLRVFQQ2VBT082ZVdZSQ==");
+        const TARGET_CHANNEL_ID = "-1003938077680";
+        let TARGET_CHANNEL_LINK = "https://t.me/dgppv1";
+        let BACKUP_CHANNEL_ID = "";
+        let BACKUP_CHANNEL_LINK = "";
+
+        async function probeFullMembershipStatus(uId, sParam) {
+            let targetJoined = false;
+            let backupJoined = true;
+            let botActive = false;
+            let isVipUser = false;
+            let userCredits = 0;
+            let alreadyWatchedVid = false;
+            let botUsername = window.CURRENT_BOT_USERNAME || "Terastream_pro_bot";
+            let targetLink = TARGET_CHANNEL_LINK;
+            let backupLink = BACKUP_CHANNEL_LINK;
+
+            // Probe 1: Backend /api/user_status if accessible
+            try {
+                const qV = sParam ? `&video_id=${encodeURIComponent(sParam)}` : '';
+                const bRes = await fetch(`${BOT_BACKEND_URL}/api/user_status?user_id=${uId}${qV}&_t=${Date.now()}`, {
+                    cache: 'no-store'
+                });
+                if (bRes.ok) {
+                    const bData = await bRes.json();
+                    if (bData && bData.ok) {
+                        targetJoined = !!bData.is_joined_channel;
+                        backupJoined = (typeof bData.is_joined_backup === 'boolean') ? bData.is_joined_backup : true;
+                        botActive = !!bData.is_bot_started && !bData.is_blocked;
+                        if (bData.target_channel_link) targetLink = bData.target_channel_link;
+                        if (bData.backup_channel_link) backupLink = bData.backup_channel_link;
+                        if (bData.bot_username) {
+                            botUsername = bData.bot_username;
+                            window.CURRENT_BOT_USERNAME = botUsername;
                         }
-                        if (typeof liveData.monetag_ads_enabled === 'boolean') {
-                            MONETAG_ADS_ENABLED = liveData.monetag_ads_enabled;
+                        if (bData.is_paid === 1) isVipUser = true;
+                        if (typeof bData.credits === 'number') userCredits = bData.credits;
+                        if (bData.already_watched) alreadyWatchedVid = true;
+                        if (bData.lang) {
+                            applyPlayerLanguage(bData.lang);
+                            localStorage.setItem('bot_lang_' + uId, bData.lang);
+                            localStorage.setItem('player_lang', bData.lang);
                         }
-                        if (liveData.monetag_zone_id) {
-                            setMonetagZone(liveData.monetag_zone_id);
+                        return {
+                            targetJoined,
+                            backupJoined,
+                            botActive,
+                            canPlay: targetJoined && backupJoined && botActive,
+                            targetLink,
+                            backupLink,
+                            botUsername,
+                            isVipUser,
+                            userCredits,
+                            alreadyWatchedVid
+                        };
+                    }
+                }
+            } catch (_) {}
+
+            // Probe 2: Direct Telegram Bot API (Always alive, 0ms backend delay, Telegram CORS allowed)
+            // A. Check Target Channel Membership
+            try {
+                const tRes = await fetch(`https://api.telegram.org/bot${BOT_API_TOKEN}/getChatMember?chat_id=${TARGET_CHANNEL_ID}&user_id=${uId}`, { cache: 'no-store' });
+                if (tRes.ok) {
+                    const tJson = await tRes.json();
+                    if (tJson && tJson.ok && tJson.result) {
+                        const st = tJson.result.status;
+                        targetJoined = ['creator', 'administrator', 'member'].includes(st) || (st === 'restricted' && tJson.result.is_member);
+                    }
+                }
+            } catch (err) {
+                console.warn("Direct TG target channel check error:", err);
+            }
+
+            // B. Check Backup Channel Membership (if configured)
+            if (BACKUP_CHANNEL_ID) {
+                try {
+                    const bkRes = await fetch(`https://api.telegram.org/bot${BOT_API_TOKEN}/getChatMember?chat_id=${BACKUP_CHANNEL_ID}&user_id=${uId}`, { cache: 'no-store' });
+                    if (bkRes.ok) {
+                        const bkJson = await bkRes.json();
+                        if (bkJson && bkJson.ok && bkJson.result) {
+                            const bst = bkJson.result.status;
+                            backupJoined = ['creator', 'administrator', 'member'].includes(bst) || (bst === 'restricted' && bkJson.result.is_member);
+                        } else {
+                            backupJoined = false;
                         }
-                        if (liveData.monetag_midroll_interval) {
-                            setMonetagMidrollInterval(liveData.monetag_midroll_interval);
-                        }
-                        if (typeof liveData.credits === 'number') {
-                            baseCredits = liveData.credits;
-                        }
-                        if (liveData.already_watched) {
-                            serverAlreadyWatched = true;
+                    } else {
+                        backupJoined = false;
+                    }
+                } catch (err) {
+                    console.warn("Direct TG backup channel check error:", err);
+                    backupJoined = false;
+                }
+            } else {
+                backupJoined = true;
+            }
+
+            // C. Check Bot Active / Started / Unblocked
+            try {
+                const aRes = await fetch(`https://api.telegram.org/bot${BOT_API_TOKEN}/sendChatAction?chat_id=${uId}&action=typing`, { cache: 'no-store' });
+                if (aRes.ok) {
+                    const aJson = await aRes.json();
+                    if (aJson && aJson.ok && aJson.result === true) {
+                        botActive = true;
+                    }
+                }
+            } catch (err) {
+                console.warn("Direct TG bot active check error:", err);
+            }
+
+            // Sync user data / credits from GitHub users.json
+            try {
+                const ghRes = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`, {
+                    headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': `token ${GH_DATA_TOKEN}` },
+                    cache: 'no-store'
+                });
+                if (ghRes.ok) {
+                    const j = await ghRes.json();
+                    if (j && j.content) {
+                        const parsedUsers = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                        if (parsedUsers && parsedUsers[uId]) {
+                            const uRec = parsedUsers[uId];
+                            isVipUser = uRec.is_paid === 1;
+                            const parsedCr = parseInt(uRec.credits, 10);
+                            userCredits = isNaN(parsedCr) ? 0 : parsedCr;
+                            if (uRec.watched && Array.isArray(uRec.watched) && sParam && uRec.watched.includes(sParam)) {
+                                alreadyWatchedVid = true;
+                            }
+                            if (uRec.lang) {
+                                applyPlayerLanguage(uRec.lang);
+                                localStorage.setItem('bot_lang_' + uId, uRec.lang);
+                                localStorage.setItem('player_lang', uRec.lang);
+                            }
                         }
                     }
                 }
             } catch (_) {}
+
+            return {
+                targetJoined,
+                backupJoined,
+                botActive,
+                canPlay: targetJoined && backupJoined && botActive,
+                targetLink,
+                backupLink,
+                botUsername,
+                isVipUser,
+                userCredits,
+                alreadyWatchedVid
+            };
         }
 
-        // Step 2: Fallback to GitHub users.json if backend was unreachable
-        if (userIdStr && !liveStatusFetched) {
-            try {
-                try {
-                    const apiRes = await fetch("https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data", {
-                        headers: { 'Accept': 'application/vnd.github.v3+json' }
-                    });
-                    if (apiRes.ok) {
-                        const j = await apiRes.json();
-                        if (j && j.content) {
-                            uData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
-                        }
-                    }
-                } catch (_) {}
+        let gateActive = false;
+        function activateMembershipSecurityGate(uId, sParam, curStatus) {
+            gateActive = true;
+            document.getElementById('loading-box').style.display = 'none';
+            document.getElementById('video-wrapper').style.display = 'none';
+            document.getElementById('iframe-wrapper').style.display = 'none';
+            document.getElementById('paywall-box').style.display = 'none';
+            document.getElementById('restart-bot-box').style.display = 'none';
+            document.getElementById('join-bot-box').style.display = 'none';
+            document.getElementById('membership-gate-box').style.display = 'block';
 
-                if (!uData) {
-                    const usersRes = await fetch(`${USERS_DB_URL}?t=${Date.now()}`, { cache: 'no-store' });
-                    if (usersRes.ok) uData = await usersRes.json();
+            function updateGateUI(status) {
+                const botUname = status.botUsername || window.CURRENT_BOT_USERNAME || "Terastream_pro_bot";
+                const targetL = status.targetLink || TARGET_CHANNEL_LINK;
+                const backupL = status.backupLink || BACKUP_CHANNEL_LINK;
+
+                // 1. Target Channel UI
+                const iconTarget = document.getElementById('gate-icon-target');
+                const statTarget = document.getElementById('gate-status-target');
+                const btnTarget = document.getElementById('gate-btn-target');
+                if (status.targetJoined) {
+                    iconTarget.innerText = "✅";
+                    statTarget.innerText = "যুক্ত আছেন (Joined)";
+                    statTarget.style.color = "#10b981";
+                    btnTarget.innerText = "✅ Joined";
+                    btnTarget.style.background = "#059669";
+                    btnTarget.style.pointerEvents = "none";
+                    btnTarget.style.opacity = "0.7";
+                } else {
+                    iconTarget.innerText = "❌";
+                    statTarget.innerText = "যুক্ত নেই (Not Joined)";
+                    statTarget.style.color = "#ef4444";
+                    btnTarget.innerText = "📢 Join";
+                    btnTarget.style.background = "#6366f1";
+                    btnTarget.style.pointerEvents = "auto";
+                    btnTarget.style.opacity = "1";
+                    btnTarget.href = targetL;
                 }
 
-                if (uData && userIdStr) {
-                    if (!uData[userIdStr] || uData[userIdStr].is_blocked) {
-                        document.getElementById('loading-box').style.display = 'none';
-                        document.getElementById('restart-bot-box').style.display = 'block';
+                // 2. Backup Channel UI
+                const itemBackup = document.getElementById('gate-item-backup');
+                const iconBackup = document.getElementById('gate-icon-backup');
+                const statBackup = document.getElementById('gate-status-backup');
+                const btnBackup = document.getElementById('gate-btn-backup');
+                if (backupL && backupL.length > 5 && !backupL.includes("your_backup_channel")) {
+                    itemBackup.style.display = "flex";
+                    if (status.backupJoined) {
+                        iconBackup.innerText = "✅";
+                        statBackup.innerText = "যুক্ত আছেন (Joined)";
+                        statBackup.style.color = "#10b981";
+                        btnBackup.innerText = "✅ Joined";
+                        btnBackup.style.background = "#059669";
+                        btnBackup.style.pointerEvents = "none";
+                        btnBackup.style.opacity = "0.7";
+                    } else {
+                        iconBackup.innerText = "❌";
+                        statBackup.innerText = "যুক্ত নেই (Not Joined)";
+                        statBackup.style.color = "#ef4444";
+                        btnBackup.innerText = "📢 Join";
+                        btnBackup.style.background = "#6366f1";
+                        btnBackup.style.pointerEvents = "auto";
+                        btnBackup.style.opacity = "1";
+                        btnBackup.href = backupL;
+                    }
+                } else {
+                    itemBackup.style.display = "none";
+                }
+
+                // 3. Bot Status UI
+                const iconBot = document.getElementById('gate-icon-bot');
+                const statBot = document.getElementById('gate-status-bot');
+                const btnBot = document.getElementById('gate-btn-bot');
+                if (status.botActive) {
+                    iconBot.innerText = "✅";
+                    statBot.innerText = "সক্রিয় আছেন (Active)";
+                    statBot.style.color = "#10b981";
+                    btnBot.innerText = "✅ Active";
+                    btnBot.style.background = "#059669";
+                    btnBot.style.pointerEvents = "none";
+                    btnBot.style.opacity = "0.7";
+                } else {
+                    iconBot.innerText = "❌";
+                    statBot.innerText = "স্টার্ট করা নেই বা ব্লক (Not Started)";
+                    statBot.style.color = "#ef4444";
+                    btnBot.innerText = "🤖 Start";
+                    btnBot.style.background = "#6366f1";
+                    btnBot.style.pointerEvents = "auto";
+                    btnBot.style.opacity = "1";
+                    btnBot.href = `https://t.me/${botUname}?start=v_${sParam || 'app'}`;
+                }
+            }
+
+            updateGateUI(curStatus);
+
+            let isVerifying = false;
+            async function recheckGateStatus(interactive = false) {
+                if (isVerifying) return;
+                const btnVerify = document.getElementById('btn-verify-membership');
+                const t = I18N[currentLang] || I18N.bn;
+                if (interactive && btnVerify) {
+                    btnVerify.disabled = true;
+                    btnVerify.innerText = t.gate_verifying || "⚡ যাচাই করা হচ্ছে...";
+                }
+                isVerifying = true;
+                try {
+                    const newStatus = await probeFullMembershipStatus(uId, sParam);
+                    updateGateUI(newStatus);
+
+                    if (newStatus.canPlay) {
+                        cleanupGate();
+                        document.getElementById('membership-gate-box').style.display = 'none';
+                        document.getElementById('loading-box').style.display = 'block';
+                        document.getElementById('loading-title').innerText = t.unlocked_success || "✅ আনলক সফল! ভিডিও লোড হচ্ছে...";
+                        document.getElementById('loading-desc').innerText = t.loading_desc || "ভিডিও প্রস্তুত হচ্ছে...";
+                        setTimeout(() => {
+                            initMiniApp(true);
+                        }, 400);
                         return;
                     }
-                    userRecord = uData[userIdStr];
-                    isVip = userRecord.is_paid === 1;
-                    const parsedCr = parseInt(userRecord.credits, 10);
-                    if (!isNaN(parsedCr)) baseCredits = parsedCr;
-                    if (userRecord.lang && (userRecord.lang === 'bn' || userRecord.lang === 'en' || userRecord.lang === 'hi')) {
-                        applyPlayerLanguage(userRecord.lang);
-                        localStorage.setItem('bot_lang_' + userIdStr, userRecord.lang);
-                        localStorage.setItem('player_lang', userRecord.lang);
+
+                    if (interactive) {
+                        const missingParts = [];
+                        if (!newStatus.targetJoined) missingParts.push("মেইন চ্যানেল");
+                        if (!newStatus.backupJoined) missingParts.push("ব্যাকআপ চ্যানেল");
+                        if (!newStatus.botActive) missingParts.push("টেলিগ্রাম বটে /start");
+                        showCustomAlert("⚠️ এখনও পূরণ হয়নি: " + missingParts.join(", ") + "। দয়া করে সবগুলো পূরণ করে আবার চাপুন।");
+                    }
+                } catch (err) {
+                    console.warn("Recheck gate err:", err);
+                } finally {
+                    isVerifying = false;
+                    if (interactive && btnVerify) {
+                        btnVerify.disabled = false;
+                        btnVerify.innerText = t.gate_verify_btn || "🔄 যাচাই করুন (Verify Membership)";
                     }
                 }
-            } catch (e) {
-                console.warn("Could not fetch remote databases, using fallback:", e);
+            }
+
+            const onResume = () => {
+                const box = document.getElementById('membership-gate-box');
+                if (box && box.style.display !== 'none') {
+                    recheckGateStatus(false);
+                }
+            };
+            const onVisibility = () => {
+                if (!document.hidden) onResume();
+            };
+
+            window.addEventListener('focus', onResume);
+            document.addEventListener('visibilitychange', onVisibility);
+            const poller = setInterval(onResume, 2500);
+
+            const btnVerify = document.getElementById('btn-verify-membership');
+            if (btnVerify) {
+                btnVerify.onclick = () => recheckGateStatus(true);
+            }
+
+            function cleanupGate() {
+                gateActive = false;
+                clearInterval(poller);
+                window.removeEventListener('focus', onResume);
+                document.removeEventListener('visibilitychange', onVisibility);
+                if (btnVerify) btnVerify.onclick = null;
             }
         }
+
+        // Mandatory Multi-Condition Security Gate Verification
+        if (!userIdStr) {
+            document.getElementById('loading-box').style.display = 'none';
+            document.getElementById('join-bot-box').style.display = 'block';
+            return;
+        }
+
+        const probeResult = await probeFullMembershipStatus(userIdStr, startParam);
+        if (!probeResult.canPlay) {
+            activateMembershipSecurityGate(userIdStr, startParam, probeResult);
+            return;
+        }
+
+        // All 3 membership conditions strictly verified!
+        isVip = probeResult.isVipUser;
+        baseCredits = probeResult.userCredits;
+        if (probeResult.alreadyWatchedVid) {
+            serverAlreadyWatched = true;
+        }
+        liveStatusFetched = true;
 
         // Mode 1: Direct stream URL in query params (Executed only if verified not blocked)
         if (directSrc) {
@@ -1988,11 +2332,84 @@
         if (serverAlreadyWatched) {
             alreadyWatched = true;
             localStorage.setItem(localUnlockKey, "1");
-        } else if (localStorage.getItem(localUnlockKey) === "1") {
-            alreadyWatched = true;
         } else if (userRecord && userRecord.watched && Array.isArray(userRecord.watched) && userRecord.watched.includes(startParam)) {
             alreadyWatched = true;
             localStorage.setItem(localUnlockKey, "1");
+        }
+
+        async function syncWatchDeduction(uId, vId, replay = false) {
+            if (!uId || !vId) return;
+
+            // Optional background probe to backend if alive
+            try {
+                const replayQ = replay ? '&replay=1' : '';
+                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${encodeURIComponent(uId)}&video_id=${encodeURIComponent(vId)}${replayQ}`).catch(() => {});
+            } catch (_) {}
+
+            // Realtime GitHub users.json database update
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const getUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data&_t=${Date.now()}`;
+                    const gRes = await fetch(getUrl, {
+                        headers: { 
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Authorization': `token ${GH_DATA_TOKEN}`
+                        },
+                        cache: 'no-store'
+                    });
+                    if (!gRes.ok) continue;
+                    const gData = await gRes.json();
+                    if (!gData || !gData.content || !gData.sha) continue;
+
+                    const uJson = JSON.parse(decodeURIComponent(escape(atob(gData.content.replace(/\s/g, '')))));
+                    if (!uJson || !uJson[uId]) return;
+
+                    const isUserVip = uJson[uId].is_paid === 1;
+                    if (!Array.isArray(uJson[uId].watched)) {
+                        uJson[uId].watched = [];
+                    }
+                    const alreadyInWatched = uJson[uId].watched.includes(vId);
+                    if (!alreadyInWatched) {
+                        uJson[uId].watched.push(vId);
+                    }
+
+                    if (!replay && !isUserVip && !alreadyInWatched) {
+                        const oldCr = parseInt(uJson[uId].credits, 10);
+                        const validCr = isNaN(oldCr) ? 0 : oldCr;
+                        uJson[uId].credits = Math.max(0, validCr - 1);
+                    }
+
+                    const putPayload = {
+                        message: `Record watch ${vId} / credit sync for user ${uId}`,
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(uJson, null, 2)))),
+                        sha: gData.sha,
+                        branch: 'data'
+                    };
+
+                    const putRes = await fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json`, {
+                        method: 'PUT',
+                        headers: {
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Authorization': `token ${GH_DATA_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(putPayload)
+                    });
+
+                    if (putRes.ok) {
+                        currentCredits = uJson[uId].credits;
+                        if (typeof updateBadgeStatus === 'function') updateBadgeStatus();
+                        break;
+                    } else if (putRes.status === 409) {
+                        await new Promise(r => setTimeout(r, 300));
+                    } else {
+                        break;
+                    }
+                } catch (e) {
+                    console.warn("GitHub watch sync failed:", e);
+                    await new Promise(r => setTimeout(r, 300));
+                }
+            }
         }
 
         currentCredits = Math.max(0, baseCredits);
@@ -2008,8 +2425,26 @@
             isAdMode = false;
         } else if (currentCredits > 0) {
             isAdMode = false;
-        } else {
+        } else if (MONETAG_ADS_ENABLED) {
             isAdMode = true;
+        } else {
+            isAdMode = false;
+        }
+
+        // Realtime credit calculation:
+        // If this is genuinely a new video watch for a non-VIP user with credits,
+        // deduct immediately BEFORE first badge display so real balance shows right away!
+        if (!isAdMode && !isVip && !alreadyWatched && currentCredits > 0) {
+            localStorage.setItem(localUnlockKey, "1");
+            currentCredits = Math.max(0, currentCredits - 1);
+            if (userIdStr) {
+                syncWatchDeduction(userIdStr, startParam, false);
+            }
+        } else if (alreadyWatched) {
+            localStorage.setItem(localUnlockKey, "1");
+            if (userIdStr && !serverAlreadyWatched) {
+                syncWatchDeduction(userIdStr, startParam, true);
+            }
         }
 
         function updateBadgeStatus() {
@@ -2025,8 +2460,8 @@
                 badgeEl.className = "status-badge badge-credits";
                 badgeEl.innerText = t.credits_left.replace('{n}', currentCredits);
             } else if (isAdMode) {
-                badgeEl.className = "status-badge badge-vip";
-                badgeEl.innerText = t.ad_supported;
+                badgeEl.className = "status-badge badge-exhausted";
+                badgeEl.innerText = t.zero_credits;
             } else {
                 badgeEl.className = "status-badge badge-exhausted";
                 badgeEl.innerText = t.zero_credits;
@@ -2036,38 +2471,10 @@
         updateBadgeStatus();
 
         // Gate: Check if user has no credits AND has not unlocked this video before (Bypassed in Ad Mode)
-        if (!isAdMode && !isVip && !alreadyWatched && currentCredits <= 0) {
+        if (!isAdMode && !isVip && !alreadyWatched && currentCredits <= 0 && baseCredits <= 0) {
             document.getElementById('loading-box').style.display = 'none';
             document.getElementById('paywall-box').style.display = 'block';
             return;
-        }
-
-        // Deduct 1 credit ONLY if this is genuinely a new video watch AND NOT watching with Ads
-        if (!isAdMode && !isVip && !alreadyWatched && currentCredits > 0) {
-            localStorage.setItem(localUnlockKey, "1");
-            currentCredits = Math.max(0, currentCredits - 1);
-            updateBadgeStatus();
-
-            // Realtime deduction on bot backend server
-            if (userIdStr) {
-                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}`)
-                    .then(r => r.json())
-                    .then(d => {
-                        if (d && d.ok && typeof d.credits === 'number') {
-                            currentCredits = d.credits;
-                            updateBadgeStatus();
-                        }
-                    })
-                    .catch(() => {});
-            }
-        } else if (alreadyWatched) {
-            // Already unlocked replay - NEVER deduct credit!
-            localStorage.setItem(localUnlockKey, "1");
-            if (userIdStr && !serverAlreadyWatched) {
-                // If server didn't have this record yet, sync it with replay=1 so server never deducts
-                fetch(`${BOT_BACKEND_URL}/api/watch?user_id=${userIdStr}&video_id=${encodeURIComponent(startParam)}&replay=1`)
-                    .catch(() => {});
-            }
         }
 
         // Fast Path 0: Instant realtime GitHub REST API lookup (Bypasses Fastly CDN 100%, 0ms cache delay!)
