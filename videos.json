@@ -35734,5 +35734,13 @@
     "res": "480p",
     "dur": "01:33",
     "type": "Video"
+  },
+  "1X3a3FRcUXFE0hU9rI-U7eQ": {
+    "stream_url": "https://iteraplay.tera-api61.workers.dev/fast_stream?token=H32BBr-CrU97aT8g21UWhTsZEOAwa3iGyjmuQVlFZcIu9ToUXJQ9XNRWHOcfVfrgW9xQPz5DnkM_6tZTcwri44govUobHvexkkLTGw_gKkIw3e6kM0pWRYOcgcmtjNdXHIIYOLfvQ7BQK4zwheQq77l7fBxLAeqXQvz0HYUidte5M7DwqOyPpuaomgvUc87RgSVZonuC33hymyM3pdtHi9OsfuYzSbMLmeJ2vEr2q4jKjZ5QcKc9YSD8nB3ZyNdDV72PuV71p6tDl_qOMQiB7GN5s7_z0eokq-xF6WviOiVJHIlfZG3nt_HfpV7_eMGZTtRZuKFJQzx1TDl2olBHVGztul5TxtdMDU8Z18z-xxw.m3u8",
+    "title": "madhuu.mp4",
+    "size": "221.6 MB",
+    "res": "1080p",
+    "dur": "13:47",
+    "type": "Video"
   }
 }
