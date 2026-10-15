@@ -35606,5 +35606,13 @@
     "res": "480p",
     "dur": "01:15",
     "type": "Video"
+  },
+  "1teN1wsk2f7W5IjR6t7tPhQ": {
+    "stream_url": "https://black-shape-1578.senyfatu.workers.dev/fast_stream?token=3Sw_qInzQk7CM229XTVLnAWfWhEzHtqdgHIM_zAKTwmVcPA1osKN-CGqQWCJ22CiR_wMJIVf9ej9pGDrdYIRM_wxrCd8L8L3A-_d7txR9XXNLEcGmjP6Ukn2o0LT_RU_4MX6O6cvefEzab2jr5NMkRc2EzASkteHkJunl92MSJcvn8LDAA97A92YTOBNjmNiS2MFMKG3hr_iBKMDf5Y8Wg4oGNxvnnMJyImDAbg01BUMD-pvvEkGNFxzhXXAF_o5FaZRb8mKDeSdaJSdiDbbOrs9CvsMSO2sHmLmUvF8p-bGBEl_Ed8BuHnL247weTuIu4k58tqGp_Cakl3wwTaUjo-TC4IjFDd55qirfbzlE1j-.m3u8",
+    "title": "video_360p.mp4",
+    "size": "64.6 MB",
+    "res": "360p",
+    "dur": "20:40",
+    "type": "Video"
   }
 }
