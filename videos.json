@@ -35662,5 +35662,13 @@
     "res": "480p",
     "dur": "00:43",
     "type": "Video"
+  },
+  "1uW4mf7a1GccOPk7QJ0B-Nw": {
+    "stream_url": "https://iteraplay.tera-api57.workers.dev/fast_stream?token=SS0x07si4M_8bQozwu6B6v5gyIXRGDM653sYkYmn9lweNV6MhMgsjoK6p16OzsnKSjnGqKBigx9s5C1yxkjpEJeAZuTAOSer8c8jVYFuKfMTb2Mtp8aY14Cp_9e3za0h-m3iLVM9DBSWxn2FCeBlAr3EQbTv53xNFeIAcaroSmIqXemcu9HSrMY2DGkLiEW-kr88tS9-yimz4VhD_9V4gXpou5zE2_AOlngzvjImuACRpBNXFFDRNBps1mrni-yIOsNUDpuzRmMpb9-nH05tbjQQIykDr8UxDgH00-RH1x9Y6TxkXnBKaDPq1uZVLzaFC6vxTNuRx4T-2-95t_e2DkdQQr85p6zTzvCrNHlbdfN3cmTjm_rSPtb_yM7zRgiRZEB5rxA.m3u8",
+    "title": "IMG 2984 - DoodStream.mp4",
+    "size": "2.3 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:18",
+    "type": "Video"
   }
 }
