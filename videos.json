@@ -27774,5 +27774,13 @@
     "res": "360p",
     "dur": "02:20",
     "type": "Video"
+  },
+  "1eYLZDrbnaoaxspexsxgHyg": {
+    "stream_url": "https://weathered-field-1e1c.giliwysi.workers.dev/fast_stream?token=r31SPgjwfKVJyGz-trVjlxaY7dXYHFmzvrdMgPVd3fc-4sY9BRP71Z9TWBnOER5cg3f-YWNrZWQeKzmQMYZKw8oQFF2hKZWJ5YJPhxkgbWixK96w4e87EsmsdYfmG1NW4odRexIvUyCFOupgAH9k0nih6H7WcJGgnuftDHMZ20hV8MpZDp07grsN7_urP_acCccOIuN_DFGVhcl5Ya902hbnazsGeawPp5Lf9hoqRQny0xw9oJUzAKAz5VhBMybHvvzwIiKKcmEL-M_RskitmfUXteesrqzfp8DjNto3k1Mx6mN-LlXfKy0l--gHxuRyNmD8E62etzyKY3Z8EgXa6QoGaHhOEv5AJUYbdi55883LdklyhumYBJnBjuMi.m3u8",
+    "title": "2024-01-14-19-23-11.mp4",
+    "size": "22.2 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "02:08",
+    "type": "Video"
   }
 }
