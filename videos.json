@@ -30350,5 +30350,13 @@
     "res": "1080p",
     "dur": "04:09",
     "type": "Video"
+  },
+  "1LYl8lGMG1VrjUXapKT9uVA": {
+    "stream_url": "https://plain-smoke-ba6b.vusewu.workers.dev/fast_stream?token=OxcAvhqyfrJxvO6UvT1Gm0O8ZVuSl-RK4gwot5iKLHHSNkeSmHFxVkvNAPg33kxQapkye3rmZPB_kR-SsrPI62tQJ2AhdTPM2FgEMA5yYVu8t9Z4NjKIGGkK-9-4rks93p8XStUY5C6XCmci5EPLhyQE0e1GjuE2q5m2jAfENB-EY4mqAUnZFrqLNkS583UcGC5fhLkfNAKlb5OIfp33pTQj0_Sl456ipePzPbhrN2WCrKsvnVRQc8sl2IYRNd51MuNJNm8_Z4NqpnLqzkUFKPob7KXHpnzEO7BYnskD-MuhX5vS0TJycaGuiEZ7W5x4w2MvRONVqip-g3wfbFlUcCKTrDii7k81cFHNW2Kz7P1S4iM.m3u8",
+    "title": "VID-lf11fs31.mp4",
+    "size": "1.2 MB",
+    "res": "480p",
+    "dur": "00:09",
+    "type": "Video"
   }
 }
