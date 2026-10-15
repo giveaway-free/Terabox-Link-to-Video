@@ -37550,5 +37550,13 @@
     "res": "1080p",
     "dur": "01:38",
     "type": "Video"
+  },
+  "1IjRKGaAEkF5YXxRz6Tv3Dg": {
+    "stream_url": "https://iteraplay.tera-api76.workers.dev/fast_stream?token=kuzfrCnoSTE3VTdvwW5dMwNVzIy_UkDp0QExEMbFqe-lbSFnDGK9SqHE6W9V4yhs4CNAGvGlUZYC1V-zjFHUpVDUWcITCEOFdZyddj5vps4qTgI7WrGFOROiUWrXwXQaQnz8ldWGNXAq5n2If2_5lQinPCtGo4BwRerHgALGnMBloChgQNqkjYOr6idT_88XrFaz7YmZvF8yy9UrX2_tWy45iVQrMCl_b80dXP82B5kjOdlZ6gytMUP2WFq3B-O3-3lbq8WAEALvvcvQmuYAvEjF8G-ns-Aj3O74lQIUW5IcqEiC7G74udscHDI1rj6HDXzVflEmwtQg4yoip0vn4Q_djZBqOBe3wOKIutNhi9KPmvct5iA.m3u8",
+    "title": "20230102_191648.mp4",
+    "size": "520.8 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "33:14",
+    "type": "Video"
   }
 }
