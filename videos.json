@@ -27486,5 +27486,13 @@
     "res": "480p",
     "dur": "06:59",
     "type": "Video"
+  },
+  "1CkFBs1w3TL8ElluEQsSkMA": {
+    "stream_url": "https://iteraplay.tera-api85.workers.dev/fast_stream?token=Qrz7IMMFAc7Fa6myjBCt-yjoWr1zvgTAoQP5vNdLGcwrQlh8TCjtv2ldgetCbYFr4tfrqzplLYPJ26nW2yboAnb3YSogkmp7nIEGu34NyzNE3aCQU4LI4RZe0zjCIpL5thSNferuxpPRNL1W11-hVKhuA8EPlGG1d_qXkQVHfNtkn4pZAdxjkdikDdV8zUV6xPxDlso3R-qwcXg2wJ0oKHfmfdmJKYr2bdX7a2fwnJZmoLXZS69KvXoWnE9capdjZNSCho_PSkNjzX94tZ7pk9PnLMX0pZf1H8tn2kamPWttBu4h7G6HFFCandbmeTi0wKhfKofKg9GmFrNjKXV7W4i4TfCgUsfoitqB.m3u8",
+    "title": "gc30.mp4",
+    "size": "14.9 MB",
+    "res": "480p",
+    "dur": "05:09",
+    "type": "Video"
   }
 }
