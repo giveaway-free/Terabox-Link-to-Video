@@ -32118,5 +32118,13 @@
     "res": "Auto (Adaptive)",
     "dur": "00:19",
     "type": "Video"
+  },
+  "1SIJB521kstw9YYEHUbX6IQ": {
+    "stream_url": "https://iteraplay.tera-api97.workers.dev/fast_stream?token=YgaaS2nmBGdq22NSzAptcAjO8vBvpUd75WaRN1m4ebfEQsUrtFozeqDLGY4hPTT8HZRPm1vNNaH9-8Rs6s-lLO0mkDJlCXaLENbKmDUW8wq5jvKe3FU_-Q-BBddoHx0BSC4YUp2O_j-dygvfU70VERiDzymZe3wV0RL6GTSOAeLqi5wk1V9WWekNARtdDXL0HjceYDpEdv_dpCunhdQ9iWDVQuWCOqndbOjy1P2I0mDlUUWNvAuZ3pUbVr4RvivXnm6GTn9U3DSoXQzbmfLKWRRuYKjIYG8n7KHFxI_Zi_rivPnCWrFfeDd2XT-QgadYlLWk-nvoov9SqFIT_mh81Al0u_xRSJrpMlNGt7VfwBAWMH2ETdVkVHbAaQUB.m3u8",
+    "title": "2025-08-23-07-05-35(2).mp4",
+    "size": "7.4 MB",
+    "res": "480p",
+    "dur": "01:05",
+    "type": "Video"
   }
 }
