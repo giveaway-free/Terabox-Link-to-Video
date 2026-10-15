@@ -28790,5 +28790,13 @@
     "res": "480p",
     "dur": "00:47",
     "type": "Video"
+  },
+  "19pUYN28J4P8xEA0MCQ3Gfw": {
+    "stream_url": "https://iteraplay.tera-api94.workers.dev/fast_stream?token=5F1zzOCq3TY3u9cOus_aLG6j5tLPRy1QGHrRGQFnS8p8IMWhCOIjNsiK03QbrFAu38k7zK8Bo_V87SXxrIUb__BR6oSQkZpUmsby_fcgEu3x0HggG0HST7xx5xU8iyYtnlxnzVBWeyNUI-5bnpE6S17IAWvvFAKW39-y129wSCnZDxCvwMvvL-DCkd1zxRBM_tyCQhRCaIV6ibXPVtB6HelQSsl8KVy9MLEFGRYRGOlhaWbang7pr3phX00IarSfG1ivun60zSGtX5AXOm3SkLEKkBXjxek8rxVec8vf7VUo-uSSkt3uXpiXHkR6TprJ8J_LPcPQpgh5JusfsLLFLHvhQFWxWmZzlrq_SeFpzPgOf6ZUIm44iKYMx84hzPCh2O3WF1Bl.m3u8",
+    "title": "15915 (2) - DoodStream.mp4",
+    "size": "132.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "11:01",
+    "type": "Video"
   }
 }
