@@ -42350,5 +42350,13 @@
     "res": "480p",
     "dur": "00:20",
     "type": "Video"
+  },
+  "1V6POTbtbgMdGe9DUmknyjQ": {
+    "stream_url": "https://iteraplay.tera-api27.workers.dev/fast_stream?token=R_HkiLoa93SeTWwIA5XHyck9a6MFTCLnl8A5FFJKKmLj9G-QlHFLT7uoMSV73wNuHsbJofPkxUTXOgAm8zXCHOY_Ue4NyZMMu_NeHYT2SFxbWmLmT5rzOHFm5BG8riWT4f5wvLyYq3-Clc3LjQPjLYuJLoT1W-bXqMHs-Hz2hcpQRts-PU_6FkBlwqc63IcE9tDVVDj18wNOEVYLDtg9xc_lgibBDKme9gGi9nXqtYuL7E0-FFAtlOU-B_TnJu2bdl4ZcCtBUUkcZYov2fv5tVCHhBDe8G3dHNQVhtet649cO52Ae6efZY5tr6fBEDXGRTfdzhhTHWPibb-S5HabGke3DJRuz9S4lH8L2-AyKmLqmTv_vG3S88lUtltRsNhILifk5Yy42nmEWQ.m3u8",
+    "title": "Srinidhi-Shetty-bed-...-video(2).mp4",
+    "size": "52.2 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "05:21",
+    "type": "Video"
   }
 }
