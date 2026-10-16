@@ -43094,5 +43094,13 @@
     "res": "1080p",
     "dur": "01:23",
     "type": "Video"
+  },
+  "1ReHYPrFnYXQ5DLcvbqAK7Q": {
+    "stream_url": "https://rough-math-380d.vumefywo.workers.dev/fast_stream?token=Gf24vN_Maej5q6sdmm8PGkTqZz9nTx9DhDswo8mvtnzapJNOu54BjgLdwOapjkkZ9I5m2Di6ib47G36_biMXTbjsQB_YYzOa35KNN0ZL_XwC0_w1sQ8Oafxa6dJNON58mPLyDysFK__Bz8kMuSPMfTmfD46ErTZLaajkEgyEAQo2KPPcom855-QkFxwjWiIITuqTlOushKVswLDlvp2Uop0M9tX6T2NrbloPThHiPIlIRQcq6oFHmi9tHwzUGjTH2q7VsJ89cdG4I9DN3OUuqnuJxxKbv_G1Ye6sDHPKGiXhr3ezcIWRhrLBfUXWrlAALxwjGRLnIsKhiLA_Y7uFxjOmzo2Cv7Lwi1L_wN6UV1HECIO2cBeaK7EWZozNJg.m3u8",
+    "title": "VID-1694606604510(1).mp4",
+    "size": "47.3 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "04:54",
+    "type": "Video"
   }
 }
