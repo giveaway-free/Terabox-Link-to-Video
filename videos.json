@@ -47318,5 +47318,13 @@
     "res": "480p",
     "dur": "02:21",
     "type": "Video"
+  },
+  "1G6vzDcMa6nCTEsHIKKDT0g": {
+    "stream_url": "https://iteraplay.tera-api21.workers.dev/fast_stream?token=eJeWJ-sV5l9v34fwS8YCNdWxy99C41gcQceaoet8L79uTlXZC5EdZWNmhYTU_9tYeSbValeWCGF0igjwHGfFMW-3vfI6e45JEGMdZaTJyhOpI1A0CyXOLsnfgpUfonsBuS7HP8zK5g-Ev7IeGmOGCw4btShvajCFpwee-yjt3OA5TCXeaM7cHi91TbJCulD_-0b_MhPvIWiqO9cJYQqYY3jOQokljKgxviKMOiT03WEA_JM4P2MUfc76sjtfAyRYfdCGDgicxcs3Jc13ZoutcbOqxF4hfEg8R2JypFRLzO19vuNaW656telusAmREFac1TtRp7p0qLgh89Eue-p222-ZSr-UIqBJp-QC4MqUwIJrL_N4lR_MR7NHZyyJ.m3u8",
+    "title": "2024-03-11-11-55-16.mp4",
+    "size": "24.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "03:01",
+    "type": "Video"
   }
 }
