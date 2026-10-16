@@ -20,8 +20,8 @@
   "553826070": {
     "username": "tuserahammed",
     "credits": 0,
-    "is_paid": 0,
-    "paid_expiry": null,
+    "is_paid": 1,
+    "paid_expiry": "2026-11-15 20:41:36",
     "lang": "en",
     "is_blocked": false,
     "watched": [
