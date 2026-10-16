@@ -56,12 +56,14 @@
   },
   "5361465032": {
     "username": "User_5361465032",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1Flbbwx0x5SGUnITultP48Q"
+    ]
   },
   "5452302287": {
     "username": "Whitedevilbdteam",
