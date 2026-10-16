@@ -43678,5 +43678,13 @@
     "res": "1080p",
     "dur": "00:53",
     "type": "Video"
+  },
+  "1hWs0bmtlPtUsR8KyvFCgYA": {
+    "stream_url": "https://throbbing-bird-96d7.dycyqufo.workers.dev/fast_stream?token=Ecee65-90SQ_h6oSV3BPwL2Y5LTEanQUfDmPNPp0QkAfSxu7sHxxpbt1YgrSbcNoJX_cGdwAOv833AvnqHi1a1pDsWMbkFuXxiRun8zxeP-_vMFR1Vfn5WIy7bRokQkbwRlghbirSqP5VG8WdX1v8MWmnHK8YTJ7hbtRALj0DJaCfSGXOv5ewHDygXFaFG1yGxlLbC23dm2-6JwDNEPEGg1B4C6p94ppEnk6d8xVS-dDRLTiy4AjKnzL6ywGkwDRZl2m2zZFpk7kkPeenp7NpgJU7RhOLunZqsqQiHhS4i8Di0NEgf6utAvjP027vu3WSxHA3afzrSYpS5V67MRV4UvhDXiJgB9D8JK6QGyrGYkf.m3u8",
+    "title": "MK68 (20).ts",
+    "size": "12.0 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:01",
+    "type": "Video"
   }
 }
