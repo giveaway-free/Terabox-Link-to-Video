@@ -48526,5 +48526,13 @@
     "res": "1080p",
     "dur": "06:46",
     "type": "Video"
+  },
+  "1SfZJfIEfs_Hg36IwI35uMw": {
+    "stream_url": "https://small-shadow-4b18.losoni.workers.dev/fast_stream?token=KChTrJEIPIwgL01zj2XDWIprh3dyUe1dYpacZGZ7kLK-0NwoqkP0a1O_kYmkBej5LSrwMOwGnoPTS0AbkgjpAQNlqho7O80wERhUaU104ibFQbmc6lMGF2Zmg5yYcYN_nDzFtsvSoOIjjQxtj-h93yzHR5VqodOdiJj2a67XRlka6RQsYJDggSlpVcwycRZ0qcjeJ68bG9PjlPEMlZ8f6DeIrnrBq2K8Bwh3CEv-3e11riiyMOFir-vSPpIa6QBmzitUG0ShwM-xigi-u1GQHz7nTF9zKM0k9PPv4Lt_UkvU8m4Zb8kcdv89XSrfc-TCXEed4BC-hX25-Pnsyj4RhEqFBpJucdtY5FkKm6A.m3u8",
+    "title": "bd 1.mp4",
+    "size": "43.7 MB",
+    "res": "480p",
+    "dur": "07:17",
+    "type": "Video"
   }
 }
