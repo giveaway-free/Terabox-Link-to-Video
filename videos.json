@@ -47558,5 +47558,13 @@
     "res": "480p",
     "dur": "01:41",
     "type": "Video"
+  },
+  "1DJTk6R2BRkrS8eDxmhNVLg": {
+    "stream_url": "https://iteraplay.tera-api42.workers.dev/fast_stream?token=orNZij1BttwRCKZs5PTNQYdLmeELLTj8Tejvu2dvtKMYkUxCM4bRpO9LFllS8w7Cg9awQusJt_uhQ-Fwwm8ttjcxaNcG6yOaJg03hL4JYfUPxztflG7MmgNMGrPGoJqf62bAi_IAvoE2UXJnNLUyVbMJJRHwOiYpK_DwBQ9oJT9qNuPaK4ETOo6jz8DTujYruEtf7Bc-a3xIJ-42Y_bvErxl1UjbNbg5nJbJAwdGg96Tc5BLYrVcLBMPhiMIjQq5KDItPZeq26O36Sio708QBmj-FIFdqbRpUQlQAP76l6DofgC_k7WPn2aYB5iblL9hdQwPH9uWYddRj7RooBfMpNaCQLzRYxbYeUIOUasTyvjBUCkCCA1mxWfUthRA7vJRtx7ZP4woeoEV5aQ.m3u8",
+    "title": "2cfe6abd-a32c-49df-8075-2fdf3bb3048c.mp4",
+    "size": "15.7 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:45",
+    "type": "Video"
   }
 }
