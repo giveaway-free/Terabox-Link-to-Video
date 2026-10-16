@@ -41662,5 +41662,13 @@
     "res": "360p",
     "dur": "02:24",
     "type": "Video"
+  },
+  "1FPD3alvl23cgEOuOT-go-g": {
+    "stream_url": "https://iteraplay.tera-api26.workers.dev/fast_stream?token=F31gYLfDHifraj8kP3nE3IsAfKareYQJwm-Ff2ypFLLabSI6bK_AzGvVeVaFHV0orjc-kMBwmMqlrnQZm6PgWdgZ2XPl2VCGixj_chDr2ncd_tQ6vzLwiXbqySdravnY_wH9d8TddE0yS7v1vpsBei6G0MxGAmHc-H8W3DQeKxMCB0b5QcfMZcXx7hxJGXs9BiYSf_nJpsg0bP9ORYjOrydktSYO7fYnfgCkv9eXCY_fDZBa9vPaQZWAXxSI_aKpKd4t-Dh9RWe4Y1qMyV_YVKeh6F0BZqUK8m-LgvyvQ-6x0ac0_FeBgVBs1la0A07mW6mzOQbEl-mZte7EN3lqLNoLB1UdRXFlWUuRwIH4OqD3B1ISUoIwvMHvBCiUwQ.m3u8",
+    "title": "fblite_video-3(2)(1).mp4",
+    "size": "6.5 MB",
+    "res": "480p",
+    "dur": "02:03",
+    "type": "Video"
   }
 }
