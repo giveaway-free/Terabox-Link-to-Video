@@ -48086,5 +48086,13 @@
     "res": "360p",
     "dur": "10:02",
     "type": "Video"
+  },
+  "1arAOhdBKFsgDvpwJV2aKVw": {
+    "stream_url": "https://iteraplay.tera-api54.workers.dev/fast_stream?token=4MX1WjEQExCjK-iJAKCdhez7d_jX7-fQZB_ESwGbzKReDP5swcb_dEFim66Nplmenf_ipUAFnUCWn-ChvSBG-THZn8PqqTNSBI2vIC2CkA6IZqk-4xFJcVDeCw5UGn01qslTK9831O8xzYqqXGXpTu75KAqBgm8VZ9nrV4RP4-Gvm37UjBMznoW7oPJcZ4VCB-xMdGtWD63fjKAIj83rT5LngSD6DpclvaLaREsnQpdntjAiB7CEtNzGrgRolyH-M4GGca5OToQBJjOwCbwQWzSQ03CkM7eWvV0iILbtLDZyY6O7e5uesT2S8v7aT-q0z0rOAdyN45a6fOXSFOcogDprGrGE5YNC1-ku82Rt6iw-LnkXP5iMi3fZLBKI.m3u8",
+    "title": "2023-11-21-00-40-27.mp4",
+    "size": "25.6 MB",
+    "res": "480p",
+    "dur": "07:46",
+    "type": "Video"
   }
 }
