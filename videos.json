@@ -43526,5 +43526,13 @@
     "res": "480p",
     "dur": "00:48",
     "type": "Video"
+  },
+  "1Ovs3ENZINjFz9c02JIqinQ": {
+    "stream_url": "https://iteraplay.tera-api69.workers.dev/fast_stream?token=X6g0XABeJQwh4n-2RPtpmQLPHSDJTvYbZUSieHdNHTdBFr17UDaGIFsr15VpDASyVU4pQ-R5MJbwZdRDu0WwQy5NpECZQTZRzbI1pHj0dU4Yz4CDk3DsvuZ3LUbhRwnYjQELT9qiYgYvaTVrQPWO80U8hOqWWU_F_B1sgnNCfDK53fjCne94OfL7x_djW6qi-pt9inj2gw_YdctZCFZYmF0WXaUO5x9c0N54Rd1MY_spK3xhLIctgHfI5rQpAq-SmUW3v3gIHuEZAHl5AmrluJvj8FjXnb1xY7kYK_JeIQCreZyAY13K_debYVJuBXUryQ-DYdBU1FklV004N9h0YnMgxocwVUkURo7vE0ELg6ugpKvlCXDZmWG9NqZv.m3u8",
+    "title": "2025-11-07-11-17-09(1).mp4",
+    "size": "12.7 MB",
+    "res": "360p",
+    "dur": "04:40",
+    "type": "Video"
   }
 }
