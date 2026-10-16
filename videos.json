@@ -45942,5 +45942,13 @@
     "res": "480p",
     "dur": "01:02",
     "type": "Video"
+  },
+  "1LThKTyfunbwyR3014-FgNA": {
+    "stream_url": "https://dawn-hat-4316.ruzyri.workers.dev/fast_stream?token=xfEAJ8n9tZ53TXDzUgweBE5U484BcpNGS_YW4tD9HlY4nJ2b_0cXrb5umgbOKNKBQZCFJMKShJZtrkRbQC0jzIHX2nxZZ9_janCEW2DsRj99901l6KAOqJgMDt6qApE2Z47Np0B4pM_IB-YQ7JMU8BosI5CNczbF12u4YJ54Fpv8psYuz6_QiWg07SNF1XHtOCr6M7IAeUDE-4SOvvU8QH1B2Hu5j8Z3izrVP-Hq_PrcxlKTGMZS1v6JU6V4eoAIJd9l1GDKPSXJLcgHqjnI8Swo8UbOQOrJ_PZKZ33YPsG5uBSUkQP_k5cp9fetkN6FuuiKtn2I-exzWBXXSgEx_CexNbh-wNG6tPolHWHd5nAFrjlM5vAvOGBq.m3u8",
+    "title": "VID_20240618_152844.mp4",
+    "size": "3.4 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "00:22",
+    "type": "Video"
   }
 }
