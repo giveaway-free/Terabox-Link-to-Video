@@ -20,8 +20,8 @@
   "553826070": {
     "username": "tuserahammed",
     "credits": 0,
-    "is_paid": 1,
-    "paid_expiry": "2026-10-16 04:38:04",
+    "is_paid": 0,
+    "paid_expiry": null,
     "lang": "en",
     "is_blocked": false,
     "watched": [
@@ -53,6 +53,15 @@
       "1sdeWnTg2OyRtUBhMTVaCyw",
       "1suJlYlkaJDAzUIS0sSVWoA"
     ]
+  },
+  "5361465032": {
+    "username": "User_5361465032",
+    "credits": 5,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "lang": "bn",
+    "is_blocked": false,
+    "watched": []
   },
   "5452302287": {
     "username": "Whitedevilbdteam",
@@ -222,11 +231,11 @@
     "lang": "bn",
     "is_blocked": false,
     "watched": [
+      "18OQC4Vt1q9xNdatDbIJlVA",
       "1Ax3KByZo23xueIIe8QttHg",
       "1EzhnGPiLoBux_V0LzhXW-Q",
-      "1TMKokG8mByu2S29DyZ95PA",
-      "18OQC4Vt1q9xNdatDbIJlVA",
-      "1RPqPVgscuqFW85hNLS42HA"
+      "1RPqPVgscuqFW85hNLS42HA",
+      "1TMKokG8mByu2S29DyZ95PA"
     ]
   },
   "7488289885": {
