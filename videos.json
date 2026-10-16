@@ -41310,5 +41310,13 @@
     "res": "480p",
     "dur": "00:35",
     "type": "Video"
+  },
+  "1qpRMmQR5E2KGC83vTWoJBA": {
+    "stream_url": "https://iteraplay.tera-api44.workers.dev/fast_stream?token=j7c-mpqhi9OAdTFWt7-azIPpgHp_P5ttGGcbRzkp47bggLX75FndbifodVZwEXgqg26CcFhRaBp5lGP5JOvHt3OqyQkSbJgVba6cDm37Xl4tzt2n-QdiqWUk5G4KR7L7OPl1Xr2uqUatLw9G4NxqRBi-hWW6GFOI-JUDsZoM78XPxjvaPryn3OH-6umzgB4tWxT9qVCPjGsbc93ZLyBhb21oJnU1WnBNicqyxdK4wYkzRkPKp4N_mtH5IaAoFjMJJLI6eYW851RCmRZQ1wkPdEVv4pKycbreBPROpcMF7prJxzDswti_ABa2H0TKLUsvcPl2BBe-4KgqIUgr9oZsX2iVnCtvWJrXoagZ2wHkBR-mhrFJSl9csTClfz8uI0Pi.m3u8",
+    "title": "2025-11-23-15-25-46(8).mp4",
+    "size": "17.3 MB",
+    "res": "480p",
+    "dur": "01:41",
+    "type": "Video"
   }
 }
