@@ -44790,5 +44790,13 @@
     "res": "480p",
     "dur": "02:21",
     "type": "Video"
+  },
+  "1IKcAX8-AsWirhnzSR1focA": {
+    "stream_url": "https://steep-smoke-576b.ryreveco.workers.dev/fast_stream?token=WgLZSzzMXm6fgOl5IhvAAStNAy50XZzle-7pIrWQIEo2sVZS-Uc1PjKZct5tklE-XZN2WXE1kRLCUOsFzEZDuq9wQ5k5kN_-HqT0AXzRjNsOWxMyZxFC9eBfL3jQCNn5OgKqDLU319ZyspodFaUuIZJhx5C-chvy9wGsv4xIe1mxUbC4vg7wEbFvYj7pKQg4DcyFMPiWuywSJF3FMsbs_LbMVxcC-H1nM02HShfFo6BvWj4lI1gnB-tfhDZ58Amh7NQEuG4wV5kvJBNA38sb9C_8gvZxYncSMnb2aukUpYOy3jdeP07IdL8fYjeIUYYunEh70TGQA5sG0z2f-61HQxk9lvxh7XKegVLyzN--LA.m3u8",
+    "title": "Maaya.mp4",
+    "size": "259.6 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "18:10",
+    "type": "Video"
   }
 }
