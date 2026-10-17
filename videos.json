@@ -52398,5 +52398,13 @@
     "res": "1080p",
     "dur": "06:20",
     "type": "Video"
+  },
+  "1rfzo_iX3fWq1thLaay_ERw": {
+    "stream_url": "https://iteraplay.tera-api18.workers.dev/fast_stream?token=v0tJR3uIZERQa1NExf3ppRIFP-kfiZnMIkiOoLHwTTqauQ_hIpZWrUHXpvn1JzBAqBcCxTpNgcll-Ew32TH_A4c2PpjtzlnVOtZHdPF1e9RjVnJPrbbJHD2WrlSMqBjyLYBlinfR4pISRxKluG88K7PLJPMqxAA74heCEvpiD3IaHWuSU0BjxDKj3wo_ULclZdOc2iLvUeKHLg8fsfk99e4tf6CPHP98s3Qo05Fd7l8QSiDJxuW2eVnfb8dRkYHcwPF_ftuaC_vyzFORcPZNjAuLU8QGLeAERPkJDPyV9D6ZGd3QmwxE9bwOOpiYxMx75Q_zvzTjmPAkPc90590pJADW9xJRR5Xg-gcy2Do.m3u8",
+    "title": "Telugu.mp4",
+    "size": "7.6 MB",
+    "res": "360p",
+    "dur": "02:36",
+    "type": "Video"
   }
 }
