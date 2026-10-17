@@ -352,7 +352,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": [
       "1iTi9A4z1XIg7lbdWAftpRw",
       "1tMgGhM3rU10O6BUj9gFNcw"
