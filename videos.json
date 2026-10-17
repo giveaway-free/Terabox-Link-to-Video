@@ -52790,5 +52790,13 @@
     "res": "480p",
     "dur": "07:39",
     "type": "Video"
+  },
+  "1TC-b9iLht5vGPZgLK18q_Q": {
+    "stream_url": "https://spring-bread-d44a.rilitu.workers.dev/fast_stream?token=yWuOje1kLUnN-gYJisR9Ui_wnvZk1sd3Xy6iuZFzzj_TTwJELnfz41YKdHquLRRWkvjjdXp3xtlvbgcx89zEzInsZOp6DSemwI-i-QG3Y4OJKieUyVIu8YmeTix3Rx0-YMWxHFqSMdDyzUTE687SCYy0fWMG0XH6IIDTQYUi15D1zDKS--D7eXKWpQEO8eIFC1Ew0ygkPqlQjqBxSk0tPZdEycJqRIZTMihEttKNgGIwokBkNkrMIEi6iGCXYPrLZtrVdA-tiJ9AiZlZxVS9yUg-L7yEf5pYlxPjoSmjukhH0IPdq4SsKFNo49OXAvm3nkFLtI5h8NXeE0pPlC3TklAlSZAb9Hz9DBMAsKCqs8hOPDomOlh6Tprt.m3u8",
+    "title": "2025-05-19-02-49-19.mp4",
+    "size": "47.6 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "05:46",
+    "type": "Video"
   }
 }
