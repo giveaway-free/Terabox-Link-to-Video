@@ -392,12 +392,14 @@
   },
   "8752296581": {
     "username": "User_8752296581",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1WWvOWjh1WB3tjyqKU2GKng"
+    ]
   },
   "8794535498": {
     "username": "User_8794535498",
