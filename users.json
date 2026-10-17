@@ -231,12 +231,14 @@
   },
   "6648582030": {
     "username": "User_6648582030",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1x4bB3w7TfR29QkzSTV8gtg"
+    ]
   },
   "6708705009": {
     "username": "User_6708705009",
