@@ -53342,5 +53342,13 @@
     "res": "1080p",
     "dur": "02:20",
     "type": "Video"
+  },
+  "1yrq1vXZcy1ceJK_CG2jY4Q": {
+    "stream_url": "https://icy-bread-bd1a.tunyby.workers.dev/fast_stream?token=PG_LXdopIUxd2Qxinu4Jy89pN1xScs-0_4368bCikhbCAe3SLtnKmLZHLYIAiRnxhUM-HJpRVJk97oDWzEf-z-pWAPmdCAeTTRSBMV1WKeCbk3CvuonrZ0npXrNtpISx0IF3v6bsiVQ8XSHiGCt-YLhDekL65gfPvWsfdrCplvo6E2Oy1HqICO5pYaSzM5uzHGSOWRkZ8jbgEMMk12UHyqTVj95foWwwUVu3IASbEv3aLqb3ao-4rP3GMepNAxN1ULKNybcq2dFxjdOROFyPoQEh7u-QninTxxjBwnlalfubludIf2evEUFGW1MQF7oOPcKD9SiB6cQhXb-8ksEv8vV646L2qsWVLuq9SOrvOA0Fw_MuyrFMRciPUxoG.m3u8",
+    "title": "2024-01-27-17-22-43.mp4",
+    "size": "5.0 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:12",
+    "type": "Video"
   }
 }
