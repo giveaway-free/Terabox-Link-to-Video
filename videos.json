@@ -53838,5 +53838,13 @@
     "res": "1080p",
     "dur": "11:22",
     "type": "Video"
+  },
+  "1fnR-WaZIsN7dmudNIgaoVA": {
+    "stream_url": "https://wandering-sun-9ba9.flat-leopard.workers.dev/fast_stream?token=v8Kek3HSU0brEDNvY9TX5Yc66JcXtEnUejsTpMSH80VrNoh6Y_Nn5XSpWL9Ip6sTtv2_UzR_1mdU7PgN7cN-SFLM8yHLJIkDCTkY5nKAymTzhXqUknyiq9HyYp5VywnHrfCLhYLzKCcwX0dEbI-RbEKStgQUov1L3aP0PPFREhLNw7pPDe8mjWSj28hFZbfqqac7Six77gbWc8qqHRy1U_01yH35aj2trt6MmaTtWkt113bDaZKCCtTHIGmjtA-kZieaMjDze8EfFgsWgiYaoLI2Y5FQ_nHLRr46nvC2pJ2GikGC7Z1uKyYpDHrLaZNk92WrHC0T3CP9tMJQ8n0296yuZWE4k_pjm7K43gAddwOwEA.m3u8",
+    "title": "Best 1.mp4",
+    "size": "25.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "04:44",
+    "type": "Video"
   }
 }
