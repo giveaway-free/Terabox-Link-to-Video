@@ -53262,5 +53262,13 @@
     "res": "480p",
     "dur": "00:54",
     "type": "Video"
+  },
+  "11RgHkGECHDToLODplhUakg": {
+    "stream_url": "https://iteraplay.tera-api77.workers.dev/fast_stream?token=dAsFVGpuweaW9GshTzJoMgpeYiOCeeMAOWcrR8f1Qb_kd4FZYeBo9LQktSG5HhAAeb8XwiWDAVEcOfuGxlHEF7pUCuVv_Xw4wCeTvr_kmsSK0rtmTr2m_cRzzpPSZAbXbqOKSSYKpTKCdiOuyHKoFL7dDznXnyTiF93yKQNLy5qJn1f5TEFXI84EF6RCklApd_bjsOyhJWEvMpFUcl6q9g6Xx7YugWl-aOtkcJ_t88HD4cEgeFBySChZb-72tnyJyFMuVV31ia24isdEv_8VgvT-pwfAUrIEOUqG-o5iDsG4O0ZpsxclSm8T2qxqRDYBFMIB99bdHilb69w4NVVUN28VtKHolsjgsaSM9h_QMonoBovU5IlHA9PjCxOK.m3u8",
+    "title": "VID-20251126-WA0016.mp4",
+    "size": "11.3 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "01:07",
+    "type": "Video"
   }
 }
