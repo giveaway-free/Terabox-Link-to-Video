@@ -350,12 +350,14 @@
   },
   "8447222014": {
     "username": "User_8447222014",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1tMgGhM3rU10O6BUj9gFNcw"
+    ]
   },
   "8641102955": {
     "username": "User_8641102955",
