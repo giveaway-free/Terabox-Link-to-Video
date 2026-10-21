@@ -566,13 +566,13 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": [
-      "1mygdNfqgLUikfXziboDA4A",
-      "1PRbj6JjTPsBUJqaLeNVSyw",
       "15pXsgg0HwI5GCM4Fsj0Ojg",
       "1IdgKEDVtj1HDm-kpIRIHNA",
-      "1dTEg50NYL3x-GbJE2e8y1w"
+      "1PRbj6JjTPsBUJqaLeNVSyw",
+      "1dTEg50NYL3x-GbJE2e8y1w",
+      "1mygdNfqgLUikfXziboDA4A"
     ]
   },
   "8934621777": {
