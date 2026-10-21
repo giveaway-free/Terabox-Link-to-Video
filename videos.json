@@ -56174,5 +56174,13 @@
     "res": "Auto (Adaptive)",
     "dur": "03:38",
     "type": "Video"
+  },
+  "14yKp5mB5BJDHW46HXlHlbA": {
+    "stream_url": "https://iteraplay.tera-api37.workers.dev/fast_stream?token=fe0qq0NowkSOy7haPhUCz8HHQcldYsY6JZrUUq5DjCX0-KhGKuiz5ZT03lGSmsiO_LLxbLZZGeug_4JIcDnLEXOUXVpGAt1Gtaqnqi1V98awwU1gLJOn4wxtkPAE-8GuPMVAI9IEYJ61RQn2S-Sgnrp8qEz52u3R2Rng7D2qwxmmlYeNWGjjGOGoOUCJMbl58WEoi3KdbSyP4jp_fkIvQuEXMx_cMCR0ijVgjjA9WEwXB64EEfJt-jZQjR8uUQZFpsa5Ru9z0X-F7ic5CxHI_34w9tREPA0FQipWOgqO1Qbl7x_uAWaPf_cGHkKxs3mcGbMM5-c3EY8ywDE-JaRePyUw-vkywZL9NF-mguPt4xb7PSgwUhtg1s_qAx8l.m3u8",
+    "title": "2026-01-09-12-49-52.mp4",
+    "size": "49.6 MB",
+    "res": "1080p",
+    "dur": "02:45",
+    "type": "Video"
   }
 }
