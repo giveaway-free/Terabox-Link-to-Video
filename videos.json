@@ -64654,5 +64654,14 @@
     "dur": "00:19",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1ksItODOYId8zqSQfgxpy5A"
+  },
+  "1REaydKLbjXpdcNZ5a1BzYw": {
+    "stream_url": "https://iteraplay.tera-api17.workers.dev/fast_stream?token=ubECVIbWtjoc9H6iyyezH28lQ0r8sKkMydPYnFR4omn7N2gB5ed4RxmJK9rlACgwywMQkrzy1oq4GzbiC-kIdNpTyjkxt1NDpBWFSE6-TsRH0CeYhlTdOFn1lr4pAj0e08UpRMS95lRIRjlIpotF22YhobMeFsXM7_-YVdS7eoD2wAMENGZu7HtD_e4I8FScqIQZGZI9TWBJ7LJPWQk53f4RWjOnAwBWTFLyjoGA7go3h0ZzFwsjLITImal_R85_sYTs6Yb-JJm2MZy9JC5Q_Ul83qw4Up3B-xyydFXzipT4aYnYxnPjNZHfo6bMOWqdLr1hrNu7rScxA0FNYIy3w2ld-qyc4E95TlQTWpC7DCPhxRfPpE0.m3u8",
+    "title": "fblite_video.mp4",
+    "size": "4.7 MB",
+    "res": "1080p",
+    "dur": "00:47",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1REaydKLbjXpdcNZ5a1BzYw"
   }
 }
