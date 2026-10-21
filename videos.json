@@ -54734,5 +54734,13 @@
     "res": "1080p",
     "dur": "22:12",
     "type": "Video"
+  },
+  "1QzIon077sB3cbI1VLXz8Mg": {
+    "stream_url": "https://still-dust-8db7.muxeduzi.workers.dev/fast_stream?token=zopLpcb_PvPWAlbY1xVU9LiYHrIT5Wjy8rzwrwYsuZNv_uUNVMKQ6JSw6XuiznF-JkDBG49M07ZSgiiGHYps8k4C9Fdin82cTYa7rTewYSTG7A9JxzggfB5eQnwzNTkSyTM6PZsAw9ciEv5BW-6S9_hZS_jnHCFsSqY5OVffgpV3GA1qQm-e_9mJJV-ViqevQhXs2zLDMQEMpOenKMq_7m195_yc1FdPA5w77-ZUkeOGakzyKDp0aqltSrgf6D24HiWMYnNfb-34lSbraAbKoyVMQI4pNRcPSelYt2jghL22y1eXKsYVAlshui-BJb4XYFNEMZfHKBGNE8Wq2A_1PnVujFNjXUvfxhTZuCEZAfcbeGVGoPK9V4Eq34Sdl7a18xQ.m3u8",
+    "title": "\u0424\u0430\u0439\u043b.mp4",
+    "size": "10.2 MB",
+    "res": "360p",
+    "dur": "02:36",
+    "type": "Video"
   }
 }
