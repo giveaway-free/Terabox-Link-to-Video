@@ -694,16 +694,16 @@
 
     <!-- Expired Stream Recovery Card -->
     <div id="expired-box" class="card-notice" style="display:none; border-color: #f59e0b; background: rgba(245, 158, 11, 0.08);">
-        <h3 id="expired-box-title" style="color: #f59e0b;">⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)</h3>
+        <h3 id="expired-box-title" style="color: #f59e0b;">⏳ Video Stream Link Expired</h3>
         <p id="expired-box-desc" style="color: var(--text-muted); font-size: 13px; margin: 8px 0 16px;">
-            ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বট স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন সতেজ লিঙ্ক তৈরি করে দেবে।
+            The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.
         </p>
         <div class="action-btn-group">
             <button class="btn-action" id="btn-refresh-stream" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; border: none; box-shadow: 0 4px 15px rgba(16,185,129,0.35);">
-                🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)
+                🔄 Auto-Refresh & Play (1-Click)
             </button>
             <button class="btn-action btn-secondary" id="btn-expired-reload" onclick="location.reload()">
-                🔁 পেজ রিলোড করুন
+                🔁 Reload Page
             </button>
         </div>
     </div>
@@ -908,10 +908,6 @@
             expired_desc: "ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বট স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন সতেজ লিঙ্ক তৈরি করে দেবে।",
             expired_refresh_btn: "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)",
             expired_reload_btn: "🔁 পেজ রিলোড করুন",
-            expired_title: "⏳ Video Stream Link Expired",
-            expired_desc: "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.",
-            expired_refresh_btn: "🔄 Auto-Refresh & Play (1-Click)",
-            expired_reload_btn: "🔁 Reload Page",
             expand_btn: "↗ Expand",
             close_btn: "✕ Close"
         },
@@ -982,6 +978,10 @@
             refer_btn: "👥 Invite Friends (+2 Free Credits)",
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "Please open a video link from the channel button to stream.",
+            expired_title: "⏳ Video Stream Link Expired",
+            expired_desc: "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.",
+            expired_refresh_btn: "🔄 Auto-Refresh & Play (1-Click)",
+            expired_reload_btn: "🔁 Reload Page",
             expand_btn: "↗ Expand",
             close_btn: "✕ Close"
         },
@@ -1116,10 +1116,10 @@
         const buyVipBtn = document.getElementById('btn-buy-vip'); if (buyVipBtn) buyVipBtn.innerText = t.buy_vip_btn;
         const referBtn = document.getElementById('btn-refer-earn'); if (referBtn) referBtn.innerText = t.refer_btn;
 
-        const expTitle = document.getElementById('expired-box-title'); if (expTitle) expTitle.innerText = t.expired_title || "⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)";
-        const expDesc = document.getElementById('expired-box-desc'); if (expDesc) expDesc.innerText = t.expired_desc || "ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে।";
-        const expRefreshBtn = document.getElementById('btn-refresh-stream'); if (expRefreshBtn) expRefreshBtn.innerText = t.expired_refresh_btn || "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)";
-        const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || "🔁 পেজ রিলোড করুন";
+        const expTitle = document.getElementById('expired-box-title'); if (expTitle) expTitle.innerText = t.expired_title || (currentLang === 'bn' ? "⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)" : "⏳ Video Stream Link Expired");
+        const expDesc = document.getElementById('expired-box-desc'); if (expDesc) expDesc.innerText = t.expired_desc || (currentLang === 'bn' ? "ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বট স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন সতেজ লিঙ্ক তৈরি করে দেবে।" : "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.");
+        const expRefreshBtn = document.getElementById('btn-refresh-stream'); if (expRefreshBtn) expRefreshBtn.innerText = t.expired_refresh_btn || (currentLang === 'bn' ? "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)" : "🔄 Auto-Refresh & Play (1-Click)");
+        const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || (currentLang === 'bn' ? "🔁 পেজ রিলোড করুন" : "🔁 Reload Page");
 
         const noVidTitle = document.getElementById('no-video-title'); if (noVidTitle) noVidTitle.innerText = t.no_video_title;
         const noVidDesc = document.getElementById('no-video-desc'); if (noVidDesc) noVidDesc.innerText = t.no_video_desc;
@@ -1831,6 +1831,12 @@
         if (lBox) lBox.style.display = 'none';
         if (expBox) {
             expBox.style.display = 'block';
+            const t = I18N[currentLang] || I18N.en;
+            const expTitle = document.getElementById('expired-box-title'); if (expTitle) expTitle.innerText = t.expired_title || "⏳ Video Stream Link Expired";
+            const expDesc = document.getElementById('expired-box-desc'); if (expDesc) expDesc.innerText = t.expired_desc || "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.";
+            const rBtn = document.getElementById('btn-refresh-stream'); if (rBtn) rBtn.innerText = t.expired_refresh_btn || "🔄 Auto-Refresh & Play (1-Click)";
+            const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || "🔁 Reload Page";
+
             const botUser = window.CURRENT_BOT_USERNAME || (typeof BOT_USERNAME !== 'undefined' ? BOT_USERNAME : "Terastream_pro_bot");
             const sParam = window.CURRENT_START_PARAM || (new URLSearchParams(window.location.search).get('startapp') || '');
             const rBtn = document.getElementById('btn-refresh-stream');
