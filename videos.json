@@ -57158,5 +57158,13 @@
     "res": "Auto (Adaptive)",
     "dur": "08:22",
     "type": "Video"
+  },
+  "1R-FQUOFB3lTx3XWK5fk9Ew": {
+    "stream_url": "https://mute-snowflake-aa97.lorapyqu.workers.dev/fast_stream?token=3Ow-AOc-Z8E6tpAPkn1MjUPaYAQSO-okSh9qirJdv7oiv5pA0hv7DlSpkZ9i73LFuF6jFt_z9S_GfYGcOM6mM4WUujeo-F_8se67RYFcUoabDj6QVJwFzu1-sZ1IDdsuqZgvs_upF72h7jJxOdnpiVc_Hjokf2Czuh3ctrJockAGdL5zBNoNHd0OVVSEJwYa2FKbW3Lj5Kw55_9zzEcIFVbO03z3CvH_fIB0n19u7Xn1ylLYpRIFbOeH8xiNPECaHHRI6ai53xR3tUpVDDmWK5XfCERCm_agW3kvLBb_5np4lZiKt6H6cKL1nvZ1H1jrfNtcQwirm78a5aEpB7h9krAyRkToBN6MTDrwOtrz_XMpoAJwUxIPgYd1.m3u8",
+    "title": "2026-01-06-18-30-30.mp4",
+    "size": "2.5 MB",
+    "res": "480p",
+    "dur": "01:09",
+    "type": "Video"
   }
 }
