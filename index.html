@@ -692,6 +692,22 @@
         </div>
     </div>
 
+    <!-- Expired Stream Recovery Card -->
+    <div id="expired-box" class="card-notice" style="display:none; border-color: #f59e0b; background: rgba(245, 158, 11, 0.08);">
+        <h3 id="expired-box-title" style="color: #f59e0b;">⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)</h3>
+        <p id="expired-box-desc" style="color: var(--text-muted); font-size: 13px; margin: 8px 0 16px;">
+            ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বট স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন সতেজ লিঙ্ক তৈরি করে দেবে।
+        </p>
+        <div class="action-btn-group">
+            <button class="btn-action" id="btn-refresh-stream" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; border: none; box-shadow: 0 4px 15px rgba(16,185,129,0.35);">
+                🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)
+            </button>
+            <button class="btn-action btn-secondary" id="btn-expired-reload" onclick="location.reload()">
+                🔁 পেজ রিলোড করুন
+            </button>
+        </div>
+    </div>
+
     <!-- Default Empty Box -->
     <div id="no-video-box" class="no-video">
         <h3 id="no-video-title">🎬 TeraStream Mini Player</h3>
@@ -888,6 +904,14 @@
             refer_btn: "👥 বন্ধুদের ইনভাইট করুন (+2 ক্রেডিট ফ্রি)",
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "ভিডিও স্ট্রিম করতে চ্যানেল থেকে ভিডিও লিংকে ক্লিক করুন।",
+            expired_title: "⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)",
+            expired_desc: "ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বট স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন সতেজ লিঙ্ক তৈরি করে দেবে।",
+            expired_refresh_btn: "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)",
+            expired_reload_btn: "🔁 পেজ রিলোড করুন",
+            expired_title: "⏳ Video Stream Link Expired",
+            expired_desc: "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.",
+            expired_refresh_btn: "🔄 Auto-Refresh & Play (1-Click)",
+            expired_reload_btn: "🔁 Reload Page",
             expand_btn: "↗ Expand",
             close_btn: "✕ Close"
         },
@@ -1028,6 +1052,10 @@
             refer_btn: "👥 दोस्तों को आमंत्रित करें (+2 मुफ़्त क्रेडिट)",
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "वीडियो स्ट्रीम करने के लिए चैनल के लिंक पर क्लिक करें।",
+            expired_title: "⏳ वीडियो स्ट्रीम लिंक समाप्त (Link Expired)",
+            expired_desc: "इस वीडियो का डायरेक्ट प्ले लिंक समाप्त हो गया है। नीचे दिए गए बटन पर क्लिक करें ताकि बॉट बैकअप टेराबॉक्स लिंक से नया लिंक जनरेट कर सके।",
+            expired_refresh_btn: "🔄 1-क्लिक रिफ्रेश और प्ले करें (Refresh Link)",
+            expired_reload_btn: "🔁 पेज रीलोड करें",
             expand_btn: "↗ बड़ा करें",
             close_btn: "✕ बंद"
         }
@@ -1087,6 +1115,11 @@
         const payDesc = document.getElementById('paywall-box-desc'); if (payDesc) payDesc.innerText = t.paywall_desc;
         const buyVipBtn = document.getElementById('btn-buy-vip'); if (buyVipBtn) buyVipBtn.innerText = t.buy_vip_btn;
         const referBtn = document.getElementById('btn-refer-earn'); if (referBtn) referBtn.innerText = t.refer_btn;
+
+        const expTitle = document.getElementById('expired-box-title'); if (expTitle) expTitle.innerText = t.expired_title || "⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)";
+        const expDesc = document.getElementById('expired-box-desc'); if (expDesc) expDesc.innerText = t.expired_desc || "ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে।";
+        const expRefreshBtn = document.getElementById('btn-refresh-stream'); if (expRefreshBtn) expRefreshBtn.innerText = t.expired_refresh_btn || "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)";
+        const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || "🔁 পেজ রিলোড করুন";
 
         const noVidTitle = document.getElementById('no-video-title'); if (noVidTitle) noVidTitle.innerText = t.no_video_title;
         const noVidDesc = document.getElementById('no-video-desc'); if (noVidDesc) noVidDesc.innerText = t.no_video_desc;
@@ -1784,9 +1817,43 @@
     videoWrapper.addEventListener('mousemove', showControlsTemporarily);
     videoWrapper.addEventListener('touchstart', showControlsTemporarily);
 
+    let streamLoadFailures = 0;
+    function triggerStreamExpiredRecovery(errDetail) {
+        console.warn("Stream playback failed / link expired:", errDetail);
+        streamLoadFailures++;
+        if (window._hlsInstance) {
+            try { window._hlsInstance.destroy(); } catch(e) {}
+        }
+        const vWrap = document.getElementById('video-wrapper');
+        const lBox = document.getElementById('loading-box');
+        const expBox = document.getElementById('expired-box');
+        if (vWrap) vWrap.style.display = 'none';
+        if (lBox) lBox.style.display = 'none';
+        if (expBox) {
+            expBox.style.display = 'block';
+            const botUser = window.CURRENT_BOT_USERNAME || (typeof BOT_USERNAME !== 'undefined' ? BOT_USERNAME : "Terastream_pro_bot");
+            const sParam = window.CURRENT_START_PARAM || (new URLSearchParams(window.location.search).get('startapp') || '');
+            const rBtn = document.getElementById('btn-refresh-stream');
+            if (rBtn) {
+                rBtn.onclick = () => {
+                    const healUrl = `https://t.me/${botUser}?start=v_${sParam}`;
+                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+                        window.Telegram.WebApp.openTelegramLink(healUrl);
+                    } else {
+                        window.open(healUrl, '_blank');
+                    }
+                };
+            }
+        }
+    }
+
     function playVideo(streamUrl, title, size, res, dur) {
         currentStreamUrl = streamUrl;
         lastMidrollTime = 0;
+        streamLoadFailures = 0;
+
+        const _expB = document.getElementById('expired-box');
+        if (_expB) _expB.style.display = 'none';
 
         document.getElementById('no-video-box').style.display = 'none';
         document.getElementById('loading-box').style.display = 'none';
@@ -1838,18 +1905,26 @@
                 startPlaybackWithAd();
             });
             hls.on(Hls.Events.ERROR, function(event, data) {
+                // If 403 Forbidden or 404 / 410, link token has expired
+                if (data.response && (data.response.code === 403 || data.response.code === 404 || data.response.code === 410)) {
+                    triggerStreamExpiredRecovery(data);
+                    return;
+                }
                 if (data.fatal) {
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
-                            hls.startLoad();
+                            if (streamLoadFailures >= 2) {
+                                triggerStreamExpiredRecovery(data);
+                            } else {
+                                streamLoadFailures++;
+                                hls.startLoad();
+                            }
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
                             hls.recoverMediaError();
                             break;
                         default:
-                            hls.destroy();
-                            video.src = streamUrl;
-                            startPlaybackWithAd();
+                            triggerStreamExpiredRecovery(data);
                             break;
                     }
                 }
@@ -1862,6 +1937,12 @@
             startPlaybackWithAd();
         }
     }
+
+    video.addEventListener('error', (e) => {
+        if (currentStreamUrl && !isAdMode) {
+            triggerStreamExpiredRecovery(e);
+        }
+    });
 
     // Mid-Roll Monetag Ads Handler during video playback
     video.addEventListener('timeupdate', () => {
