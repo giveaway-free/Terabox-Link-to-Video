@@ -962,7 +962,7 @@
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "ভিডিও স্ট্রিম করতে চ্যানেল থেকে ভিডিও লিংকে ক্লিক করুন।",
             expired_title: "⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)",
-            expired_desc: "ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বট স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন সতেজ লিঙ্ক তৈরি করে দেবে।",
+            expired_desc: "ভিডিওটির প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বটের মাধ্যমে স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন লিঙ্ক তৈরি হয়ে যাবে। (কোনো সাবস্ক্রিপশন ছাড়াই দেখা যাবে)",
             expired_refresh_btn: "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)",
             expired_reload_btn: "🔁 পেজ রিলোড করুন",
             expand_btn: "↗ Expand",
@@ -1036,7 +1036,7 @@
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "Please open a video link from the channel button to stream.",
             expired_title: "⏳ Video Stream Link Expired",
-            expired_desc: "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.",
+            expired_desc: "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot. (No subscription required)",
             expired_refresh_btn: "🔄 Auto-Refresh & Play (1-Click)",
             expired_reload_btn: "🔁 Reload Page",
             expand_btn: "↗ Expand",
@@ -1897,7 +1897,33 @@
             const botUser = getActiveBotUsername();
             const sParam = window.CURRENT_START_PARAM || (new URLSearchParams(window.location.search).get('startapp') || '');
             if (rBtn) {
-                rBtn.onclick = () => {
+                rBtn.onclick = async () => {
+                    const origBtnText = rBtn.innerText;
+                    rBtn.disabled = true;
+                    rBtn.innerText = (currentLang === 'bn' ? "⚡ রিফ্রেশ হচ্ছে, অপেক্ষা করুন..." : "⚡ Refreshing, please wait...");
+
+                    // Check if GitHub already has a freshly healed stream URL
+                    try {
+                        const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
+                        const ghVidRes = await fetch(ghVidUrl, {
+                            headers: { 'Accept': 'application/vnd.github.v3+json' },
+                            cache: 'no-store'
+                        });
+                        if (ghVidRes.ok) {
+                            const jData = await ghVidRes.json();
+                            if (jData && jData.content) {
+                                const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
+                                if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
+                                    rBtn.disabled = false;
+                                    rBtn.innerText = origBtnText;
+                                    playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
+                                    return;
+                                }
+                            }
+                        }
+                    } catch(e) {}
+
+                    // Open bot to immediately regenerate fresh stream link from backup TeraBox link
                     const activeBot = getActiveBotUsername();
                     const healUrl = `https://t.me/${activeBot}?start=v_${sParam}`;
                     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
@@ -1905,6 +1931,10 @@
                     } else {
                         window.open(healUrl, '_blank');
                     }
+                    setTimeout(() => {
+                        rBtn.disabled = false;
+                        rBtn.innerText = origBtnText;
+                    }, 2500);
                 };
             }
         }
