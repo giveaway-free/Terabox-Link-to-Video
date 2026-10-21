@@ -56342,5 +56342,13 @@
     "res": "1080p",
     "dur": "20:18",
     "type": "Video"
+  },
+  "1SwToK7VGfWTQjNN-6GrFkg": {
+    "stream_url": "https://iteraplay.tera-api92-new.workers.dev/fast_stream?token=3gMz79Y47MZrGucqhyO7SetETkKjNlIgWPvDwtM7ZqzkAEkMqKoSji93EsS7qkkyHJ6_8dpnVXfMELwfIdOyjnmGYDREqg5UUClu1T_DWZVt2nN8STdV5_alsLTIe6UEVuOFTOELTF_53bVDaEJ0gETWx5xgNNLl2c4aeP9pO0kuhebQus5rSyT4uLsHkXJXPjM_JBgT-sBA47uTO1XnFWPLrJivaYJPqnIE-NHkVsfw6hiX-LHEHc1so0rqvivGNZVKnURzSTJ6t1U0y2HeqWJozZH-XVqoLGG1SY9sgUr7MNPVrNPTaQzSmfVgb_hLDOYkY3DG9fZLqJJ5Hx0UpPjw00_TofNPl8FiRYA27IvhPQC7Ol5XuviYCcMY.m3u8",
+    "title": "2023-11-15-02-46-30.mp4",
+    "size": "162.8 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "17:28",
+    "type": "Video"
   }
 }
