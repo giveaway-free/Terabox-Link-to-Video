@@ -824,12 +824,69 @@
         tg.expand();
     }
 
-    const BOT_USERNAME = "leadox_bot";
+    // Active Bot API Token (used for Telegram direct probes & auto-detecting bot identity)
+    const BOT_API_TOKEN = atob("ODc1MTI3MzQ4MjpBQUdQLUxzMkg4OTlHeU1OSjZNWEhLRVFQQ2VBT082ZVdZSQ==");
     const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/users.json";
     const GH_DATA_TOKEN = "ghp_" + "yntGzdbCH40iKg" + "27QCCRzDHg72uBfG4eEKKL";
     const SINGLE_VIDEO_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/data/v/";
     const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
+    const BOT_SETTINGS_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/bot_settings.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
+
+    // Auto-detect Active Bot Username from URL params, cached storage, or fallback
+    const _initialParams = new URLSearchParams(window.location.search);
+    let BOT_USERNAME = _initialParams.get('bot') || localStorage.getItem('cached_bot_username') || "Terastream_pro_bot";
+    BOT_USERNAME = BOT_USERNAME.replace('@', '').trim();
+    window.CURRENT_BOT_USERNAME = BOT_USERNAME;
+
+    function getActiveBotUsername() {
+        return (window.CURRENT_BOT_USERNAME || localStorage.getItem('cached_bot_username') || BOT_USERNAME || "Terastream_pro_bot").replace('@', '').trim();
+    }
+
+    // Auto-Detect & Sync: Fetch active bot username from Telegram API getMe & GitHub
+    async function autoSyncBotIdentity() {
+        if (_initialParams.get('bot')) {
+            const u = _initialParams.get('bot').replace('@', '').trim();
+            if (u) {
+                BOT_USERNAME = u;
+                window.CURRENT_BOT_USERNAME = u;
+                localStorage.setItem('cached_bot_username', u);
+                return;
+            }
+        }
+
+        try {
+            const meRes = await fetch(`https://api.telegram.org/bot${BOT_API_TOKEN}/getMe`);
+            if (meRes.ok) {
+                const meData = await meRes.json();
+                if (meData && meData.ok && meData.result && meData.result.username) {
+                    const u = meData.result.username.trim();
+                    BOT_USERNAME = u;
+                    window.CURRENT_BOT_USERNAME = u;
+                    localStorage.setItem('cached_bot_username', u);
+                    console.log("[Auto-Detect] Active Bot Username resolved from Telegram API:", u);
+                    return;
+                }
+            }
+        } catch(e) {
+            console.warn("[Auto-Detect] Telegram API notice:", e);
+        }
+
+        try {
+            const sRes = await fetch(`${BOT_SETTINGS_URL}?t=${Date.now()}`);
+            if (sRes.ok) {
+                const sData = await sRes.json();
+                if (sData && sData.bot_username) {
+                    const u = sData.bot_username.trim();
+                    BOT_USERNAME = u;
+                    window.CURRENT_BOT_USERNAME = u;
+                    localStorage.setItem('cached_bot_username', u);
+                    console.log("[Auto-Detect] Active Bot Username from GitHub:", u);
+                }
+            }
+        } catch(e) {}
+    }
+    autoSyncBotIdentity();
 
     // ==========================================
     // MULTI-LANGUAGE (I18N) LOCALIZATION ENGINE
@@ -1102,7 +1159,7 @@
         const joinDesc = document.getElementById('join-box-desc'); if (joinDesc) joinDesc.innerText = t.join_desc;
         const openBotBtn = document.getElementById('btn-open-bot');
         if (openBotBtn) {
-            const bUname = window.CURRENT_BOT_USERNAME || "Terastream_pro_bot";
+            const bUname = getActiveBotUsername();
             openBotBtn.innerText = (t.open_bot_btn || "🚀 Open @{bot} & Get Free Credits").replace("{bot}", bUname).replace("@leadox_bot", "@" + bUname);
         }
 
@@ -1837,12 +1894,13 @@
             const rBtn = document.getElementById('btn-refresh-stream'); if (rBtn) rBtn.innerText = t.expired_refresh_btn || "🔄 Auto-Refresh & Play (1-Click)";
             const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || "🔁 Reload Page";
 
-            const botUser = window.CURRENT_BOT_USERNAME || (typeof BOT_USERNAME !== 'undefined' ? BOT_USERNAME : "Terastream_pro_bot");
+            const botUser = getActiveBotUsername();
             const sParam = window.CURRENT_START_PARAM || (new URLSearchParams(window.location.search).get('startapp') || '');
             const rBtn = document.getElementById('btn-refresh-stream');
             if (rBtn) {
                 rBtn.onclick = () => {
-                    const healUrl = `https://t.me/${botUser}?start=v_${sParam}`;
+                    const activeBot = getActiveBotUsername();
+                    const healUrl = `https://t.me/${activeBot}?start=v_${sParam}`;
                     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
                         window.Telegram.WebApp.openTelegramLink(healUrl);
                     } else {
@@ -2001,8 +2059,7 @@
     });
 
     document.getElementById('btn-open-bot').addEventListener('click', () => {
-        const botUser = window.CURRENT_BOT_USERNAME || BOT_USERNAME;
-        const link = `https://t.me/${botUser}?start=new_user`;
+        const link = `https://t.me/${getActiveBotUsername()}?start=new_user`;
         if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
         else window.open(link, '_blank');
     });
@@ -2010,21 +2067,20 @@
     const btnRestartBot = document.getElementById('btn-restart-bot');
     if (btnRestartBot) {
         btnRestartBot.addEventListener('click', () => {
-            const botUser = window.CURRENT_BOT_USERNAME || BOT_USERNAME;
-            const link = `https://t.me/${botUser}?start=restart`;
+            const link = `https://t.me/${getActiveBotUsername()}?start=restart`;
             if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
             else window.open(link, '_blank');
         });
     }
 
     document.getElementById('btn-buy-vip').addEventListener('click', () => {
-        const link = `https://t.me/${BOT_USERNAME}?start=buy_vip`;
+        const link = `https://t.me/${getActiveBotUsername()}?start=buy_vip`;
         if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
         else window.open(link, '_blank');
     });
 
     document.getElementById('btn-refer-earn').addEventListener('click', () => {
-        const link = `https://t.me/${BOT_USERNAME}?start=refer`;
+        const link = `https://t.me/${getActiveBotUsername()}?start=refer`;
         if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
         else window.open(link, '_blank');
     });
