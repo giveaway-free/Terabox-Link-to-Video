@@ -1896,7 +1896,6 @@
 
             const botUser = getActiveBotUsername();
             const sParam = window.CURRENT_START_PARAM || (new URLSearchParams(window.location.search).get('startapp') || '');
-            const rBtn = document.getElementById('btn-refresh-stream');
             if (rBtn) {
                 rBtn.onclick = () => {
                     const activeBot = getActiveBotUsername();
@@ -2209,7 +2208,6 @@
             modal.style.display = 'flex';
         }
 
-        const BOT_API_TOKEN = atob("ODc1MTI3MzQ4MjpBQUdQLUxzMkg4OTlHeU1OSjZNWEhLRVFQQ2VBT082ZVdZSQ==");
         const TARGET_CHANNEL_ID = "-1003938077680";
         let TARGET_CHANNEL_LINK = "https://t.me/dgppv1";
         let BACKUP_CHANNEL_ID = "";
