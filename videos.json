@@ -54838,5 +54838,13 @@
     "res": "1080p",
     "dur": "08:01",
     "type": "Video"
+  },
+  "1RegDDjBFTWJy1oc9Ys6BGA": {
+    "stream_url": "https://bitter-frost-8680.lepole.workers.dev/fast_stream?token=f3WZCtF02NvwnJixwrLEQM3Z5VRtL0E09RKoQNPEn7kwRrXMhO_afsMq0aDCjHp6eL90v_D1jFXNWN7L4NVBJFkeZyRKCMysmsIHia30tTdfc3hUWmzsSC8sSkNnWGfXp20G3Qv6IvAdjsmoVAfeNIc_Ui4dnzb2g8ba9kVCM28LHtCwUtA61hq961uI68MdOphLrYcOka_MJ-a50T5eraOEWGIrSibAT8eknRQM_c78MHpAaSbDy4Ms4kvPfZdOc1ixZmJp3MwZ9GnK94FKUeuCfeGbScxe7S6_RHZ_1028k8uVpwzmvqcMqRcldl5PTmAAiYZr-uBqwpT6VX-mPtH8VkX6CW1XzmlFj_9dHUtfNrIDbsw1d_2k0J_2.m3u8",
+    "title": "2025-09-03-23-45-47.mp4",
+    "size": "21.3 MB",
+    "res": "1080p",
+    "dur": "01:15",
+    "type": "Video"
   }
 }
