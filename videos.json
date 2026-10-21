@@ -57150,5 +57150,13 @@
     "res": "360p",
     "dur": "12:25",
     "type": "Video"
+  },
+  "187OFzHm7w6GmxrInyK4Pxg": {
+    "stream_url": "https://iteraplay.tera-api73.workers.dev/fast_stream?token=nIsBUZ_LZxVyrOmWLUlHwcoU1z6FKtQyLWLeudfxZS14GbVtA7Doylf_nwoZUMEoh6cedathF0VD4ql55lyCNw4mYBzFnwVUefYE0Jjh9Ub1iLQLz5DD0K_3JAmUgI9PQBqGkZyEF5x724nj3nD4BUrNnh8TeSdadLHHkSb-A5-ovTBFkSUeGKqXxCu3hQ1NrFFR8H8XdWNz9vg4IXLbnz5NJ3RoFIfHK_M2qaSgYruH5QdMrvm_z-DgrzOhoYij9bq6uJAFV_XTLaLC8QZTGZ7pedq_yI_dxShkRrTISAc6QRc39mGiD8gMjx6Iev8-OrGLPXKfT32X95_hOxrSsDnhWjVPekGn6K4C0HrtRKFxrvdok4tJvqmf.m3u8",
+    "title": "1uHAwAMCamSa3M65.mp4",
+    "size": "41.1 MB",
+    "res": "Auto (Adaptive)",
+    "dur": "08:22",
+    "type": "Video"
   }
 }
