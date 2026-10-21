@@ -385,12 +385,14 @@
   },
   "8128868163": {
     "username": "User_8128868163",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1NRIbtF6iiFy35M3Y6d1B0g"
+    ]
   },
   "8346534659": {
     "username": "BABU",
