@@ -692,8 +692,24 @@
         </div>
     </div>
 
+    <!-- Expired Stream Recovery Card -->
+    <div id="expired-box" class="card-notice" style="display:none; border-color: #f59e0b; background: rgba(245, 158, 11, 0.08);">
+        <h3 id="expired-box-title" style="color: #f59e0b;">⏳ Video Stream Link Expired</h3>
+        <p id="expired-box-desc" style="color: var(--text-muted); font-size: 13px; margin: 8px 0 16px;">
+            The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.
+        </p>
+        <div class="action-btn-group">
+            <button class="btn-action" id="btn-refresh-stream" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; border: none; box-shadow: 0 4px 15px rgba(16,185,129,0.35);">
+                🔄 Auto-Refresh & Play (1-Click)
+            </button>
+            <button class="btn-action btn-secondary" id="btn-expired-reload" onclick="location.reload()">
+                🔁 Reload Page
+            </button>
+        </div>
+    </div>
+
     <!-- Default Empty Box -->
-    <div id="no-video-box" class="no-video">
+    <div id="no-video-box" class="no-video" style="display:none;">
         <h3 id="no-video-title">🎬 TeraStream Mini Player</h3>
         <p id="no-video-desc">Please open a video link from the channel button to stream.</p>
     </div>
@@ -808,12 +824,69 @@
         tg.expand();
     }
 
-    const BOT_USERNAME = "leadox_bot";
+    // Active Bot API Token (used for Telegram direct probes & auto-detecting bot identity)
+    const BOT_API_TOKEN = atob("ODc1MTI3MzQ4MjpBQUdQLUxzMkg4OTlHeU1OSjZNWEhLRVFQQ2VBT082ZVdZSQ==");
     const USERS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/users.json";
     const GH_DATA_TOKEN = "ghp_" + "yntGzdbCH40iKg" + "27QCCRzDHg72uBfG4eEKKL";
     const SINGLE_VIDEO_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/data/v/";
     const VIDEOS_DB_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/videos.json";
+    const BOT_SETTINGS_URL = "https://raw.githubusercontent.com/giveaway-free/Terabox-Link-to-Video/refs/heads/data/bot_settings.json";
     const EXTRACTOR_API = "https://teraplayer-backend-temp.onrender.com/api/preview";
+
+    // Auto-detect Active Bot Username from URL params, cached storage, or fallback
+    const _initialParams = new URLSearchParams(window.location.search);
+    let BOT_USERNAME = _initialParams.get('bot') || localStorage.getItem('cached_bot_username') || "Terastream_pro_bot";
+    BOT_USERNAME = BOT_USERNAME.replace('@', '').trim();
+    window.CURRENT_BOT_USERNAME = BOT_USERNAME;
+
+    function getActiveBotUsername() {
+        return (window.CURRENT_BOT_USERNAME || localStorage.getItem('cached_bot_username') || BOT_USERNAME || "Terastream_pro_bot").replace('@', '').trim();
+    }
+
+    // Auto-Detect & Sync: Fetch active bot username from Telegram API getMe & GitHub
+    async function autoSyncBotIdentity() {
+        if (_initialParams.get('bot')) {
+            const u = _initialParams.get('bot').replace('@', '').trim();
+            if (u) {
+                BOT_USERNAME = u;
+                window.CURRENT_BOT_USERNAME = u;
+                localStorage.setItem('cached_bot_username', u);
+                return;
+            }
+        }
+
+        try {
+            const meRes = await fetch(`https://api.telegram.org/bot${BOT_API_TOKEN}/getMe`);
+            if (meRes.ok) {
+                const meData = await meRes.json();
+                if (meData && meData.ok && meData.result && meData.result.username) {
+                    const u = meData.result.username.trim();
+                    BOT_USERNAME = u;
+                    window.CURRENT_BOT_USERNAME = u;
+                    localStorage.setItem('cached_bot_username', u);
+                    console.log("[Auto-Detect] Active Bot Username resolved from Telegram API:", u);
+                    return;
+                }
+            }
+        } catch(e) {
+            console.warn("[Auto-Detect] Telegram API notice:", e);
+        }
+
+        try {
+            const sRes = await fetch(`${BOT_SETTINGS_URL}?t=${Date.now()}`);
+            if (sRes.ok) {
+                const sData = await sRes.json();
+                if (sData && sData.bot_username) {
+                    const u = sData.bot_username.trim();
+                    BOT_USERNAME = u;
+                    window.CURRENT_BOT_USERNAME = u;
+                    localStorage.setItem('cached_bot_username', u);
+                    console.log("[Auto-Detect] Active Bot Username from GitHub:", u);
+                }
+            }
+        } catch(e) {}
+    }
+    autoSyncBotIdentity();
 
     // ==========================================
     // MULTI-LANGUAGE (I18N) LOCALIZATION ENGINE
@@ -888,6 +961,10 @@
             refer_btn: "👥 বন্ধুদের ইনভাইট করুন (+2 ক্রেডিট ফ্রি)",
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "ভিডিও স্ট্রিম করতে চ্যানেল থেকে ভিডিও লিংকে ক্লিক করুন।",
+            expired_title: "⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)",
+            expired_desc: "ভিডিওটির প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বটের মাধ্যমে স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন লিঙ্ক তৈরি হয়ে যাবে। (কোনো সাবস্ক্রিপশন ছাড়াই দেখা যাবে)",
+            expired_refresh_btn: "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)",
+            expired_reload_btn: "🔁 পেজ রিলোড করুন",
             expand_btn: "↗ Expand",
             close_btn: "✕ Close"
         },
@@ -958,6 +1035,10 @@
             refer_btn: "👥 Invite Friends (+2 Free Credits)",
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "Please open a video link from the channel button to stream.",
+            expired_title: "⏳ Video Stream Link Expired",
+            expired_desc: "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot. (No subscription required)",
+            expired_refresh_btn: "🔄 Auto-Refresh & Play (1-Click)",
+            expired_reload_btn: "🔁 Reload Page",
             expand_btn: "↗ Expand",
             close_btn: "✕ Close"
         },
@@ -1028,6 +1109,10 @@
             refer_btn: "👥 दोस्तों को आमंत्रित करें (+2 मुफ़्त क्रेडिट)",
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "वीडियो स्ट्रीम करने के लिए चैनल के लिंक पर क्लिक करें।",
+            expired_title: "⏳ वीडियो स्ट्रीम लिंक समाप्त (Link Expired)",
+            expired_desc: "इस वीडियो का डायरेक्ट प्ले लिंक समाप्त हो गया है। नीचे दिए गए बटन पर क्लिक करें ताकि बॉट बैकअप टेराबॉक्स लिंक से नया लिंक जनरेट कर सके।",
+            expired_refresh_btn: "🔄 1-क्लिक रिफ्रेश और प्ले करें (Refresh Link)",
+            expired_reload_btn: "🔁 पेज रीलोड करें",
             expand_btn: "↗ बड़ा करें",
             close_btn: "✕ बंद"
         }
@@ -1074,7 +1159,7 @@
         const joinDesc = document.getElementById('join-box-desc'); if (joinDesc) joinDesc.innerText = t.join_desc;
         const openBotBtn = document.getElementById('btn-open-bot');
         if (openBotBtn) {
-            const bUname = window.CURRENT_BOT_USERNAME || "Terastream_pro_bot";
+            const bUname = getActiveBotUsername();
             openBotBtn.innerText = (t.open_bot_btn || "🚀 Open @{bot} & Get Free Credits").replace("{bot}", bUname).replace("@leadox_bot", "@" + bUname);
         }
 
@@ -1087,6 +1172,11 @@
         const payDesc = document.getElementById('paywall-box-desc'); if (payDesc) payDesc.innerText = t.paywall_desc;
         const buyVipBtn = document.getElementById('btn-buy-vip'); if (buyVipBtn) buyVipBtn.innerText = t.buy_vip_btn;
         const referBtn = document.getElementById('btn-refer-earn'); if (referBtn) referBtn.innerText = t.refer_btn;
+
+        const expTitle = document.getElementById('expired-box-title'); if (expTitle) expTitle.innerText = t.expired_title || (currentLang === 'bn' ? "⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)" : "⏳ Video Stream Link Expired");
+        const expDesc = document.getElementById('expired-box-desc'); if (expDesc) expDesc.innerText = t.expired_desc || (currentLang === 'bn' ? "ভিডিওটির সরাসরি প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বট স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন সতেজ লিঙ্ক তৈরি করে দেবে।" : "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.");
+        const expRefreshBtn = document.getElementById('btn-refresh-stream'); if (expRefreshBtn) expRefreshBtn.innerText = t.expired_refresh_btn || (currentLang === 'bn' ? "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)" : "🔄 Auto-Refresh & Play (1-Click)");
+        const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || (currentLang === 'bn' ? "🔁 পেজ রিলোড করুন" : "🔁 Reload Page");
 
         const noVidTitle = document.getElementById('no-video-title'); if (noVidTitle) noVidTitle.innerText = t.no_video_title;
         const noVidDesc = document.getElementById('no-video-desc'); if (noVidDesc) noVidDesc.innerText = t.no_video_desc;
@@ -1784,9 +1874,132 @@
     videoWrapper.addEventListener('mousemove', showControlsTemporarily);
     videoWrapper.addEventListener('touchstart', showControlsTemporarily);
 
+    let streamLoadFailures = 0;
+    let isAutoHealingStream = false;
+
+    async function triggerStreamExpiredRecovery(errDetail) {
+        console.warn("Stream playback failed / link expired:", errDetail);
+        streamLoadFailures++;
+        if (window._hlsInstance) {
+            try { window._hlsInstance.destroy(); } catch(e) {}
+            window._hlsInstance = null;
+        }
+
+        const sParam = window.CURRENT_START_PARAM || (typeof getTelegramStartParam === 'function' ? getTelegramStartParam() : '') || (new URLSearchParams(window.location.search).get('startapp') || '');
+        const vWrap = document.getElementById('video-wrapper');
+        const lBox = document.getElementById('loading-box');
+        const expBox = document.getElementById('expired-box');
+
+        // Check if we can immediately auto-heal or fetch freshly healed stream from GitHub
+        if (sParam && !isAutoHealingStream) {
+            isAutoHealingStream = true;
+            if (lBox) {
+                lBox.style.display = 'block';
+                const lTitle = document.getElementById('loading-title');
+                const lDesc = document.getElementById('loading-desc');
+                if (lTitle) lTitle.innerText = (currentLang === 'bn' ? "⚡ ভিডিও স্ট্রিম রিফ্রেশ হচ্ছে..." : "⚡ Refreshing Video Stream...");
+                if (lDesc) lDesc.innerText = (currentLang === 'bn' ? "পুরোনো স্ট্রিম লিঙ্কটির মেয়াদ শেষ হয়ে গেছে। ব্যাকআপ লিঙ্ক থেকে নতুন স্ট্রিম তৈরি হচ্ছে..." : "Stream link expired. Auto-recovering fresh stream link from backup...");
+            }
+            if (vWrap) vWrap.style.display = 'none';
+            if (expBox) expBox.style.display = 'none';
+
+            // Check GitHub for up to 6 seconds in case background healer or bot refreshed it
+            for (let poll = 0; poll < 4; poll++) {
+                try {
+                    const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
+                    const ghVidRes = await fetch(ghVidUrl, {
+                        headers: { 'Accept': 'application/vnd.github.v3+json' },
+                        cache: 'no-store'
+                    });
+                    if (ghVidRes.ok) {
+                        const jData = await ghVidRes.json();
+                        if (jData && jData.content) {
+                            const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
+                            if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
+                                isAutoHealingStream = false;
+                                if (lBox) lBox.style.display = 'none';
+                                playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
+                                return;
+                            }
+                        }
+                    }
+                } catch(e) {}
+                await new Promise(r => setTimeout(r, 1500));
+            }
+            isAutoHealingStream = false;
+        }
+
+        // If auto-heal didn't find new link yet, show the 1-Click Refresh box
+        if (vWrap) vWrap.style.display = 'none';
+        if (lBox) lBox.style.display = 'none';
+        if (expBox) {
+            expBox.style.display = 'block';
+            const t = I18N[currentLang] || I18N.en;
+            const expTitle = document.getElementById('expired-box-title'); if (expTitle) expTitle.innerText = t.expired_title || "⏳ Video Stream Link Expired";
+            const expDesc = document.getElementById('expired-box-desc'); if (expDesc) expDesc.innerText = t.expired_desc || "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.";
+            const rBtn = document.getElementById('btn-refresh-stream'); if (rBtn) rBtn.innerText = t.expired_refresh_btn || "🔄 Auto-Refresh & Play (1-Click)";
+            const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || "🔁 Reload Page";
+
+            const activeBot = getActiveBotUsername();
+            if (rBtn) {
+                rBtn.onclick = async () => {
+                    const origBtnText = rBtn.innerText;
+                    rBtn.disabled = true;
+                    rBtn.innerText = (currentLang === 'bn' ? "⚡ রিফ্রেশ হচ্ছে, অপেক্ষা করুন..." : "⚡ Refreshing, please wait...");
+
+                    // 1. Open bot to trigger instant on-demand healing
+                    const healUrl = `https://t.me/${activeBot}?start=v_${sParam}`;
+                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+                        window.Telegram.WebApp.openTelegramLink(healUrl);
+                    } else {
+                        window.open(healUrl, '_blank');
+                    }
+
+                    // 2. Poll GitHub for 12 seconds while bot processes it
+                    for (let p = 0; p < 9; p++) {
+                        await new Promise(r => setTimeout(r, 1200));
+                        try {
+                            const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
+                            const ghVidRes = await fetch(ghVidUrl, {
+                                headers: { 'Accept': 'application/vnd.github.v3+json' },
+                                cache: 'no-store'
+                            });
+                            if (ghVidRes.ok) {
+                                const jData = await ghVidRes.json();
+                                if (jData && jData.content) {
+                                    const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
+                                    if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
+                                        rBtn.disabled = false;
+                                        rBtn.innerText = origBtnText;
+                                        expBox.style.display = 'none';
+                                        playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
+                                        return;
+                                    }
+                                }
+                            }
+                        } catch(e) {}
+                    }
+
+                    // 3. Fallback: If still on same URL, resume playback directly
+                    if (currentStreamUrl) {
+                        expBox.style.display = 'none';
+                        playVideo(currentStreamUrl, document.getElementById('video-title').innerText || "TeraBox Video", "Unknown", "HD", "--");
+                    }
+
+                    rBtn.disabled = false;
+                    rBtn.innerText = origBtnText;
+                };
+            }
+        }
+    }
+
     function playVideo(streamUrl, title, size, res, dur) {
         currentStreamUrl = streamUrl;
         lastMidrollTime = 0;
+        streamLoadFailures = 0;
+
+        const _expB = document.getElementById('expired-box');
+        if (_expB) _expB.style.display = 'none';
 
         document.getElementById('no-video-box').style.display = 'none';
         document.getElementById('loading-box').style.display = 'none';
@@ -1817,19 +2030,29 @@
         function startPlaybackWithAd() {
             if (isAdMode) {
                 showRewardedAdWithEnforcement().then(() => {
-                    video.play().catch(() => {});
-                    updatePlayIcon(true);
+                    video.play().then(() => updatePlayIcon(true)).catch(() => updatePlayIcon(false));
                 });
             } else {
-                video.play().catch(() => {});
-                updatePlayIcon(true);
+                video.play().then(() => updatePlayIcon(true)).catch(() => updatePlayIcon(false));
             }
         }
 
         if (Hls.isSupported() && (streamUrl.includes('.m3u8') || !streamUrl.includes('.mp4'))) {
             const hls = new Hls({
                 enableWorker: true,
-                lowLatencyMode: true
+                lowLatencyMode: false,
+                manifestLoadingTimeOut: 25000,
+                manifestLoadingMaxRetry: 5,
+                manifestLoadingRetryDelay: 1500,
+                levelLoadingTimeOut: 25000,
+                levelLoadingMaxRetry: 5,
+                levelLoadingRetryDelay: 1500,
+                fragLoadingTimeOut: 35000,
+                fragLoadingMaxRetry: 6,
+                fragLoadingRetryDelay: 1500,
+                startLevel: -1,
+                capLevelToPlayerSize: true,
+                backBufferLength: 90
             });
             window._hlsInstance = hls;
             hls.loadSource(streamUrl);
@@ -1837,19 +2060,60 @@
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
                 startPlaybackWithAd();
             });
-            hls.on(Hls.Events.ERROR, function(event, data) {
+            let hlsMediaErrorRetries = 0;
+            let hlsNetworkRetries = 0;
+
+            hls.on(Hls.Events.ERROR, async function(event, data) {
+                // Explicit token expiration HTTP codes (403, 404, 410)
+                if (data.response && (data.response.code === 403 || data.response.code === 404 || data.response.code === 410)) {
+                    console.warn("Explicit stream token expired (HTTP " + data.response.code + "), triggering recovery");
+                    triggerStreamExpiredRecovery(data);
+                    return;
+                }
+
                 if (data.fatal) {
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
-                            hls.startLoad();
+                            hlsNetworkRetries++;
+                            if (hlsNetworkRetries <= 4) {
+                                console.log("HLS network glitch, retrying " + hlsNetworkRetries + "/4...");
+                                setTimeout(() => { hls.startLoad(); }, 1200 * hlsNetworkRetries);
+                            } else {
+                                try {
+                                    const testRes = await fetch(streamUrl, { method: 'GET', headers: { 'Range': 'bytes=0-100' }, cache: 'no-store' });
+                                    if (testRes.status === 403 || testRes.status === 404 || testRes.status === 410) {
+                                        triggerStreamExpiredRecovery(data);
+                                        return;
+                                    }
+                                } catch (_) {}
+                                console.warn("HLS fatal network error, re-initializing loader...");
+                                hls.loadSource(streamUrl);
+                                hls.startLoad();
+                            }
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
-                            hls.recoverMediaError();
+                            hlsMediaErrorRetries++;
+                            if (hlsMediaErrorRetries === 1) {
+                                console.log("HLS fatal media error, attempting media recovery...");
+                                hls.recoverMediaError();
+                            } else if (hlsMediaErrorRetries === 2) {
+                                console.log("HLS fatal media error, swapping audio codec & recovering...");
+                                hls.swapAudioCodec();
+                                hls.recoverMediaError();
+                            } else if (hlsMediaErrorRetries <= 4) {
+                                console.log("HLS fatal media error, reloading stream source...");
+                                hls.loadSource(streamUrl);
+                                hls.startLoad();
+                            } else {
+                                console.warn("HLS unrecoverable media error, falling back to direct video element");
+                                try { hls.destroy(); } catch(e) {}
+                                video.src = streamUrl;
+                                video.play().catch(() => {});
+                            }
                             break;
                         default:
-                            hls.destroy();
-                            video.src = streamUrl;
-                            startPlaybackWithAd();
+                            console.warn("HLS fatal unhandled error, retrying load:", data);
+                            hls.startLoad();
                             break;
                     }
                 }
@@ -1862,6 +2126,11 @@
             startPlaybackWithAd();
         }
     }
+
+    video.addEventListener('error', (e) => {
+        // Safe logger: Do NOT falsely trigger stream expiration on generic DOM element errors
+        console.warn("Native video element notice:", video.error ? video.error.code : e);
+    });
 
     // Mid-Roll Monetag Ads Handler during video playback
     video.addEventListener('timeupdate', () => {
@@ -1914,8 +2183,7 @@
     });
 
     document.getElementById('btn-open-bot').addEventListener('click', () => {
-        const botUser = window.CURRENT_BOT_USERNAME || BOT_USERNAME;
-        const link = `https://t.me/${botUser}?start=new_user`;
+        const link = `https://t.me/${getActiveBotUsername()}?start=new_user`;
         if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
         else window.open(link, '_blank');
     });
@@ -1923,21 +2191,20 @@
     const btnRestartBot = document.getElementById('btn-restart-bot');
     if (btnRestartBot) {
         btnRestartBot.addEventListener('click', () => {
-            const botUser = window.CURRENT_BOT_USERNAME || BOT_USERNAME;
-            const link = `https://t.me/${botUser}?start=restart`;
+            const link = `https://t.me/${getActiveBotUsername()}?start=restart`;
             if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
             else window.open(link, '_blank');
         });
     }
 
     document.getElementById('btn-buy-vip').addEventListener('click', () => {
-        const link = `https://t.me/${BOT_USERNAME}?start=buy_vip`;
+        const link = `https://t.me/${getActiveBotUsername()}?start=buy_vip`;
         if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
         else window.open(link, '_blank');
     });
 
     document.getElementById('btn-refer-earn').addEventListener('click', () => {
-        const link = `https://t.me/${BOT_USERNAME}?start=refer`;
+        const link = `https://t.me/${getActiveBotUsername()}?start=refer`;
         if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
         else window.open(link, '_blank');
     });
@@ -1968,19 +2235,66 @@
 
     // Helper: Extract Start Param across Telegram Desktop / Mobile WebApp
     function getTelegramStartParam() {
-        const urlParams = new URLSearchParams(window.location.search);
         let p = null;
-        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-            p = tg.initDataUnsafe.start_param;
-        } else if (urlParams.get('startapp')) {
-            p = urlParams.get('startapp');
-        } else if (urlParams.get('tgWebAppStartParam')) {
-            p = urlParams.get('tgWebAppStartParam');
-        } else if (window.location.hash.includes('tgWebAppStartParam=')) {
-            const m = window.location.hash.match(/tgWebAppStartParam=([^&]+)/);
-            if (m) p = decodeURIComponent(m[1]);
+
+        // 1. Direct WebApp SDK initDataUnsafe
+        if (window.Telegram && window.Telegram.WebApp) {
+            const twa = window.Telegram.WebApp;
+            if (twa.initDataUnsafe && twa.initDataUnsafe.start_param) {
+                p = twa.initDataUnsafe.start_param;
+            }
+            // 2. Direct WebApp SDK initData query string
+            if (!p && twa.initData) {
+                try {
+                    const idParams = new URLSearchParams(twa.initData);
+                    p = idParams.get('start_param') || idParams.get('startapp') || idParams.get('tgWebAppStartParam');
+                } catch(e) {}
+            }
         }
-        return p ? p.replace(/^v_/, '') : null;
+
+        // 3. Search query params (?startapp=... or ?tgWebAppStartParam=... or ?start_param=...)
+        if (!p) {
+            const q = new URLSearchParams(window.location.search);
+            p = q.get('startapp') || q.get('tgWebAppStartParam') || q.get('start_param') || q.get('v') || q.get('id');
+        }
+
+        // 4. Hash params (#tgWebAppData=... or #tgWebAppStartParam=... or #startapp=...)
+        if (!p && window.location.hash) {
+            const hashStr = window.location.hash.replace(/^#/, '');
+            try {
+                const hParams = new URLSearchParams(hashStr);
+                p = hParams.get('tgWebAppStartParam') || hParams.get('startapp') || hParams.get('start_param');
+
+                // 5. Encoded inside tgWebAppData in hash
+                if (!p && hParams.get('tgWebAppData')) {
+                    const appData = decodeURIComponent(hParams.get('tgWebAppData'));
+                    const adParams = new URLSearchParams(appData);
+                    p = adParams.get('start_param') || adParams.get('startapp') || adParams.get('tgWebAppStartParam');
+                }
+            } catch(e) {}
+        }
+
+        // 6. Regex fallback across full window.location.href
+        if (!p) {
+            try {
+                const fullHref = decodeURIComponent(window.location.href);
+                const m = fullHref.match(/(?:startapp|start_param|tgWebAppStartParam)[=%3D]([a-zA-Z0-9_\-]+)/i);
+                if (m) p = m[1];
+            } catch(e) {}
+        }
+
+        if (p) {
+            p = decodeURIComponent(p).replace(/^v_/, '').trim();
+            try { sessionStorage.setItem('last_active_startparam', p); } catch(_) {}
+            return p;
+        }
+
+        try {
+            const cachedP = sessionStorage.getItem('last_active_startparam');
+            if (cachedP) return cachedP;
+        } catch(_) {}
+
+        return null;
     }
 
     // Main Dispatcher Logic
@@ -2017,6 +2331,7 @@
             }
         }
         const startParam = rawParam;
+        window.CURRENT_START_PARAM = startParam;
         const tgUser = getTelegramUser();
         const userIdStr = tgUser && tgUser.id ? String(tgUser.id) : null;
 
@@ -2066,7 +2381,6 @@
             modal.style.display = 'flex';
         }
 
-        const BOT_API_TOKEN = atob("ODc1MTI3MzQ4MjpBQUdQLUxzMkg4OTlHeU1OSjZNWEhLRVFQQ2VBT082ZVdZSQ==");
         const TARGET_CHANNEL_ID = "-1003938077680";
         let TARGET_CHANNEL_LINK = "https://t.me/dgppv1";
         let BACKUP_CHANNEL_ID = "";
