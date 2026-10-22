@@ -709,7 +709,7 @@
     </div>
 
     <!-- Default Empty Box -->
-    <div id="no-video-box" class="no-video">
+    <div id="no-video-box" class="no-video" style="display:none;">
         <h3 id="no-video-title">🎬 TeraStream Mini Player</h3>
         <p id="no-video-desc">Please open a video link from the channel button to stream.</p>
     </div>
@@ -1986,24 +1986,6 @@
             }
         }
     }
-                    } catch(e) {}
-
-                    // Open bot to immediately regenerate fresh stream link from backup TeraBox link
-                    const activeBot = getActiveBotUsername();
-                    const healUrl = `https://t.me/${activeBot}?start=v_${sParam}`;
-                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
-                        window.Telegram.WebApp.openTelegramLink(healUrl);
-                    } else {
-                        window.open(healUrl, '_blank');
-                    }
-                    setTimeout(() => {
-                        rBtn.disabled = false;
-                        rBtn.innerText = origBtnText;
-                    }, 2500);
-                };
-            }
-        }
-    }
 
     function playVideo(streamUrl, title, size, res, dur) {
         currentStreamUrl = streamUrl;
@@ -2205,19 +2187,66 @@
 
     // Helper: Extract Start Param across Telegram Desktop / Mobile WebApp
     function getTelegramStartParam() {
-        const urlParams = new URLSearchParams(window.location.search);
         let p = null;
-        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-            p = tg.initDataUnsafe.start_param;
-        } else if (urlParams.get('startapp')) {
-            p = urlParams.get('startapp');
-        } else if (urlParams.get('tgWebAppStartParam')) {
-            p = urlParams.get('tgWebAppStartParam');
-        } else if (window.location.hash.includes('tgWebAppStartParam=')) {
-            const m = window.location.hash.match(/tgWebAppStartParam=([^&]+)/);
-            if (m) p = decodeURIComponent(m[1]);
+
+        // 1. Direct WebApp SDK initDataUnsafe
+        if (window.Telegram && window.Telegram.WebApp) {
+            const twa = window.Telegram.WebApp;
+            if (twa.initDataUnsafe && twa.initDataUnsafe.start_param) {
+                p = twa.initDataUnsafe.start_param;
+            }
+            // 2. Direct WebApp SDK initData query string
+            if (!p && twa.initData) {
+                try {
+                    const idParams = new URLSearchParams(twa.initData);
+                    p = idParams.get('start_param') || idParams.get('startapp') || idParams.get('tgWebAppStartParam');
+                } catch(e) {}
+            }
         }
-        return p ? p.replace(/^v_/, '') : null;
+
+        // 3. Search query params (?startapp=... or ?tgWebAppStartParam=... or ?start_param=...)
+        if (!p) {
+            const q = new URLSearchParams(window.location.search);
+            p = q.get('startapp') || q.get('tgWebAppStartParam') || q.get('start_param') || q.get('v') || q.get('id');
+        }
+
+        // 4. Hash params (#tgWebAppData=... or #tgWebAppStartParam=... or #startapp=...)
+        if (!p && window.location.hash) {
+            const hashStr = window.location.hash.replace(/^#/, '');
+            try {
+                const hParams = new URLSearchParams(hashStr);
+                p = hParams.get('tgWebAppStartParam') || hParams.get('startapp') || hParams.get('start_param');
+
+                // 5. Encoded inside tgWebAppData in hash
+                if (!p && hParams.get('tgWebAppData')) {
+                    const appData = decodeURIComponent(hParams.get('tgWebAppData'));
+                    const adParams = new URLSearchParams(appData);
+                    p = adParams.get('start_param') || adParams.get('startapp') || adParams.get('tgWebAppStartParam');
+                }
+            } catch(e) {}
+        }
+
+        // 6. Regex fallback across full window.location.href
+        if (!p) {
+            try {
+                const fullHref = decodeURIComponent(window.location.href);
+                const m = fullHref.match(/(?:startapp|start_param|tgWebAppStartParam)[=%3D]([a-zA-Z0-9_\-]+)/i);
+                if (m) p = m[1];
+            } catch(e) {}
+        }
+
+        if (p) {
+            p = decodeURIComponent(p).replace(/^v_/, '').trim();
+            try { sessionStorage.setItem('last_active_startparam', p); } catch(_) {}
+            return p;
+        }
+
+        try {
+            const cachedP = sessionStorage.getItem('last_active_startparam');
+            if (cachedP) return cachedP;
+        } catch(_) {}
+
+        return null;
     }
 
     // Main Dispatcher Logic
