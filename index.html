@@ -1875,15 +1875,61 @@
     videoWrapper.addEventListener('touchstart', showControlsTemporarily);
 
     let streamLoadFailures = 0;
-    function triggerStreamExpiredRecovery(errDetail) {
+    let isAutoHealingStream = false;
+
+    async function triggerStreamExpiredRecovery(errDetail) {
         console.warn("Stream playback failed / link expired:", errDetail);
         streamLoadFailures++;
         if (window._hlsInstance) {
             try { window._hlsInstance.destroy(); } catch(e) {}
+            window._hlsInstance = null;
         }
+
+        const sParam = window.CURRENT_START_PARAM || (typeof getTelegramStartParam === 'function' ? getTelegramStartParam() : '') || (new URLSearchParams(window.location.search).get('startapp') || '');
         const vWrap = document.getElementById('video-wrapper');
         const lBox = document.getElementById('loading-box');
         const expBox = document.getElementById('expired-box');
+
+        // Check if we can immediately auto-heal or fetch freshly healed stream from GitHub
+        if (sParam && !isAutoHealingStream) {
+            isAutoHealingStream = true;
+            if (lBox) {
+                lBox.style.display = 'block';
+                const lTitle = document.getElementById('loading-title');
+                const lDesc = document.getElementById('loading-desc');
+                if (lTitle) lTitle.innerText = (currentLang === 'bn' ? "⚡ ভিডিও স্ট্রিম রিফ্রেশ হচ্ছে..." : "⚡ Refreshing Video Stream...");
+                if (lDesc) lDesc.innerText = (currentLang === 'bn' ? "পুরোনো স্ট্রিম লিঙ্কটির মেয়াদ শেষ হয়ে গেছে। ব্যাকআপ লিঙ্ক থেকে নতুন স্ট্রিম তৈরি হচ্ছে..." : "Stream link expired. Auto-recovering fresh stream link from backup...");
+            }
+            if (vWrap) vWrap.style.display = 'none';
+            if (expBox) expBox.style.display = 'none';
+
+            // Check GitHub for up to 6 seconds in case background healer or bot refreshed it
+            for (let poll = 0; poll < 4; poll++) {
+                try {
+                    const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
+                    const ghVidRes = await fetch(ghVidUrl, {
+                        headers: { 'Accept': 'application/vnd.github.v3+json' },
+                        cache: 'no-store'
+                    });
+                    if (ghVidRes.ok) {
+                        const jData = await ghVidRes.json();
+                        if (jData && jData.content) {
+                            const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
+                            if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
+                                isAutoHealingStream = false;
+                                if (lBox) lBox.style.display = 'none';
+                                playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
+                                return;
+                            }
+                        }
+                    }
+                } catch(e) {}
+                await new Promise(r => setTimeout(r, 1500));
+            }
+            isAutoHealingStream = false;
+        }
+
+        // If auto-heal didn't find new link yet, show the 1-Click Refresh box
         if (vWrap) vWrap.style.display = 'none';
         if (lBox) lBox.style.display = 'none';
         if (expBox) {
@@ -1894,33 +1940,52 @@
             const rBtn = document.getElementById('btn-refresh-stream'); if (rBtn) rBtn.innerText = t.expired_refresh_btn || "🔄 Auto-Refresh & Play (1-Click)";
             const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || "🔁 Reload Page";
 
-            const botUser = getActiveBotUsername();
-            const sParam = window.CURRENT_START_PARAM || (new URLSearchParams(window.location.search).get('startapp') || '');
+            const activeBot = getActiveBotUsername();
             if (rBtn) {
                 rBtn.onclick = async () => {
                     const origBtnText = rBtn.innerText;
                     rBtn.disabled = true;
                     rBtn.innerText = (currentLang === 'bn' ? "⚡ রিফ্রেশ হচ্ছে, অপেক্ষা করুন..." : "⚡ Refreshing, please wait...");
 
-                    // Check if GitHub already has a freshly healed stream URL
-                    try {
-                        const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
-                        const ghVidRes = await fetch(ghVidUrl, {
-                            headers: { 'Accept': 'application/vnd.github.v3+json' },
-                            cache: 'no-store'
-                        });
-                        if (ghVidRes.ok) {
-                            const jData = await ghVidRes.json();
-                            if (jData && jData.content) {
-                                const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
-                                if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
-                                    rBtn.disabled = false;
-                                    rBtn.innerText = origBtnText;
-                                    playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
-                                    return;
+                    // 1. Open bot to trigger instant on-demand healing
+                    const healUrl = `https://t.me/${activeBot}?start=v_${sParam}`;
+                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+                        window.Telegram.WebApp.openTelegramLink(healUrl);
+                    } else {
+                        window.open(healUrl, '_blank');
+                    }
+
+                    // 2. Poll GitHub for 10 seconds while bot processes it
+                    for (let p = 0; p < 8; p++) {
+                        await new Promise(r => setTimeout(r, 1200));
+                        try {
+                            const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
+                            const ghVidRes = await fetch(ghVidUrl, {
+                                headers: { 'Accept': 'application/vnd.github.v3+json' },
+                                cache: 'no-store'
+                            });
+                            if (ghVidRes.ok) {
+                                const jData = await ghVidRes.json();
+                                if (jData && jData.content) {
+                                    const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
+                                    if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
+                                        rBtn.disabled = false;
+                                        rBtn.innerText = origBtnText;
+                                        expBox.style.display = 'none';
+                                        playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
+                                        return;
+                                    }
                                 }
                             }
-                        }
+                        } catch(e) {}
+                    }
+
+                    rBtn.disabled = false;
+                    rBtn.innerText = origBtnText;
+                };
+            }
+        }
+    }
                     } catch(e) {}
 
                     // Open bot to immediately regenerate fresh stream link from backup TeraBox link
@@ -2189,6 +2254,7 @@
             }
         }
         const startParam = rawParam;
+        window.CURRENT_START_PARAM = startParam;
         const tgUser = getTelegramUser();
         const userIdStr = tgUser && tgUser.id ? String(tgUser.id) : null;
 
