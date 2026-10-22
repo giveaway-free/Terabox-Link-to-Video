@@ -18,6 +18,7 @@ import time
 import base64
 import threading
 import sqlite3
+import socket
 import requests
 import asyncio
 import logging
@@ -50,7 +51,8 @@ from forwarder_core import (
     AutomationEngine, Database, MediaProcessor,
     DEFAULT_TERABOX_DOMAINS, normalize_terabox_url,
     get_terabox_media, build_player_url, save_video_cache,
-    push_single_video_to_gh
+    push_single_video_to_gh, fetch_bot_username_from_token,
+    get_or_refresh_video_stream, is_stream_url_alive
 )
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -118,6 +120,22 @@ def update_env(key_values: Dict[str, Any]):
     with open(DOTENV_PATH, "w", encoding="utf-8") as f:
         f.writelines(new_lines)
 
+    # LIVE ENGINE HOT-RELOAD: Instantly apply settings to running engine without restart
+    try:
+        if 'mgr' in globals() and getattr(mgr, "engine", None) and hasattr(mgr.engine, "config"):
+            for k, val_str in keys_to_update.items():
+                low_k = k.lower()
+                val_s = str(val_str).strip()
+                if val_s.lower() in ("true", "false"):
+                    parsed_val = (val_s.lower() == "true")
+                elif val_s.isdigit():
+                    parsed_val = int(val_s)
+                else:
+                    parsed_val = val_s
+                mgr.engine.config[low_k] = parsed_val
+    except Exception:
+        pass
+
     threading.Thread(target=sync_file_to_github, args=(DOTENV_PATH, "Auto-sync updated .env config"), daemon=True).start()
 
 def sync_file_to_github(filepath: str, commit_msg: str):
@@ -153,22 +171,27 @@ def sync_monetag_to_github_pages(zone_id: str):
 
 # Read Environment Defaults
 env_init = read_env()
-BOT_TOKEN = os.environ.get("BOT_TOKEN") or env_init.get("BOT_TOKEN") or env_init.get("DISPATCH_BOT_TOKEN") or "7796341783:AAEng5ditGE0sYkyfSrm7DrzF1u6KTr20lI"
+BOT_TOKEN = os.environ.get("BOT_TOKEN") or env_init.get("BOT_TOKEN") or env_init.get("DISPATCH_BOT_TOKEN") or "8751273482:AAGP-Ls2H899GyMNJ6MXHKEQPCeAOO6eWYI"
 MY_PLAYER_URL = env_init.get("PLAYER_URL") or "https://giveaway-free.github.io/Terabox-Link-to-Video/"
 
 bot = telebot.TeleBot(BOT_TOKEN, parse_mode=None)
 
 _BOT_USERNAME = None
 def get_bot_username():
+    """
+    Dynamically resolves active bot username using current BOT_TOKEN / DISPATCH_BOT_TOKEN.
+    Auto-fetches from Telegram API whenever token changes and synchronizes .env.
+    """
     global _BOT_USERNAME
-    if not _BOT_USERNAME:
-        try:
-            me = bot.get_me()
-            if me and me.username:
-                _BOT_USERNAME = me.username
-        except Exception:
-            _BOT_USERNAME = "leadox_bot"
-    return _BOT_USERNAME or "leadox_bot"
+    curr_token = (
+        os.environ.get("DISPATCH_BOT_TOKEN")
+        or os.environ.get("BOT_TOKEN")
+        or read_env().get("DISPATCH_BOT_TOKEN")
+        or read_env().get("BOT_TOKEN")
+        or BOT_TOKEN
+    )
+    _BOT_USERNAME = fetch_bot_username_from_token(curr_token, sync_to_env=True)
+    return _BOT_USERNAME
 
 
 # -------------------------------------------------------------
@@ -279,6 +302,65 @@ def init_db():
     conn.commit()
     conn.close()
 
+def push_users_json_to_gh():
+    token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
+    hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
+    url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data"
+    put_url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json"
+    
+    for attempt in range(3):
+        try:
+            if not os.path.exists('users.json'):
+                return
+            with open('users.json', 'r', encoding='utf-8') as f:
+                content = f.read()
+            b64 = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+            r_get = requests.get(url, headers=hdrs, timeout=8)
+            sha = r_get.json().get('sha') if r_get.status_code == 200 else None
+            p = {'message': 'Sync users.json', 'content': b64, 'branch': 'data'}
+            if sha:
+                p['sha'] = sha
+            res = requests.put(put_url, headers=hdrs, json=p, timeout=8)
+            if res.status_code in [200, 201]:
+                print(f"[SUCCESS] Pushed users.json to GH data branch (HTTP {res.status_code})")
+                return
+            else:
+                print(f"[WARNING] Push users.json attempt {attempt+1} got HTTP {res.status_code}")
+                time.sleep(1)
+        except Exception as e:
+            print(f"[ERROR] Error pushing users.json to GH (attempt {attempt+1}): {e}")
+            time.sleep(1)
+
+def sync_users_json():
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry, language, is_blocked FROM users').fetchall()
+        try:
+            watched_rows = c.execute('SELECT user_id, video_id FROM watched_videos').fetchall()
+        except Exception:
+            watched_rows = []
+        conn.close()
+        watched_map = {}
+        for uid, vid in watched_rows:
+            watched_map.setdefault(str(uid), []).append(vid)
+        data = {
+            str(r[0]): {
+                'username': r[1],
+                'credits': r[2],
+                'is_paid': r[3],
+                'paid_expiry': r[4],
+                'lang': r[5] or 'bn',
+                'is_blocked': bool(r[6]),
+                'watched': watched_map.get(str(r[0]), [])
+            } for r in rows
+        }
+        with open('users.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+        threading.Thread(target=push_users_json_to_gh, daemon=True).start()
+    except Exception as e:
+        print(f"Error syncing users.json: {e}")
+
 init_db()
 
 def restore_users_from_gh():
@@ -335,8 +417,50 @@ def restore_users_from_gh():
     except Exception as e:
         print(f"[WARNING] Could not restore users from GH: {e}")
 
+def pull_users_from_gh():
+    try:
+        token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
+        hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
+        url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data"
+        r = requests.get(url, headers=hdrs, timeout=8)
+        if r.status_code == 200:
+            content = base64.b64decode(r.json()['content']).decode('utf-8')
+            data = json.loads(content)
+            conn = sqlite3.connect('users.db')
+            cursor = conn.cursor()
+            for uid_str, uinfo in data.items():
+                if uid_str.startswith('_'):
+                    continue
+                try:
+                    uid = int(uid_str)
+                    credits = int(uinfo.get('credits', 10))
+                    is_blk = 1 if uinfo.get('is_blocked') else 0
+                    cursor.execute('''
+                        UPDATE users SET credits = ?, is_blocked = ? WHERE user_id = ?
+                    ''', (credits, is_blk, uid))
+                    for vid in uinfo.get('watched', []):
+                        cursor.execute('INSERT OR IGNORE INTO watched_videos (user_id, video_id, created_at) VALUES (?, ?, datetime("now"))', (uid, vid))
+                except Exception:
+                    continue
+            conn.commit()
+            conn.close()
+    except Exception as e:
+        pass
+
+def start_gh_users_poller():
+    def _poll():
+        while True:
+            time.sleep(15)
+            try:
+                pull_users_from_gh()
+            except Exception:
+                pass
+    t = threading.Thread(target=_poll, daemon=True)
+    t.start()
+
 init_db()
 restore_users_from_gh()
+start_gh_users_poller()
 
 # --- DB HELPERS ---
 def get_setting(key):
@@ -360,9 +484,9 @@ def is_admin(user_id):
         auth_env = read_env().get("AUTHORIZED_USERS", "")
         auth_list = [int(u.strip()) for u in auth_env.split(",") if u.strip().isdigit()]
         uid = int(user_id)
-        return uid == int(admin_id_str) or uid in auth_list or uid in [553826070, 6525538939]
+        return uid == int(admin_id_str) or uid in auth_list or uid == 553826070
     except Exception:
-        return int(user_id) in [553826070, 6525538939]
+        return int(user_id) == 553826070
 
 def is_user_authenticated(user_id):
     return is_admin(user_id)
@@ -387,6 +511,10 @@ def mark_user_blocked(user_id: int, blocked: bool):
         ''', (user_id, f"User_{user_id}", val))
         conn.commit()
         conn.close()
+        try:
+            threading.Thread(target=sync_users_json, daemon=True).start()
+        except Exception:
+            pass
     except Exception as e:
         logging.error(f"Error marking user blocked {user_id}: {e}")
 
@@ -536,15 +664,133 @@ def mark_watched_video(user_id, vid_id):
     except Exception:
         pass
 
-def is_user_in_chat(user_id):
-    req_group = get_setting("required_group_id")
+def check_user_all_memberships(user_id):
+    """
+    Strict security verification for video playback:
+    1. Target Channel Membership (OUTPUT_CHANNEL / required_group_id)
+    2. Backup Channel Membership (backup_channel_link / backup_channel_id / BACKUP_CHANNEL)
+    3. Bot Status (Started, in database, and not blocked)
+    """
+    res = {
+        "target_channel_joined": False,
+        "backup_channel_joined": True,
+        "bot_started": False,
+        "is_blocked": False,
+        "can_play": False,
+        "target_channel_link": "https://t.me/dgppv1",
+        "target_channel_title": "",
+        "backup_channel_link": "",
+        "backup_channel_title": "",
+        "missing": []
+    }
+
+    if is_admin(user_id):
+        res["target_channel_joined"] = True
+        res["backup_channel_joined"] = True
+        res["bot_started"] = True
+        res["is_blocked"] = False
+        res["can_play"] = True
+        return res
+    
+    # 1. Target Channel Verification
+    req_group = get_setting("required_group_id") or os.getenv("OUTPUT_CHANNEL", "-1003938077680")
+    if str(req_group) in ["-1001234567890", "", "None"]:
+        req_group = os.getenv("OUTPUT_CHANNEL", "-1003938077680")
+    
+    target_link = get_target_group_link()
+    if not target_link or target_link in ["https://t.me/", "https://t.me/your_channel"]:
+        target_link = "https://t.me/dgppv1"
+    res["target_channel_link"] = target_link
+
+    target_chat_id = None
     try:
-        member = bot.get_chat_member(req_group, user_id)
-        if member.status in ['member', 'administrator', 'creator']:
-            return True
+        if str(req_group).startswith("-100") or str(req_group).lstrip("-").isdigit():
+            target_chat_id = int(req_group)
+        else:
+            target_chat_id = str(req_group)
     except Exception:
-        pass
-    return False
+        target_chat_id = -1003938077680
+
+    try:
+        m = bot.get_chat_member(target_chat_id, user_id)
+        if m.status in ['creator', 'administrator', 'member'] or (m.status == 'restricted' and getattr(m, 'is_member', True)):
+            res["target_channel_joined"] = True
+    except Exception:
+        res["target_channel_joined"] = False
+
+    if not res["target_channel_joined"]:
+        res["missing"].append("target_channel")
+
+    # 2. Backup Channel Verification
+    bk_link = get_setting("backup_channel_link") or os.getenv("BACKUP_CHANNEL") or ""
+    bk_id = get_setting("backup_channel_id") or os.getenv("BACKUP_CHANNEL_ID") or ""
+    dummy_bk = ["https://t.me/your_backup_channel", "https://t.me/", "", "None", None, "your_backup_channel"]
+    
+    if (bk_link not in dummy_bk) or bk_id:
+        res["backup_channel_link"] = bk_link if bk_link not in dummy_bk else ""
+        backup_chat_target = None
+        if bk_id:
+            try:
+                backup_chat_target = int(bk_id)
+            except Exception:
+                backup_chat_target = bk_id
+        elif bk_link:
+            if "t.me/" in bk_link:
+                h = bk_link.split("t.me/")[-1].replace("/", "").strip()
+                if not h.startswith("+"):
+                    backup_chat_target = f"@{h}"
+            elif bk_link.startswith("@"):
+                backup_chat_target = bk_link
+            elif bk_link.startswith("-100") or bk_link.lstrip("-").isdigit():
+                backup_chat_target = int(bk_link)
+        
+        if backup_chat_target:
+            try:
+                bm = bot.get_chat_member(backup_chat_target, user_id)
+                if bm.status in ['creator', 'administrator', 'member'] or (bm.status == 'restricted' and getattr(bm, 'is_member', True)):
+                    res["backup_channel_joined"] = True
+                else:
+                    res["backup_channel_joined"] = False
+            except Exception:
+                res["backup_channel_joined"] = False
+        else:
+            res["backup_channel_joined"] = True
+            
+        if not res["backup_channel_joined"]:
+            res["missing"].append("backup_channel")
+    else:
+        res["backup_channel_joined"] = True
+
+    # 3. Bot Status & Registration Verification
+    u = get_user(user_id)
+    try:
+        bot.send_chat_action(user_id, 'typing')
+        res["bot_started"] = True
+        res["is_blocked"] = False
+        mark_user_blocked(user_id, False)
+        if not u:
+            register_user(user_id, f"User_{user_id}")
+            u = get_user(user_id)
+    except Exception as act_err:
+        err_s = str(act_err).lower()
+        err_c = getattr(act_err, 'error_code', None)
+        if err_c in [400, 403] or "blocked" in err_s or "deactivated" in err_s or "can't initiate" in err_s or "chat not found" in err_s or "forbidden" in err_s or "peer_id_invalid" in err_s:
+            res["bot_started"] = False
+            res["is_blocked"] = True
+            mark_user_blocked(user_id, True)
+        else:
+            res["bot_started"] = (u is not None)
+            res["is_blocked"] = is_user_blocked(user_id)
+
+    if not res["bot_started"] or res["is_blocked"]:
+        res["missing"].append("bot")
+
+    res["can_play"] = (res["target_channel_joined"] and res["backup_channel_joined"] and res["bot_started"] and not res["is_blocked"])
+    return res
+
+def is_user_in_chat(user_id):
+    chk = check_user_all_memberships(user_id)
+    return chk["target_channel_joined"] and chk["backup_channel_joined"]
 
 def get_target_group_link():
     target_link = get_setting("target_channel_link")
@@ -1271,10 +1517,39 @@ class SchedulerService:
         env = read_env()
         dest_channel = env.get("OUTPUT_CHANNEL", "").strip()
 
+        def _resolve_tid(ch: Any) -> Any:
+            if not ch or str(ch).strip() in ("", "None"):
+                return None
+            s = str(ch).strip()
+            if s.startswith("@"):
+                return s
+            clean_digits = s.lstrip("-")
+            if clean_digits.isdigit():
+                val = int(s)
+                if val < 0:
+                    if not s.startswith("-100") and len(clean_digits) >= 9:
+                        return int(f"-100{clean_digits}")
+                    return val
+                if len(s) >= 9:
+                    return int(f"-100{s}")
+                return val
+            return s
+
         for p in posts:
             try:
                 targets = p["target_chats"] or dest_channel
                 target_list = [t.strip() for t in targets.split(",") if t.strip()] or [dest_channel]
+
+                valid_targets = []
+                for ch in target_list:
+                    tid = _resolve_tid(ch)
+                    if tid and tid not in valid_targets:
+                        valid_targets.append(tid)
+
+                if not valid_targets and dest_channel:
+                    fallback_id = _resolve_tid(dest_channel)
+                    if fallback_id:
+                        valid_targets.append(fallback_id)
 
                 reply_markup = None
                 if p["buttons_json"]:
@@ -1288,11 +1563,7 @@ class SchedulerService:
                             ])
                     except Exception: pass
 
-                for ch in target_list:
-                    if not ch or ch == "None": continue
-                    try: target_id = int(ch)
-                    except ValueError: target_id = ch
-
+                for target_id in valid_targets:
                     if p["media_path"] and os.path.exists(p["media_path"]):
                         with open(p["media_path"], "rb") as mf:
                             if p["media_type"] == "photo":
@@ -1325,6 +1596,9 @@ class SchedulerService:
                 time.sleep(int(env.get("POST_DELAY_SECONDS", 3)))
             except Exception as e:
                 push_log("ERROR", f"Error dispatching post #{p['id']}: {e}")
+                err_msg = str(e).lower()
+                if "chat not found" in err_msg or "bot was blocked" in err_msg or not (p["media_path"] and os.path.exists(p["media_path"])):
+                    remove_scheduled_post(p["id"], p["media_path"])
 
         return posted
 
@@ -1348,6 +1622,7 @@ class EngineManager:
         }
         self.auth_future: Optional[asyncio.Future] = None
         self.auth_prompt_text = ""
+        self.restarted = False
 
     def update_stat(self, key: str, value: Any):
         if key in self.stats:
@@ -1470,7 +1745,8 @@ class EngineManager:
             "button_backup_text": env.get("BUTTON_BACKUP_TEXT", "📢 Backup Channel"),
             "button_how_to_watch_text": env.get("BUTTON_HOW_TO_WATCH_TEXT", "👀 How to Watch"),
             "button_other_text": env.get("BUTTON_OTHER_TEXT", "🔗 Open Link"),
-            "dispatch_bot_token": env.get("DISPATCH_BOT_TOKEN", "7796341783:AAEng5ditGE0sYkyfSrm7DrzF1u6KTr20lI"),
+            "dispatch_bot_token": env.get("DISPATCH_BOT_TOKEN", "8751273482:AAGP-Ls2H899GyMNJ6MXHKEQPCeAOO6eWYI"),
+            "dispatch_bot_username": env.get("DISPATCH_BOT_USERNAME", "Terastream_pro_bot"),
             "max_concurrent_tasks": 1,
         }
 
@@ -1579,6 +1855,9 @@ class EngineManager:
         return True, "Engine stopped."
 
     def restart(self) -> Tuple[bool, str]:
+        self.stats["forwarded"] = 0
+        self.stats["errors"] = 0
+        self.restarted = True
         self.stop()
         time.sleep(2.0)
         return self.start()
@@ -1745,8 +2024,10 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
     # Live system metrics (CPU / RAM)
     sys_m = get_system_metrics()
 
-    total_forwarded = max(db_completed, mgr.stats.get("forwarded", 0))
-    total_filtered = max(db_filtered, mgr.stats.get("filtered", 0))
+    if getattr(mgr, "restarted", False):
+        total_forwarded = mgr.stats.get("forwarded", 0)
+    else:
+        total_forwarded = max(db_completed, mgr.stats.get("forwarded", 0))
 
     text = (
         "╔════════════════════════════╗\n"
@@ -1760,8 +2041,6 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
         f"• 🤖 Process RAM: <code>{sys_m['proc_ram_mb']:.1f} MB</code>\n\n"
         "📊 <b>Forwarding Metrics (Persistent):</b>\n"
         f"• 🚀 Successfully Forwarded: <b>{total_forwarded}</b>\n"
-        f"• 🧹 Filtered (Non-TeraBox): <b>{total_filtered}</b>\n"
-        f"• 🎯 TeraBox Links Converted: <code>{mgr.stats['converted']}</code>\n"
         f"• ⏳ In Queue: <code>{q_len}</code>\n"
         f"• ❌ Errors: <code>{mgr.stats['errors']}</code>\n\n"
         "⚙️ <b>Live Configuration:</b>\n"
@@ -1797,13 +2076,14 @@ def build_main_dashboard() -> Tuple[str, InlineKeyboardMarkup]:
     sw_hj = env.get("AUTO_HIDE_JOIN_MESSAGES", "False").lower() == "true"
     sw_stk = env.get("STICKER_ENABLED", "True").lower() == "true"
     sw_btns = env.get("POST_LINKS_AS_BUTTONS", "True").lower() == "true"
+    sw_trans = env.get("TRANSLATE_ENABLED", "False").lower() == "true"
 
     markup.row(
         InlineKeyboardButton(f"👥 Auto-Joins: {'🟢 ON' if sw_aj else '🔴 OFF'}", callback_data="nav:auto_join"),
         InlineKeyboardButton(f"🚫 Clear Joins: {'🟢 ON' if sw_hj else '🔴 OFF'}", callback_data="nav:hide_join")
     )
     markup.row(
-        InlineKeyboardButton("🌐 Language / Translate", callback_data="nav:trans"),
+        InlineKeyboardButton(f"🌐 Translate: {'🟢 ON' if sw_trans else '🔴 OFF'}", callback_data="nav:trans"),
         InlineKeyboardButton(f"🏷 Sticker: {'🟢 ON' if sw_stk else '🔴 OFF'}", callback_data="nav:sticker")
     )
     markup.row(
@@ -1881,9 +2161,252 @@ def build_output_menu() -> Tuple[str, InlineKeyboardMarkup]:
         InlineKeyboardButton("✏️ Change Output Channel", callback_data="act:set_output")
     )
     markup.row(
+        InlineKeyboardButton("🧹 Clear All Posts (Delete for Everyone)", callback_data="act:purge_output_prompt")
+    )
+    markup.row(
         InlineKeyboardButton("🔙 Back to Dashboard", callback_data="nav:main")
     )
     return text, markup
+
+def build_purge_output_confirm_menu() -> Tuple[str, InlineKeyboardMarkup]:
+    env = read_env()
+    output = env.get("OUTPUT_CHANNEL", "Not set")
+    text = (
+        "⚠️ <b>WARNING: Output Channel Post Auto-Removal</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🎯 <b>Target Destination:</b> <code>{output}</code>\n\n"
+        "🚨 <b>আপনি কি নিশ্চিত যে আপনি এই পোস্টিং চ্যানেলের সকল পোস্ট মুছে ফেলতে চান?</b>\n\n"
+        "• এটি চ্যানেলের সমস্ত পূর্ববর্তী পোস্ট ও মিডিয়া <b>সকল ব্যবহারকারী ও মেম্বারদের জন্য স্থায়ীভাবে ডিলিট (Delete for Everyone)</b> করে দেবে।\n"
+        "• একবার ডিলিট প্রক্রিয়া শুরু হলে এগুলো আর ফিরিয়ে আনা যাবে না।\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "<i>চালিয়ে যেতে নিচের কনফার্ম বাটনে চাপুন:</i>"
+    )
+    markup = InlineKeyboardMarkup()
+    markup.row(
+        InlineKeyboardButton("🗑️ Yes, Delete All Posts (সব পোস্ট ডিলিট করুন)", callback_data="act:do_purge_output")
+    )
+    markup.row(
+        InlineKeyboardButton("❌ Cancel (বাতিল)", callback_data="nav:output")
+    )
+    return text, markup
+
+def execute_output_channel_purge(call):
+    chat_id = call.message.chat.id
+    message_id = call.message.message_id
+    env = read_env()
+    raw_output = env.get("OUTPUT_CHANNEL", "").strip()
+
+    if not raw_output or raw_output == "Not set":
+        bot.answer_callback_query(call.id, "❌ No Output Channel configured!", show_alert=True)
+        return
+
+    target_list = [t.strip() for t in raw_output.split(",") if t.strip()]
+
+    try:
+        bot.edit_message_text(
+            f"⏳ <b>Auto-Removing Posts from Output Channel...</b>\n\n"
+            f"🎯 <b>Target(s):</b> <code>{raw_output}</code>\n\n"
+            f"🔄 চ্যানেল কানেক্ট করা হচ্ছে এবং সমস্ত মেসেজ স্ক্যান করা হচ্ছে...\n"
+            f"<i>(মেসেজ ডিলিট হতে থাকলে রিয়েল-টাইম কাউন্ট এখানে আপডেট হবে)</i>",
+            chat_id=chat_id,
+            message_id=message_id,
+            parse_mode="HTML"
+        )
+    except Exception:
+        pass
+
+    def _purge_thread():
+        deleted_total = 0
+        err_msg = None
+
+        async def _resolve_target(client, target):
+            candidates = []
+            target_str = str(target).strip()
+            if target_str.startswith("-") or target_str.isdigit():
+                clean_str = target_str.replace("-100", "").replace("-", "")
+                if clean_str.isdigit():
+                    candidates.extend([int(f"-100{clean_str}"), int(clean_str)])
+            else:
+                candidates.append(target_str)
+
+            for cand in candidates:
+                try:
+                    ent = await client.get_entity(cand)
+                    if ent: return ent
+                except Exception:
+                    pass
+
+            try:
+                cand_clean = str(candidates[0]).replace("-100", "").replace("-", "") if candidates else ""
+                async for d in client.iter_dialogs():
+                    d_clean = str(d.id).replace("-100", "").replace("-", "")
+                    d_uname = getattr(d.entity, "username", None) or ""
+                    if cand_clean == d_clean or (d_uname and target_str.lstrip("@").lower() == d_uname.lower()):
+                        return d.entity
+            except Exception:
+                pass
+            return None
+
+        async def _run_purge_on_client(client):
+            nonlocal deleted_total, err_msg
+            try:
+                for out_tgt in target_list:
+                    ent = None
+                    if mgr.is_running and mgr.engine:
+                        if getattr(mgr.engine, "output_entities", None):
+                            for oe in mgr.engine.output_entities:
+                                oe_str = str(getattr(oe, "id", ""))
+                                clean_oe = oe_str.replace("-100", "").replace("-", "")
+                                clean_tgt = str(out_tgt).replace("-100", "").replace("-", "")
+                                if clean_oe == clean_tgt or getattr(oe, "username", "") == out_tgt.lstrip("@"):
+                                    ent = oe
+                                    break
+                        if not ent and getattr(mgr.engine, "output_entity", None):
+                            ent = mgr.engine.output_entity
+
+                    if not ent:
+                        ent = await _resolve_target(client, out_tgt)
+
+                    if not ent:
+                        err_msg = f"চ্যানেল খুঁজে পাওয়া যায়নি: '{out_tgt}'"
+                        continue
+
+                    last_ui_update = time.time()
+                    consecutive_empty = 0
+
+                    while consecutive_empty < 3:
+                        try:
+                            messages = await client.get_messages(ent, limit=100)
+                        except errors.FloodWaitError as fwe:
+                            wait_s = min(fwe.seconds, 15) + 1
+                            await asyncio.sleep(wait_s)
+                            continue
+                        except Exception as e:
+                            err_msg = f"মেসেজ ফেচ করতে সমস্যা: {e}"
+                            break
+
+                        if not messages:
+                            consecutive_empty += 1
+                            await asyncio.sleep(0.8)
+                            continue
+
+                        consecutive_empty = 0
+                        msg_ids = [m.id for m in messages if m and hasattr(m, 'id')]
+                        if not msg_ids:
+                            break
+
+                        try:
+                            await client.delete_messages(ent, msg_ids, revoke=True)
+                            deleted_total += len(msg_ids)
+                        except errors.FloodWaitError as fwe:
+                            wait_s = min(fwe.seconds, 15) + 1
+                            await asyncio.sleep(wait_s)
+                        except Exception:
+                            for mid in msg_ids:
+                                try:
+                                    await client.delete_messages(ent, [mid], revoke=True)
+                                    deleted_total += 1
+                                except Exception:
+                                    pass
+
+                        if time.time() - last_ui_update > 3.0:
+                            last_ui_update = time.time()
+                            try:
+                                bot.edit_message_text(
+                                    f"⏳ <b>Auto-Removing Posts from Output Channel...</b>\n\n"
+                                    f"🎯 <b>Target:</b> <code>{raw_output}</code>\n"
+                                    f"🗑️ <b>Deleted:</b> <code>{deleted_total}</code> posts\n\n"
+                                    f"<i>চ্যানেল থেকে সমস্ত পোস্ট রিমুভ হচ্ছে (Delete for Everyone)...</i>",
+                                    chat_id=chat_id,
+                                    message_id=message_id,
+                                    parse_mode="HTML"
+                                )
+                            except Exception:
+                                pass
+                        await asyncio.sleep(0.2)
+
+            except Exception as ex:
+                err_msg = str(ex)
+
+        if mgr.is_running and mgr.engine and getattr(mgr.engine, "client", None) and mgr.engine_loop:
+            try:
+                future = asyncio.run_coroutine_threadsafe(_run_purge_on_client(mgr.engine.client), mgr.engine_loop)
+                future.result(timeout=900.0)
+            except Exception as e:
+                if not err_msg:
+                    err_msg = str(e)
+        else:
+            temp_loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(temp_loop)
+
+            async def _standalone_runner():
+                nonlocal err_msg
+                api_id = env.get("API_ID")
+                api_hash = env.get("API_HASH")
+                session_name = env.get("SESSION_NAME", "telegram_automation")
+                session_path = os.path.join(APP_DIR, "sessions", f"{session_name}.session")
+                if not (api_id and api_hash and os.path.exists(session_path)):
+                    err_msg = "Telegram session বা API credentials পাওয়া যায়নি।"
+                    return
+                temp_client = TelegramClient(session_path, int(api_id), api_hash)
+                await temp_client.connect()
+                if not await temp_client.is_user_authorized():
+                    await temp_client.disconnect()
+                    err_msg = "টেলিগ্রাম অ্যাকাউন্টে লগইন করা নেই। অনুগ্রহ করে প্রথমে লগইন করুন।"
+                    return
+                try:
+                    await _run_purge_on_client(temp_client)
+                finally:
+                    try:
+                        await temp_client.disconnect()
+                    except Exception:
+                        pass
+
+            try:
+                temp_loop.run_until_complete(_standalone_runner())
+            except Exception as e:
+                if not err_msg:
+                    err_msg = str(e)
+            finally:
+                temp_loop.close()
+
+        markup = InlineKeyboardMarkup()
+        markup.row(
+            InlineKeyboardButton("🔙 Back to Output Channel", callback_data="nav:output"),
+            InlineKeyboardButton("🏠 Main Dashboard", callback_data="nav:main")
+        )
+
+        if err_msg and deleted_total == 0:
+            try:
+                bot.edit_message_text(
+                    f"❌ <b>Post Removal Failed:</b>\n\n"
+                    f"🎯 <b>Target:</b> <code>{raw_output}</code>\n"
+                    f"⚠️ <b>Error:</b> <code>{html.escape(err_msg)}</code>\n\n"
+                    f"<i>নিশ্চিত করুন যে আপনার টেলিগ্রাম অ্যাকাউন্টটি উক্ত চ্যানেলে অ্যাডমিন এবং মেসেজ ডিলিট করার অধিকার রয়েছে।</i>",
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    reply_markup=markup,
+                    parse_mode="HTML"
+                )
+            except Exception:
+                pass
+        else:
+            try:
+                bot.edit_message_text(
+                    f"✅ <b>All Posts Removed Successfully!</b>\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"🎯 <b>Target:</b> <code>{raw_output}</code>\n"
+                    f"🗑️ <b>Total Posts Deleted:</b> <code>{deleted_total}</code>\n\n"
+                    f"✨ পোস্টিং চ্যানেল/গ্রুপ থেকে সমস্ত পোস্ট সফলভাবে সকল মেম্বার ও ব্যবহারকারীদের জন্য চিরতরে মুছে ফেলা হয়েছে (Deleted for Everyone)।",
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    reply_markup=markup,
+                    parse_mode="HTML"
+                )
+            except Exception:
+                pass
+
+    threading.Thread(target=_purge_thread, daemon=True).start()
 
 def build_sticker_menu() -> Tuple[str, InlineKeyboardMarkup]:
     env = read_env()
@@ -2096,19 +2619,25 @@ def build_btn_texts_menu() -> Tuple[str, InlineKeyboardMarkup]:
     next_btns = "False" if sw_btns else "True"
     status_text = "🟢 <b>ACTIVE (পোস্টে বাটন যুক্ত হবে)</b>" if sw_btns else "🔴 <b>DISABLED (পোস্টে টেক্সট লিংক যাবে)</b>"
 
+    sw_free = env.get("BUTTON_TERABOX_FREE_ENABLED", "True").lower() == "true"
+    next_free = "False" if sw_free else "True"
+    free_status_icon = "🟢 ON" if sw_free else "🔴 OFF"
+
     text = (
-        "🔘 <b>Custom Inline Button Labels</b>\n\n"
-        f"• <b>Status:</b> {status_text}\n"
+        "🔘 <b>Custom Inline Button Labels & Toggles</b>\n\n"
+        f"• <b>Master Buttons:</b> {status_text}\n"
+        f"• <b>Watch Video (Free) Status:</b> <b>{free_status_icon}</b>\n\n"
         f"1. <b>Free Button:</b> <code>{html.escape(btn_free)}</code>\n"
         f"2. <b>Play Video Button:</b> <code>{html.escape(btn_paid)}</code>\n"
         f"3. <b>Guide Button:</b> <code>{html.escape(btn_guide)}</code>\n"
         f"4. <b>Backup Button:</b> <code>{html.escape(btn_backup)}</code>\n\n"
-        "<i>Click below to edit any button label:</i>"
+        "<i>Click below to toggle buttons or edit labels:</i>"
     )
 
     markup = InlineKeyboardMarkup()
     markup.row(
-        InlineKeyboardButton(f"🔘 Buttons Status: {'🟢 Turn OFF' if sw_btns else '🔴 Turn ON'}", callback_data=f"tgl_btn_master:{next_btns}")
+        InlineKeyboardButton(f"🔘 All Buttons: {'🟢 Turn OFF' if sw_btns else '🔴 Turn ON'}", callback_data=f"tgl_btn_master:{next_btns}"),
+        InlineKeyboardButton(f"🎬 Free Btn: {free_status_icon}", callback_data=f"tgl_tb_free:{next_free}")
     )
     markup.row(
         InlineKeyboardButton("✏️ Edit Free Label", callback_data="act:edit_btn:BUTTON_TERABOX_FREE_TEXT"),
@@ -2187,6 +2716,35 @@ def build_scheduler_menu() -> Tuple[str, InlineKeyboardMarkup]:
         InlineKeyboardButton("🗑️ Clear Queue", callback_data="sched:clear_queue")
     )
     markup.row(InlineKeyboardButton("🔙 Back to Dashboard", callback_data="nav:main"))
+    return text, markup
+
+def build_flush_options_menu() -> Tuple[str, InlineKeyboardMarkup]:
+    q_count = get_scheduled_queue_count()
+    text = (
+        "🚀 <b>Post Now — Select Flush Count</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📦 <b>বর্তমানে কিউতে জমা মোট পোস্ট:</b> <code>{q_count} Posts</code>\n\n"
+        "এখন আপনি চ্যানেলটিতে কতটি পোস্ট পাঠাতে চান? সব পোস্ট পাঠাতে চান নাকি নির্দিষ্ট কোনো সংখ্যা নির্ধারণ করতে চান?\n\n"
+        "<i>নিচের অপশনগুলোর মধ্যে যেকোনো একটি নির্বাচন করুন:</i>"
+    )
+    markup = InlineKeyboardMarkup()
+    all_label = f"🌟 All Posts ({q_count}টি সব)" if q_count > 0 else "🌟 All Posts"
+    markup.row(InlineKeyboardButton(all_label, callback_data="sched:flush_run:all"))
+    markup.row(
+        InlineKeyboardButton("5 Posts", callback_data="sched:flush_run:5"),
+        InlineKeyboardButton("10 Posts", callback_data="sched:flush_run:10"),
+        InlineKeyboardButton("20 Posts", callback_data="sched:flush_run:20")
+    )
+    markup.row(
+        InlineKeyboardButton("50 Posts", callback_data="sched:flush_run:50"),
+        InlineKeyboardButton("100 Posts", callback_data="sched:flush_run:100")
+    )
+    markup.row(
+        InlineKeyboardButton("✏️ Custom Number (কাস্টম সংখ্যা)", callback_data="sched:flush_custom")
+    )
+    markup.row(
+        InlineKeyboardButton("🔙 Back to Queue Menu", callback_data="nav:scheduler")
+    )
     return text, markup
 
 class TgLoginManager:
@@ -2513,43 +3071,77 @@ def language_selection_markup(referrer_id=None):
 
 def is_account_button(text):
     if not text: return False
-    return any(k.lower() in text.lower() for k in ["my account", "account overview", "account", "আমার অ্যাকাউন্ট", "অ্যাকাউন্ট", "अकाउंट"])
+    t = text.strip().lower()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["my account", "account overview", "আমার অ্যাকাউন্ট", "অ্যাকাউন্ট", "अकाउंट"])
 
 def is_refer_button(text):
     if not text: return False
-    return any(k.lower() in text.lower() for k in ["refer & earn", "refer", "invite & earn", "invite", "রেফার", "ইনভাইট", "रेफर"])
+    t = text.strip().lower()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["refer & earn", "invite & earn", "রেফার", "ইনভাইট", "रेफर"])
 
 def is_buy_button(text):
     if not text: return False
-    return any(k.lower() in text.lower() for k in ["buy subscription", "upgrade vip", "buy vip", "vip", "subscription", "plan", "plans", "সাবস্ক্রিপশন", "প্ল্যান", "সব্সक्रिप्शन"])
+    t = text.strip().lower()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["buy subscription", "upgrade vip", "buy vip", "সাবস্ক্রিপশন", "সব্সक्रिप्शन"])
 
 def is_backup_button(text):
     if not text: return False
-    return any(k.lower() in text.lower() for k in ["backup channel", "join backup channel", "backup", "ব্যাকআপ", "बैकअप"])
+    t = text.strip().lower()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["backup channel", "join backup channel", "ব্যাকআপ চ্যানেল", "ব্যাকআপ", "बैकअप"])
 
 def is_contact_button(text):
     if not text: return False
-    return any(k.lower() in text.lower() for k in ["contact admin", "contact", "যোগাযোগ", "সম্পর্ক", "संपर्क"])
+    t = text.strip().lower()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["contact admin", "যোগাযোগ", "সম্পর্ক", "संपर्क"])
 
 def is_lang_button(text):
     if not text: return False
-    return any(k.lower() in text.lower() for k in ["language", "ভাষা", "भाषा"])
+    t = text.strip().lower()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["language", "change language", "ভাষা পরিবর্তন", "ভাষা", "भाषा"])
 
 def is_user_stats_button(text):
-    return any(k in text for k in ["User List & Stats", "User Stats", "ইউজার লিস্ট"])
+    if not text: return False
+    t = text.strip()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["User List & Stats", "User Stats", "ইউজার লিস্ট"])
 
 def is_controller_button(text):
     if not text: return False
-    return any(k in text for k in ["Channel Controller", "চ্যানেল কন্ট্রোলার", "Forwarder", "ফরওয়ার্ডার"])
+    t = text.strip()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["Channel Controller", "চ্যানেল কন্ট্রোলার", "Forwarder", "ফরওয়ার্ডার"])
 
 def is_scheduler_button(text):
     if not text: return False
-    return any(k in text for k in ["Post Scheduler", "শিডিউল পোস্ট", "পোস্ট শিডিউলার", "Scheduler"])
+    t = text.strip()
+    if t.startswith("http://") or t.startswith("https://") or t.startswith("t.me/") or t.startswith("@"):
+        return False
+    return any(k in t for k in ["Post Scheduler", "শিডিউল পোস্ট", "পোস্ট শিডিউলার", "Scheduler"])
 
 def is_menu_navigation(text):
     if not text:
         return False
     t = text.strip()
+    # URLs, usernames, telegram links, numbers, negative IDs, or link text are NEVER menu navigation buttons!
+    if (t.startswith("http://") or t.startswith("https://") or 
+        t.startswith("t.me/") or "t.me/" in t or 
+        t.startswith("@") or t.startswith("-100") or 
+        t.lstrip("-").isdigit()):
+        return False
     if t.startswith('/'):
         return True
     return (
@@ -2930,73 +3522,16 @@ def handle_direct_video_watch(message, vid_id):
     user_id = message.from_user.id
     username = message.from_user.username or message.from_user.first_name or "User"
     mark_user_blocked(user_id, False)
-    
+
     # 1. Register user if not exists
     user = get_user(user_id)
     if not user:
         register_user(user_id, username)
         user = get_user(user_id)
-        
-    # 2. Check force-join channel membership
-    if not is_user_in_chat(user_id):
-        invite_link = get_target_group_link()
-        markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton(text="📢 Join Required Channel", url=invite_link))
-        bot_username = get_bot_username()
-        markup.add(InlineKeyboardButton(text="✅ Joined! Watch Video", url=f"https://t.me/{bot_username}?start=v_{vid_id}"))
-        bot.send_message(
-            message.chat.id,
-            "⚠️ **Channel Membership Required!**\n\n"
-            "এই ভিডিওটি ইনবিল্ট মিনি অ্যাপে দেখতে হলে প্রথমে আমাদের চ্যানেলে জয়েন করুন। জয়েন করার পর নিচের **'Joined! Watch Video'** বাটনে চাপ দিন।",
-            reply_markup=markup,
-            parse_mode="Markdown"
-        )
-        return
 
-    # 3. Check Subscription & Credits
-    is_paid = check_paid_status(user_id)
-    curr_credits = user[2] if user else 0
-    if not is_paid and curr_credits <= 0:
-        markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton(text="💳 Buy VIP Subscription", callback_data="buy_plan"))
-        markup.add(InlineKeyboardButton(text="🎁 Refer Friends for Credits", callback_data="refer_earn"))
-        bot.send_message(
-            message.chat.id,
-            "⚠️ **আপনার ফ্রি ক্রেডিট শেষ হয়ে গেছে!**\n\n"
-            "ইনবিল্ট মিনি অ্যাপে আনলিমিটেড ভিডিও দেখতে ভিআইপি সাবস্ক্রিপশন নিন অথবা বন্ধুদের রেফার করে ফ্রি ক্রেডিট আর্ন করুন।",
-            reply_markup=markup,
-            parse_mode="Markdown"
-        )
-        return
-
-    # 4. Fetch Video Info from Cache or API
+    # 2. Immediate feedback and Auto-Heal video stream FIRST!
     status_msg = bot.send_message(message.chat.id, "⚡ **Preparing Mini App Video Player...**", parse_mode="Markdown")
-    cached = get_cached_video(vid_id)
-    
-    stream_url = None
-    title = "TeraBox Video"
-    size = "Unknown"
-    resolution = "Auto"
-    duration = "--"
-    file_type = "Video"
-    
-    if cached and cached[0]:
-        stream_url = cached[0]
-        title = cached[1] or title
-        size = cached[2] or size
-        resolution = cached[3] or resolution
-        duration = cached[4] or duration
-        file_type = cached[5] or file_type
-    else:
-        target_url = cached[6] if (cached and cached[6]) else f"https://1024terabox.com/s/{vid_id}"
-        t, dl, sz, res, dur, ft = get_terabox_media(target_url)
-        if dl:
-            stream_url = dl
-            title = t or title
-            size = sz or size
-            resolution = res or resolution
-            duration = dur or duration
-            file_type = ft or file_type
+    stream_url, title, size, resolution, duration, file_type, terabox_url = get_or_refresh_video_stream(vid_id, force_refresh=True)
 
     if not stream_url:
         bot.edit_message_text(
@@ -3006,22 +3541,59 @@ def handle_direct_video_watch(message, vid_id):
         )
         return
 
-    # 5. Check if already watched (prevent duplicate deduction)
+    # 3. Check multi-channel membership gate
+    sec_check = check_user_all_memberships(user_id)
+    if not sec_check["can_play"]:
+        markup = InlineKeyboardMarkup()
+        bot_username = get_bot_username()
+        if not sec_check["target_channel_joined"]:
+            markup.add(InlineKeyboardButton(text="📢 Join Main Channel", url=sec_check["target_channel_link"]))
+        if not sec_check["backup_channel_joined"] and sec_check["backup_channel_link"]:
+            markup.add(InlineKeyboardButton(text="📢 Join Backup Channel", url=sec_check["backup_channel_link"]))
+        markup.add(InlineKeyboardButton(text="🔄 Joined! Verify & Watch", url=f"https://t.me/{bot_username}?start=v_{vid_id}"))
+        
+        missing_reasons = []
+        if not sec_check["target_channel_joined"]:
+            missing_reasons.append("• মেইন চ্যানেলে জয়েন থাকতে হবে")
+        if not sec_check["backup_channel_joined"]:
+            missing_reasons.append("• ব্যাকআপ চ্যানেলে জয়েন থাকতে হবে")
+        if not sec_check["bot_started"] or sec_check["is_blocked"]:
+            missing_reasons.append("• বটে /start দিয়ে আনব্লক থাকতে হবে")
+        
+        reason_txt = "\n".join(missing_reasons)
+        bot.edit_message_text(
+            f"⚠️ **Access Locked / Membership Required!**\n\n"
+            f"এই ভিডিওটি দেখতে হলে নিচের শর্তগুলো পূরণ করুন:\n{reason_txt}\n\n"
+            f"জয়েন করার পর নিচের **'Joined! Verify & Watch'** বাটনে চাপ দিন।",
+            chat_id=message.chat.id,
+            message_id=status_msg.message_id,
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
+        return
+
+    # 4. Check Subscription, Already Unlocked status, and Credits (Never block!)
+    is_paid = check_paid_status(user_id)
     already_unlocked = has_watched_video(user_id, vid_id)
-    if not is_paid:
-        if already_unlocked:
-            user = get_user(user_id)
-            rem_balance = f"{user[2]} Credits (Already Unlocked)"
-        else:
-            update_credits(user_id, -1)
-            mark_watched_video(user_id, vid_id)
-            user = get_user(user_id)
-            rem_balance = f"{user[2]} Credits"
-    else:
+    curr_credits = user[2] if user else 0
+    is_ad_mode = False
+
+    if is_paid:
         mark_watched_video(user_id, vid_id)
         rem_balance = "Unlimited (VIP Active)"
+    elif already_unlocked:
+        rem_balance = f"{curr_credits} Credits (Already Unlocked)"
+    elif curr_credits > 0:
+        update_credits(user_id, -1)
+        mark_watched_video(user_id, vid_id)
+        user = get_user(user_id)
+        rem_balance = f"{user[2]} Credits"
+    else:
+        # User has 0 credits and is not VIP: Enable Free Ad Mode playback!
+        is_ad_mode = True
+        rem_balance = "0 Credits (Ad Supported)"
 
-    # 6. Build Mini App Player URL
+    # 5. Build Mini App Player URL
     encoded_stream_url = quote(stream_url, safe='')
     encoded_title = quote(title, safe='')
     encoded_size = quote(size, safe='')
@@ -3030,6 +3602,7 @@ def handle_direct_video_watch(message, vid_id):
     encoded_type = quote(file_type, safe='')
     
     u_lang = get_user_lang(user_id) or "bn"
+    ad_param = "&mode=ad" if is_ad_mode else ""
     player_url = (
         f"{MY_PLAYER_URL}?"
         f"src={encoded_stream_url}&"
@@ -3039,16 +3612,28 @@ def handle_direct_video_watch(message, vid_id):
         f"dur={encoded_dur}&"
         f"type={encoded_type}&"
         f"lang={u_lang}"
+        f"{ad_param}"
     )
 
     markup = InlineKeyboardMarkup()
-    play_btn_app = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_app"), web_app=WebAppInfo(url=player_url))
-    markup.add(play_btn_app)
+    if is_ad_mode:
+        play_btn_text = "🎬 Watch Video (Ad Supported)" if u_lang == "en" else "🎬 ভিডিও দেখুন (ফ্রি অ্যাড সমর্থিত)"
+        markup.add(InlineKeyboardButton(text=play_btn_text, web_app=WebAppInfo(url=player_url)))
+        markup.add(InlineKeyboardButton(text="💎 Buy VIP (Ad-Free)", callback_data="buy_plan"))
+        markup.add(InlineKeyboardButton(text="🎁 Refer Friends (+2 Credits)", callback_data="refer_earn"))
+    else:
+        play_btn_app = InlineKeyboardButton(text=get_txt(user_id, "btn_open_player_app"), web_app=WebAppInfo(url=player_url))
+        markup.add(play_btn_app)
 
     clean_t = clean_text_for_markdown(title)
     clean_s = clean_text_for_markdown(size)
     clean_r = clean_text_for_markdown(resolution)
     clean_d = clean_text_for_markdown(duration)
+
+    if is_ad_mode:
+        prompt_txt = "💡 আপনার ফ্রি ক্রেডিট শেষ হয়ে গেছে, তবে আপনি বিজ্ঞাপন দেখে বিনামূল্যে সম্পূর্ণ ভিডিওটি দেখতে পারবেন:" if u_lang == "bn" else "💡 You have 0 credits, but you can watch this video for free with sponsored ads:"
+    else:
+        prompt_txt = get_txt(user_id, 'stream_play_prompt')
 
     reply_text = (
         f"🎬 *Title:* {clean_t}\n"
@@ -3056,7 +3641,7 @@ def handle_direct_video_watch(message, vid_id):
         f"⚡ *Resolution:* {clean_r}\n"
         f"⏱️ *Duration:* {clean_d}\n"
         f"💳 *Remaining Balance:* {rem_balance}\n\n"
-        f"{get_txt(user_id, 'stream_play_prompt')}"
+        f"{prompt_txt}"
     )
 
     bot.edit_message_text(
@@ -3076,10 +3661,16 @@ def send_welcome(message):
     mark_user_blocked(user_id, False)
     
     command_args = message.text.split()
-    if len(command_args) > 1 and command_args[1].startswith("v_"):
-        vid_id = command_args[1][2:]
-        handle_direct_video_watch(message, vid_id)
-        return
+    if len(command_args) > 1:
+        param = command_args[1]
+        if param.startswith("v_"):
+            vid_id = param[2:]
+            handle_direct_video_watch(message, vid_id)
+            return
+        elif (len(param) >= 6 and not param.isdigit() and
+              param.lower() not in ["buy_vip", "plan", "vip", "buy", "upgrade", "update_plan", "plans", "refer", "invite", "ref", "invite_friends"]):
+            handle_direct_video_watch(message, param)
+            return
 
     # Direct button routing for Upgrade VIP and Invite
     if len(command_args) > 1:
@@ -3802,6 +4393,31 @@ def process_setting_update(message, setting_key, prompt_msg_id=None):
             to_delete.append(prompt_msg_id)
         auto_delete_after(message.chat.id, to_delete, 5)
         return
+    elif setting_key == "backup_channel_link":
+        if not (new_val.startswith("http://") or new_val.startswith("https://")):
+            if new_val.startswith("@"):
+                new_val = f"https://t.me/{new_val[1:]}"
+            elif new_val.startswith("t.me/"):
+                new_val = f"https://{new_val}"
+            else:
+                new_val = f"https://t.me/{new_val}"
+        set_setting("backup_channel_link", new_val)
+        update_env({"BACKUP_CHANNEL_LINK": new_val, "BACKUP_CHANNEL": new_val})
+        if "t.me/" in new_val:
+            raw_handle = new_val.split("t.me/")[-1].replace("/", "").strip()
+            if not raw_handle.startswith("+"):
+                try:
+                    chat = bot.get_chat(f"@{raw_handle}")
+                    set_setting("backup_channel_id", str(chat.id))
+                    update_env({"BACKUP_CHANNEL_ID": str(chat.id)})
+                except Exception:
+                    pass
+        rep = bot.reply_to(message, f"✅ **Backup Channel Link** successfully updated to:\n`{clean_text_for_markdown(new_val)}`", parse_mode="Markdown")
+        to_delete = [rep.message_id, message.message_id]
+        if prompt_msg_id:
+            to_delete.append(prompt_msg_id)
+        auto_delete_after(message.chat.id, to_delete, 5)
+        return
 
     set_setting(setting_key, new_val)
     friendly_key = setting_key.replace('_', ' ').title()
@@ -4065,7 +4681,21 @@ def cb_refer_earn(call):
 @bot.message_handler(func=lambda msg: bool(msg.text and is_backup_button(msg.text)))
 def backup_channel_info(message):
     user_id = message.from_user.id
-    backup_link = get_setting("backup_channel_link") or "https://t.me/"
+    backup_link = get_setting("backup_channel_link") or ""
+    dummy_bk = ["https://t.me/your_backup_channel", "https://t.me/", "", "None", None, "your_backup_channel"]
+    if not backup_link or backup_link in dummy_bk or "your_backup_channel" in backup_link.lower():
+        env_bk = read_env().get("BACKUP_CHANNEL_LINK") or read_env().get("BACKUP_CHANNEL") or ""
+        if env_bk and env_bk not in dummy_bk and "your_backup_channel" not in env_bk.lower():
+            backup_link = env_bk
+        else:
+            backup_link = get_setting("target_channel_link") or "https://t.me/"
+    if not (backup_link.startswith("http://") or backup_link.startswith("https://")):
+        if backup_link.startswith("@"):
+            backup_link = f"https://t.me/{backup_link[1:]}"
+        elif backup_link.startswith("t.me/"):
+            backup_link = f"https://{backup_link}"
+        else:
+            backup_link = f"https://t.me/{backup_link}"
     
     text = (
         f"{get_txt(user_id, 'backup_title')}\n\n"
@@ -4331,65 +4961,6 @@ def handle_message(message):
             else:
                 auto_delete_after(message.chat.id, status_msg.message_id, 5)
 
-def push_users_json_to_gh():
-    token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
-    hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
-    url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json?ref=data"
-    put_url = "https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/users.json"
-    
-    for attempt in range(3):
-        try:
-            if not os.path.exists('users.json'):
-                return
-            with open('users.json', 'r', encoding='utf-8') as f:
-                content = f.read()
-            b64 = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-            r_get = requests.get(url, headers=hdrs, timeout=8)
-            sha = r_get.json().get('sha') if r_get.status_code == 200 else None
-            p = {'message': 'Sync users.json', 'content': b64, 'branch': 'data'}
-            if sha:
-                p['sha'] = sha
-            res = requests.put(put_url, headers=hdrs, json=p, timeout=8)
-            if res.status_code in [200, 201]:
-                print(f"[SUCCESS] Pushed users.json to GH data branch (HTTP {res.status_code})")
-                return
-            else:
-                print(f"[WARNING] Push users.json attempt {attempt+1} got HTTP {res.status_code}")
-                time.sleep(1)
-        except Exception as e:
-            print(f"[ERROR] Error pushing users.json to GH (attempt {attempt+1}): {e}")
-            time.sleep(1)
-
-def sync_users_json():
-    try:
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        rows = c.execute('SELECT user_id, username, credits, is_paid, paid_expiry, language, is_blocked FROM users').fetchall()
-        try:
-            watched_rows = c.execute('SELECT user_id, video_id FROM watched_videos').fetchall()
-        except Exception:
-            watched_rows = []
-        conn.close()
-        watched_map = {}
-        for uid, vid in watched_rows:
-            watched_map.setdefault(str(uid), []).append(vid)
-        data = {
-            str(r[0]): {
-                'username': r[1],
-                'credits': r[2],
-                'is_paid': r[3],
-                'paid_expiry': r[4],
-                'lang': r[5] or 'bn',
-                'is_blocked': bool(r[6]),
-                'watched': watched_map.get(str(r[0]), [])
-            } for r in rows
-        }
-        with open('users.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2)
-        threading.Thread(target=push_users_json_to_gh, daemon=True).start()
-    except Exception as e:
-        print(f"Error syncing users.json: {e}")
-
 
 def handle_sticker_upload(message):
     uid = message.from_user.id
@@ -4612,7 +5183,15 @@ def handle_admin_text(message):
         key = meta.get("key")
         if key:
             update_env({key: text_val})
-            bot.reply_to(message, f"✅ <b>{key} সফলভাবে আপডেট করা হয়েছে:</b> <code>{text_val}</code>\n<i>সতর্কতা: ইঞ্জিন রিস্টার্ট করলে নতুন ক্রেডেনশিয়াল কার্যকর হবে।</i>", parse_mode="HTML")
+            if key in ("DISPATCH_BOT_TOKEN", "BOT_TOKEN"):
+                new_uname = fetch_bot_username_from_token(text_val, sync_to_env=True)
+                update_env({
+                    "DISPATCH_BOT_USERNAME": new_uname,
+                    "BOT_USERNAME": new_uname
+                })
+                bot.reply_to(message, f"✅ <b>{key} সফলভাবে আপডেট করা হয়েছে:</b> <code>{text_val}</code>\n🤖 <b>স্বয়ংক্রিয়ভাবে সনাক্তকৃত বট ইউজারনেম:</b> <code>@{new_uname}</code>\n<i>সতর্কতা: ইঞ্জিন রিস্টার্ট করলে নতুন ক্রেডেনশিয়াল কার্যকর হবে।</i>", parse_mode="HTML")
+            else:
+                bot.reply_to(message, f"✅ <b>{key} সফলভাবে আপডেট করা হয়েছে:</b> <code>{text_val}</code>\n<i>সতর্কতা: ইঞ্জিন রিস্টার্ট করলে নতুন ক্রেডেনশিয়াল কার্যকর হবে।</i>", parse_mode="HTML")
         clear_admin_state(message.from_user.id)
         t, m = build_credentials_menu()
         bot.send_message(message.chat.id, t, reply_markup=m, parse_mode="HTML")
@@ -5059,12 +5638,30 @@ def handle_controller_callbacks(call):
             parse_mode="HTML"
         )
 
+    elif data == "act:purge_output_prompt":
+        t, m = build_purge_output_confirm_menu()
+        safe_edit_message(call, t, m)
+        bot.answer_callback_query(call.id)
+
+    elif data == "act:do_purge_output":
+        bot.answer_callback_query(call.id, "Purge started...")
+        execute_output_channel_purge(call)
+
     elif data.startswith("tgl_btn_master:"):
         next_val = data.split(":")[1]
         update_env({"POST_LINKS_AS_BUTTONS": next_val})
         if mgr.engine and hasattr(mgr.engine, "config"):
             mgr.engine.config["post_links_as_buttons"] = (next_val.lower() == "true")
         bot.answer_callback_query(call.id, f"Buttons status set to {next_val}")
+        t, m = build_btn_texts_menu()
+        safe_edit_message(call, t, m)
+
+    elif data.startswith("tgl_tb_free:"):
+        next_val = data.split(":")[1]
+        update_env({"BUTTON_TERABOX_FREE_ENABLED": next_val})
+        if mgr.engine and hasattr(mgr.engine, "config"):
+            mgr.engine.config["button_terabox_free_enabled"] = (next_val.lower() == "true")
+        bot.answer_callback_query(call.id, f"Watch Video (Free) Button is now {'ON' if next_val == 'True' else 'OFF'}", show_alert=True)
         t, m = build_btn_texts_menu()
         safe_edit_message(call, t, m)
 
@@ -5515,7 +6112,8 @@ def _async_extract_and_send(message, raw_url: str, extract_fn):
         vid_id = m_code.group(1)
 
     player_url = build_player_url(stream_url, title, size, resolution, duration, file_type)
-    bot_deep_link = f"https://t.me/leadox_bot?start={vid_id}"
+    b_uname = get_bot_username()
+    bot_deep_link = f"https://t.me/{b_uname}?startapp={vid_id}"
 
     env = read_env()
     btn_free = env.get("BUTTON_TERABOX_FREE_TEXT", "🎬 Watch Video (Free)")
@@ -5528,9 +6126,18 @@ def _async_extract_and_send(message, raw_url: str, extract_fn):
         InlineKeyboardButton(btn_free, url=raw_url),
         InlineKeyboardButton(btn_paid, url=bot_deep_link)
     )
+    bk_url = get_setting("backup_channel_link") or env.get("BACKUP_CHANNEL_LINK") or env.get("BACKUP_CHANNEL") or get_setting("target_channel_link") or "https://t.me/"
+    if "your_backup_channel" in bk_url or "your_channel" in bk_url:
+        bk_url = get_setting("target_channel_link") or "https://t.me/"
+    if not (bk_url.startswith("http://") or bk_url.startswith("https://")):
+        bk_url = f"https://t.me/{bk_url.lstrip('@')}"
+    guide_url = get_setting("target_channel_link") or "https://t.me/"
+    if not (guide_url.startswith("http://") or guide_url.startswith("https://")):
+        guide_url = f"https://t.me/{guide_url.lstrip('@')}"
+
     markup.row(
-        InlineKeyboardButton(btn_backup, url="https://t.me/your_channel"),
-        InlineKeyboardButton(btn_guide, url="https://t.me/your_channel")
+        InlineKeyboardButton(btn_backup, url=bk_url),
+        InlineKeyboardButton(btn_guide, url=guide_url)
     )
 
     caption = (
@@ -5586,13 +6193,52 @@ def handle_scheduler_callbacks(call):
         t, m = build_scheduler_menu()
         safe_edit_message(call, t, m)
     elif data == "sched:flush_now":
-        posted = scheduler_service.flush_target_count(100)
-        bot.answer_callback_query(call.id, f"Flushed {posted} posts!", show_alert=True)
+        t, m = build_flush_options_menu()
+        safe_edit_message(call, t, m)
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
+    elif data.startswith("sched:flush_run:"):
+        opt = data.split(":")[2]
+        total_avail = get_scheduled_queue_count()
+        if opt == "all":
+            cnt = total_avail if total_avail > 0 else 999999
+            msg_alert = f"🚀 কিউতে থাকা সব ({total_avail}টি) পোস্ট ব্যাকগ্রাউন্ডে পাঠানো শুরু হয়েছে!"
+        else:
+            cnt = int(opt)
+            msg_alert = f"🚀 কিউ থেকে {cnt}টি পোস্ট ব্যাকগ্রাউন্ডে পাঠানো শুরু হয়েছে!"
+        try:
+            bot.answer_callback_query(call.id, msg_alert, show_alert=True)
+        except Exception:
+            pass
+        threading.Thread(target=scheduler_service.flush_target_count, args=(cnt,), daemon=True).start()
         t, m = build_scheduler_menu()
         safe_edit_message(call, t, m)
+    elif data == "sched:flush_custom":
+        set_admin_state(uid, "WAIT_FLUSH_CUSTOM_COUNT")
+        q_count = get_scheduled_queue_count()
+        try:
+            bot.answer_callback_query(call.id)
+        except Exception:
+            pass
+        cancel_kb = InlineKeyboardMarkup().row(InlineKeyboardButton("❌ Cancel", callback_data="cancel_admin_input"))
+        bot.send_message(
+            call.message.chat.id,
+            f"✏️ <b>কাস্টম পোস্ট সংখ্যা নির্ধারণ / Enter Custom Post Count</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📦 <b>বর্তমানে কিউতে জমা আছে:</b> <code>{q_count} Posts</code>\n\n"
+            f"একবারে কতটি পোস্ট পাবলিশ করতে চান তা লিখে পাঠান (যেমন: <code>15</code> বা <code>30</code>):\n\n"
+            f"<i>বাতিল করতে নিচের বাটনে চাপ দিন বা /cancel লিখুন।</i>",
+            reply_markup=cancel_kb,
+            parse_mode="HTML"
+        )
     elif data == "sched:clear_queue":
         clear_scheduled_queue()
-        bot.answer_callback_query(call.id, "Queue cleared!", show_alert=True)
+        try:
+            bot.answer_callback_query(call.id, "Queue cleared!", show_alert=True)
+        except Exception:
+            pass
         t, m = build_scheduler_menu()
         safe_edit_message(call, t, m)
 
@@ -5602,45 +6248,56 @@ def handle_scheduler_callbacks(call):
 # -------------------------------------------------------------
 @bot.callback_query_handler(func=lambda call: True)
 def master_callback_router(call):
-    data = call.data
-    uid = call.from_user.id
+    try:
+        data = call.data
+        uid = call.from_user.id
 
-    # 1. Customer actions (all users)
-    if data.startswith("set_lang_"):
-        set_language_callback(call)
-        return
-    elif data.startswith("verify_join_"):
-        verify_join_callback(call)
-        return
-    elif data in ["buy_plan", "buy_vip", "upgrade_vip"]:
-        cb_buy_plan(call)
-        return
-    elif data in ["refer_earn", "invite", "refer"]:
-        cb_refer_earn(call)
-        return
+        # 1. Customer actions (all users)
+        if data.startswith("set_lang_"):
+            set_language_callback(call)
+            return
+        elif data.startswith("verify_join_"):
+            verify_join_callback(call)
+            return
+        elif data in ["buy_plan", "buy_vip", "upgrade_vip"]:
+            cb_buy_plan(call)
+            return
+        elif data in ["refer_earn", "invite", "refer"]:
+            cb_refer_earn(call)
+            return
 
-    # 2. Admin actions
-    if not is_admin(uid):
-        bot.answer_callback_query(call.id, "Access Denied!", show_alert=True)
-        return
+        # 2. Admin actions
+        if not is_admin(uid):
+            try:
+                bot.answer_callback_query(call.id, "Access Denied!", show_alert=True)
+            except Exception:
+                pass
+            return
 
-    if data.startswith("reply_to_"):
-        handle_reply_to_user(call)
-        return
-    elif data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"] or (data in ADMIN_SETTING_KEYS):
-        handle_admin_callbacks(call)
-        return
-    elif data.startswith("sched:") or data == "nav:scheduler":
-        handle_scheduler_callbacks(call)
-        return
-    elif data.startswith("act:quick_add_src:") or data.startswith("act:quick_set_out:"):
-        handle_quick_actions(call)
-        return
-    elif data.startswith("nav:") or data.startswith("act:") or data.startswith("tgl_") or data.startswith("tgl:"):
-        handle_controller_callbacks(call)
-        return
-    else:
-        handle_controller_callbacks(call)
+        if data.startswith("reply_to_"):
+            handle_reply_to_user(call)
+            return
+        elif data in ["btn_add_paid", "btn_find_id", "btn_broadcast", "btn_user_list", "btn_close_admin_panel", "cancel_admin_input", "btn_admin_lang", "btn_add_credits", "btn_deduct_credits", "btn_set_credits"] or (data in ADMIN_SETTING_KEYS):
+            handle_admin_callbacks(call)
+            return
+        elif data.startswith("sched:") or data == "nav:scheduler":
+            handle_scheduler_callbacks(call)
+            return
+        elif data.startswith("act:quick_add_src:") or data.startswith("act:quick_set_out:"):
+            handle_quick_actions(call)
+            return
+        elif data.startswith("nav:") or data.startswith("act:") or data.startswith("tgl_") or data.startswith("tgl:"):
+            handle_controller_callbacks(call)
+            return
+        else:
+            handle_controller_callbacks(call)
+    except ApiTelegramException as ate:
+        if "query is too old" in str(ate).lower() or "query id is invalid" in str(ate).lower():
+            pass
+        else:
+            push_log("WARNING", f"Callback query API note: {ate}")
+    except Exception as e:
+        push_log("ERROR", f"Callback router error: {e}")
 
 # -------------------------------------------------------------
 # MASTER UNIFIED MESSAGE HANDLER & DISPATCHER
@@ -5697,6 +6354,18 @@ def master_message_dispatcher(message):
                 bot.reply_to(message, f"✅ Schedule added: {t_str.upper()} ({count} posts)")
             else:
                 bot.reply_to(message, "❌ Invalid format! Use: `10:30 PM 10`")
+            t_m, m_m = build_scheduler_menu()
+            bot.send_message(message.chat.id, t_m, reply_markup=m_m, parse_mode="HTML")
+            return
+        elif st == "WAIT_FLUSH_CUSTOM_COUNT":
+            clear_admin_state(uid)
+            val_str = txt.strip()
+            if val_str.isdigit() and int(val_str) > 0:
+                count = int(val_str)
+                bot.reply_to(message, f"🚀 কিউ থেকে {count}টি পোস্ট ব্যাকগ্রাউন্ডে পাঠানো শুরু হয়েছে!")
+                threading.Thread(target=scheduler_service.flush_target_count, args=(count,), daemon=True).start()
+            else:
+                bot.reply_to(message, "❌ অনুগ্রহ করে একটি সঠিক সংখ্যা লিখে পাঠান (যেমন: 15 বা 30)।")
             t_m, m_m = build_scheduler_menu()
             bot.send_message(message.chat.id, t_m, reply_markup=m_m, parse_mode="HTML")
             return
@@ -5783,32 +6452,36 @@ def start_render_health_server():
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+                self.send_header("Pragma", "no-cache")
+                self.send_header("Expires", "0")
                 self.end_headers()
                 if uid:
                     try:
                         uid_int = int(uid)
                         u = get_user(uid_int)
+                        
+                        # Full comprehensive security check across all 3 criteria
+                        sec = check_user_all_memberships(uid_int)
+                        user_blocked = sec["is_blocked"]
+
                         is_p = check_paid_status(uid_int)
                         cr = u[2] if u else 0
                         already = False
                         if vid:
                             already = has_watched_video(uid_int, vid)
 
-                        user_blocked = is_user_blocked(uid_int) or (u is None)
-                        if u and not user_blocked:
-                            try:
-                                bot.send_chat_action(uid_int, 'typing')
-                            except Exception as act_err:
-                                err_str = str(act_err).lower()
-                                err_code = getattr(act_err, 'error_code', None)
-                                if err_code == 403 or "blocked" in err_str or "deactivated" in err_str or "can't initiate" in err_str or "chat not found" in err_str or "forbidden" in err_str:
-                                    user_blocked = True
-                                    mark_user_blocked(uid_int, True)
-
                         self.wfile.write(json.dumps({
                             "ok": True,
-                            "exists": u is not None,
+                            "exists": u is not None or not user_blocked,
                             "is_blocked": user_blocked,
+                            "is_joined_channel": sec["target_channel_joined"],
+                            "is_joined_backup": sec["backup_channel_joined"],
+                            "is_bot_started": sec["bot_started"],
+                            "can_play": sec["can_play"],
+                            "target_channel_link": sec["target_channel_link"],
+                            "backup_channel_link": sec["backup_channel_link"],
+                            "missing": sec["missing"],
                             "bot_username": get_bot_username(),
                             "is_paid": 1 if is_p else 0,
                             "credits": cr,
@@ -5907,12 +6580,21 @@ def start_render_health_server():
 
         def log_message(self, format, *args):
             pass
-    try:
-        server = http.server.HTTPServer(("0.0.0.0", port), HealthHandler)
-        push_log("SERVER", f"Render Health & Mini App Server listening on port {port}")
-        server.serve_forever()
-    except Exception as e:
-        push_log("WARNING", f"Health server error: {e}")
+    server = None
+    for p in [port, 8085, 8888, 5000]:
+        try:
+            server = http.server.HTTPServer(("0.0.0.0", p), HealthHandler)
+            push_log("SERVER", f"Render Health & Mini App Server listening on port {p}")
+            break
+        except Exception:
+            continue
+    if server:
+        try:
+            server.serve_forever()
+        except Exception as e:
+            push_log("WARNING", f"Health server error: {e}")
+    else:
+        push_log("WARNING", f"Could not bind health server on port {port} or fallbacks.")
 
 def publish_render_status():
     try:
@@ -5937,10 +6619,63 @@ def publish_render_status():
     except Exception as e:
         pass
 
+def check_internet_connection(timeout: float = 3.0) -> bool:
+    endpoints = [("1.1.1.1", 53), ("8.8.8.8", 53), ("api.telegram.org", 443)]
+    for host, port in endpoints:
+        try:
+            s = socket.create_connection((host, port), timeout=timeout)
+            s.close()
+            return True
+        except Exception:
+            continue
+    return False
+
+def wait_for_internet(interval: float = 5.0) -> None:
+    if check_internet_connection():
+        return
+    push_log("NETWORK", "⚠️ Internet connection unavailable. Waiting for connection to restore...")
+    while not check_internet_connection():
+        time.sleep(interval)
+    push_log("NETWORK", "🟢 Internet connection restored! Resuming operations...")
+
 # -------------------------------------------------------------
 # MAIN RUNNER
 # -------------------------------------------------------------
+def start_background_stream_healer():
+    """
+    Background daemon: Periodically scans the most recent cached channel videos.
+    If any stream link has expired (HTTP 403/404), it re-extracts the stream
+    using the backup TeraBox link and updates database & GitHub cache.
+    """
+    def _healer_loop():
+        time.sleep(15)  # Wait for startup
+        push_log("HEALER", "Background Stream Auto-Healer daemon started.")
+        while True:
+            try:
+                conn = sqlite3.connect('users.db')
+                c = conn.cursor()
+                # Check 100 most recent videos
+                rows = c.execute('SELECT video_id, stream_url, terabox_url FROM video_cache ORDER BY created_at DESC LIMIT 100').fetchall()
+                conn.close()
+
+                healed = 0
+                for vid_id, s_url, tb_url in rows:
+                    if s_url and not is_stream_url_alive(s_url):
+                        push_log("HEALER", f"Detected expired stream for {vid_id}. Auto-refreshing...")
+                        get_or_refresh_video_stream(vid_id)
+                        healed += 1
+                        time.sleep(2)
+                if healed > 0:
+                    push_log("HEALER", f"Successfully healed {healed} expired video streams.")
+            except Exception as e:
+                push_log("HEALER_ERR", f"Stream healer notice: {e}")
+            time.sleep(300)  # Scan every 5 minutes
+
+    threading.Thread(target=_healer_loop, daemon=True).start()
+
+
 if __name__ == '__main__':
+    wait_for_internet()
     push_log("STARTUP", "🚀 Starting Master All-In-One TeraStream Bot...")
     restore_users_from_gh()
     threading.Thread(target=publish_render_status, daemon=True).start()
@@ -5952,19 +6687,34 @@ if __name__ == '__main__':
 
     scheduler_service.start()
 
-    try:
-        cfg = mgr.build_config()
-        if cfg["api_id"] and cfg["api_hash"] and cfg["source_chats"]:
-            push_log("STARTUP", "Auto-starting integrated Channel Automation Engine...")
-            mgr.start()
-    except Exception as e:
-        push_log("WARNING", f"Engine auto-start note: {e}")
+    def start_engine_safely():
+        try:
+            cfg = mgr.build_config()
+            if cfg["api_id"] and cfg["api_hash"] and cfg["source_chats"]:
+                if not getattr(mgr, "is_running", False):
+                    push_log("STARTUP", "Auto-starting integrated Channel Automation Engine...")
+                    mgr.start()
+        except Exception as e:
+            push_log("WARNING", f"Engine auto-start note: {e}")
 
-    push_log("STARTUP", "Bot infinity polling starting...")
+    start_engine_safely()
+    start_background_stream_healer()
+
     allowed_upd = [
         "message", "edited_message", "channel_post", "edited_channel_post",
         "inline_query", "chosen_inline_result", "callback_query",
         "shipping_query", "pre_checkout_query", "poll", "poll_answer",
         "my_chat_member", "chat_member", "chat_join_request"
     ]
-    bot.infinity_polling(skip_pending=True, allowed_updates=allowed_upd)
+
+    while True:
+        try:
+            wait_for_internet()
+            start_engine_safely()
+            push_log("STARTUP", "Bot infinity polling starting...")
+            bot.infinity_polling(skip_pending=True, allowed_updates=allowed_upd, timeout=20, long_polling_timeout=20)
+        except Exception as e:
+            push_log("WARNING", f"Bot polling paused/interrupted: {e}")
+            wait_for_internet(5.0)
+            push_log("INFO", "Reconnecting bot...")
+            time.sleep(2)
