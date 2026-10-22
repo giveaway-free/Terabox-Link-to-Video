@@ -52,6 +52,13 @@
       "1suJlYlkaJDAzUIS0sSVWoA"
     ]
   },
+  "1462018967": {
+    "username": "immatureturd",
+    "credits": 5,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "watched": []
+  },
   "5361465032": {
     "username": "User_5361465032",
     "credits": 3,
@@ -552,13 +559,11 @@
   },
   "8980576385": {
     "username": "Anujedits97",
-    "credits": 2,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "watched": [
-      "1VLDBu3s4HoDeZBo5MBXzQQ",
-      "1mHWdaHfzHor9A2tXYiYMkQ",
-      "1ovDE_o8lCvYElCnjuvO6Hg"
+      "1VLDBu3s4HoDeZBo5MBXzQQ"
     ]
   }
 }
