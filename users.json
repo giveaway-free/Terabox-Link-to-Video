@@ -205,12 +205,14 @@
   },
   "6494214813": {
     "username": "User_6494214813",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1IwLdSXaOap2ruHgd2eeSHg"
+    ]
   },
   "6525538939": {
     "username": "Mohitdff",
