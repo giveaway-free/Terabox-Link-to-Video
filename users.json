@@ -187,12 +187,14 @@
   },
   "6001878502": {
     "username": "User_6001878502",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1AwpmVdoGIzzJLd7cifC_4g"
+    ]
   },
   "6087739585": {
     "username": "Sg_Darkness",
