@@ -465,12 +465,14 @@
   },
   "7680909403": {
     "username": "User_7680909403",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1kkuGDRKyk63ab8n37wwkaw"
+    ]
   },
   "7758628370": {
     "username": "Sohel",
