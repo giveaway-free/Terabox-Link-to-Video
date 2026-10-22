@@ -1955,8 +1955,8 @@
                         window.open(healUrl, '_blank');
                     }
 
-                    // 2. Poll GitHub for 10 seconds while bot processes it
-                    for (let p = 0; p < 8; p++) {
+                    // 2. Poll GitHub for 12 seconds while bot processes it
+                    for (let p = 0; p < 9; p++) {
                         await new Promise(r => setTimeout(r, 1200));
                         try {
                             const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
@@ -1978,6 +1978,12 @@
                                 }
                             }
                         } catch(e) {}
+                    }
+
+                    // 3. Fallback: If still on same URL, resume playback directly
+                    if (currentStreamUrl) {
+                        expBox.style.display = 'none';
+                        playVideo(currentStreamUrl, document.getElementById('video-title').innerText || "TeraBox Video", "Unknown", "HD", "--");
                     }
 
                     rBtn.disabled = false;
@@ -2044,26 +2050,45 @@
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
                 startPlaybackWithAd();
             });
+            let hlsMediaErrorRetries = 0;
+            let hlsNetworkRetries = 0;
+
             hls.on(Hls.Events.ERROR, function(event, data) {
-                // If 403 Forbidden or 404 / 410, link token has expired
+                // Explicit token expiration HTTP codes (403, 404, 410)
                 if (data.response && (data.response.code === 403 || data.response.code === 404 || data.response.code === 410)) {
+                    console.warn("Explicit stream token expired (HTTP " + data.response.code + "), triggering recovery");
                     triggerStreamExpiredRecovery(data);
                     return;
                 }
+
                 if (data.fatal) {
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
-                            if (streamLoadFailures >= 2) {
+                            hlsNetworkRetries++;
+                            if (hlsNetworkRetries > 3) {
+                                console.warn("HLS fatal network error after 3 retries, triggering recovery");
                                 triggerStreamExpiredRecovery(data);
                             } else {
-                                streamLoadFailures++;
-                                hls.startLoad();
+                                console.log("HLS network glitch, retrying " + hlsNetworkRetries + "/3...");
+                                setTimeout(() => { hls.startLoad(); }, 800 * hlsNetworkRetries);
                             }
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
-                            hls.recoverMediaError();
+                            hlsMediaErrorRetries++;
+                            if (hlsMediaErrorRetries === 1) {
+                                console.log("HLS fatal media error, attempting media recovery...");
+                                hls.recoverMediaError();
+                            } else if (hlsMediaErrorRetries === 2) {
+                                console.log("HLS fatal media error, swapping audio codec & recovering...");
+                                hls.swapAudioCodec();
+                                hls.recoverMediaError();
+                            } else {
+                                console.warn("HLS unrecoverable media error, triggering recovery");
+                                triggerStreamExpiredRecovery(data);
+                            }
                             break;
                         default:
+                            console.warn("HLS fatal unhandled error:", data);
                             triggerStreamExpiredRecovery(data);
                             break;
                     }
@@ -2079,9 +2104,8 @@
     }
 
     video.addEventListener('error', (e) => {
-        if (currentStreamUrl && !isAdMode) {
-            triggerStreamExpiredRecovery(e);
-        }
+        // Safe logger: Do NOT falsely trigger stream expiration on generic DOM element errors
+        console.warn("Native video element notice:", video.error ? video.error.code : e);
     });
 
     // Mid-Roll Monetag Ads Handler during video playback
