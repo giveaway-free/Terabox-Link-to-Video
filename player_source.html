@@ -1908,7 +1908,7 @@
                 try {
                     const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
                     const ghVidRes = await fetch(ghVidUrl, {
-                        headers: { 'Accept': 'application/vnd.github.v3+json' },
+                        headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': 	oken  },
                         cache: 'no-store'
                     });
                     if (ghVidRes.ok) {
@@ -1961,7 +1961,7 @@
                         try {
                             const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
                             const ghVidRes = await fetch(ghVidUrl, {
-                                headers: { 'Accept': 'application/vnd.github.v3+json' },
+                                headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': 	oken  },
                                 cache: 'no-store'
                             });
                             if (ghVidRes.ok) {
