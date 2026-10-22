@@ -752,12 +752,14 @@
   },
   "8978355702": {
     "username": "User_8978355702",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1K4CjHn65b23tTH3B7FVWBQ"
+    ]
   },
   "8980576385": {
     "username": "Anujedits97",
