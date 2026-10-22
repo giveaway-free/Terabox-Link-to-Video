@@ -2030,19 +2030,29 @@
         function startPlaybackWithAd() {
             if (isAdMode) {
                 showRewardedAdWithEnforcement().then(() => {
-                    video.play().catch(() => {});
-                    updatePlayIcon(true);
+                    video.play().then(() => updatePlayIcon(true)).catch(() => updatePlayIcon(false));
                 });
             } else {
-                video.play().catch(() => {});
-                updatePlayIcon(true);
+                video.play().then(() => updatePlayIcon(true)).catch(() => updatePlayIcon(false));
             }
         }
 
         if (Hls.isSupported() && (streamUrl.includes('.m3u8') || !streamUrl.includes('.mp4'))) {
             const hls = new Hls({
                 enableWorker: true,
-                lowLatencyMode: true
+                lowLatencyMode: false,
+                manifestLoadingTimeOut: 25000,
+                manifestLoadingMaxRetry: 5,
+                manifestLoadingRetryDelay: 1500,
+                levelLoadingTimeOut: 25000,
+                levelLoadingMaxRetry: 5,
+                levelLoadingRetryDelay: 1500,
+                fragLoadingTimeOut: 35000,
+                fragLoadingMaxRetry: 6,
+                fragLoadingRetryDelay: 1500,
+                startLevel: -1,
+                capLevelToPlayerSize: true,
+                backBufferLength: 90
             });
             window._hlsInstance = hls;
             hls.loadSource(streamUrl);
@@ -2053,7 +2063,7 @@
             let hlsMediaErrorRetries = 0;
             let hlsNetworkRetries = 0;
 
-            hls.on(Hls.Events.ERROR, function(event, data) {
+            hls.on(Hls.Events.ERROR, async function(event, data) {
                 // Explicit token expiration HTTP codes (403, 404, 410)
                 if (data.response && (data.response.code === 403 || data.response.code === 404 || data.response.code === 410)) {
                     console.warn("Explicit stream token expired (HTTP " + data.response.code + "), triggering recovery");
@@ -2065,12 +2075,20 @@
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
                             hlsNetworkRetries++;
-                            if (hlsNetworkRetries > 3) {
-                                console.warn("HLS fatal network error after 3 retries, triggering recovery");
-                                triggerStreamExpiredRecovery(data);
+                            if (hlsNetworkRetries <= 4) {
+                                console.log("HLS network glitch, retrying " + hlsNetworkRetries + "/4...");
+                                setTimeout(() => { hls.startLoad(); }, 1200 * hlsNetworkRetries);
                             } else {
-                                console.log("HLS network glitch, retrying " + hlsNetworkRetries + "/3...");
-                                setTimeout(() => { hls.startLoad(); }, 800 * hlsNetworkRetries);
+                                try {
+                                    const testRes = await fetch(streamUrl, { method: 'GET', headers: { 'Range': 'bytes=0-100' }, cache: 'no-store' });
+                                    if (testRes.status === 403 || testRes.status === 404 || testRes.status === 410) {
+                                        triggerStreamExpiredRecovery(data);
+                                        return;
+                                    }
+                                } catch (_) {}
+                                console.warn("HLS fatal network error, re-initializing loader...");
+                                hls.loadSource(streamUrl);
+                                hls.startLoad();
                             }
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
@@ -2082,14 +2100,20 @@
                                 console.log("HLS fatal media error, swapping audio codec & recovering...");
                                 hls.swapAudioCodec();
                                 hls.recoverMediaError();
+                            } else if (hlsMediaErrorRetries <= 4) {
+                                console.log("HLS fatal media error, reloading stream source...");
+                                hls.loadSource(streamUrl);
+                                hls.startLoad();
                             } else {
-                                console.warn("HLS unrecoverable media error, triggering recovery");
-                                triggerStreamExpiredRecovery(data);
+                                console.warn("HLS unrecoverable media error, falling back to direct video element");
+                                try { hls.destroy(); } catch(e) {}
+                                video.src = streamUrl;
+                                video.play().catch(() => {});
                             }
                             break;
                         default:
-                            console.warn("HLS fatal unhandled error:", data);
-                            triggerStreamExpiredRecovery(data);
+                            console.warn("HLS fatal unhandled error, retrying load:", data);
+                            hls.startLoad();
                             break;
                     }
                 }
