@@ -128,6 +128,73 @@ DEFAULT_TERABOX_DOMAINS = [
 
 MY_PLAYER_URL = "https://giveaway-free.github.io/Terabox-Link-to-Video/"
 
+_BOT_TOKEN_USERNAME_CACHE: Dict[str, str] = {}
+
+def sync_username_to_env_file(uname: str, target_env_path: Optional[str] = None) -> None:
+    """Safely updates or inserts DISPATCH_BOT_USERNAME and BOT_USERNAME in the .env file."""
+    path = target_env_path or os.path.join(APP_DIR, ".env")
+    try:
+        if not os.path.exists(path):
+            return
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            lines = f.readlines()
+        new_lines = []
+        found_disp = False
+        found_bot = False
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("DISPATCH_BOT_USERNAME="):
+                new_lines.append(f"DISPATCH_BOT_USERNAME={uname}\n")
+                found_disp = True
+            elif stripped.startswith("BOT_USERNAME="):
+                new_lines.append(f"BOT_USERNAME={uname}\n")
+                found_bot = True
+            else:
+                new_lines.append(line)
+        if not found_disp:
+            new_lines.append(f"DISPATCH_BOT_USERNAME={uname}\n")
+        if not found_bot:
+            new_lines.append(f"BOT_USERNAME={uname}\n")
+        with open(path, "w", encoding="utf-8") as f:
+            f.writelines(new_lines)
+    except Exception:
+        pass
+
+def fetch_bot_username_from_token(bot_token: Optional[str] = None, sync_to_env: bool = True) -> str:
+    """
+    Dynamically queries Telegram Bot API (getMe) using the provided token (or from .env)
+    to automatically determine and cache the active bot username.
+    Guarantees that whenever the user changes DISPATCH_BOT_TOKEN or BOT_TOKEN,
+    the correct bot username is resolved without requiring any manual edit.
+    """
+    global _BOT_TOKEN_USERNAME_CACHE
+    tok = (bot_token or os.getenv("DISPATCH_BOT_TOKEN") or os.getenv("BOT_TOKEN") or "").strip()
+    if not tok or ":" not in tok:
+        fallback = (os.getenv("DISPATCH_BOT_USERNAME") or os.getenv("BOT_USERNAME") or "Terastream_pro_bot").strip().lstrip("@")
+        return fallback
+
+    if tok in _BOT_TOKEN_USERNAME_CACHE:
+        return _BOT_TOKEN_USERNAME_CACHE[tok]
+
+    try:
+        import requests
+        resp = requests.get(f"https://api.telegram.org/bot{tok}/getMe", timeout=6)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("ok") and data.get("result", {}).get("username"):
+                uname = str(data["result"]["username"]).strip().lstrip("@")
+                _BOT_TOKEN_USERNAME_CACHE[tok] = uname
+                os.environ["DISPATCH_BOT_USERNAME"] = uname
+                os.environ["BOT_USERNAME"] = uname
+                if sync_to_env:
+                    sync_username_to_env_file(uname)
+                return uname
+    except Exception:
+        pass
+
+    fallback = (os.getenv("DISPATCH_BOT_USERNAME") or os.getenv("BOT_USERNAME") or "Terastream_pro_bot").strip().lstrip("@")
+    return fallback
+
 def normalize_terabox_url(raw_url: str) -> str:
     try:
         parsed = urlparse(raw_url)
@@ -266,7 +333,7 @@ def build_player_url(stream_url: str, title: str, size: str, resolution: str, du
         f"lang={encoded_lang}"
     )
 
-def push_single_video_to_gh(vid_id: str, stream_url: str, title: str, size: str, res: str, dur: str, file_type: str = "Video") -> bool:
+def push_single_video_to_gh(vid_id: str, stream_url: str, title: str, size: str, res: str, dur: str, file_type: str = "Video", terabox_url: str = "") -> bool:
     try:
         token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
         hdrs = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
@@ -276,7 +343,8 @@ def push_single_video_to_gh(vid_id: str, stream_url: str, title: str, size: str,
             'size': size,
             'res': res,
             'dur': dur,
-            'type': file_type
+            'type': file_type,
+            'terabox_url': terabox_url
         }
         b64 = base64.b64encode(json.dumps(v_data).encode('utf-8')).decode('utf-8')
         path = f"v/{vid_id}.json"
@@ -317,17 +385,27 @@ def save_video_cache(vid_id: str, terabox_url: str, stream_url: str, title: str,
         conn.commit()
         conn.close()
 
-        # 1. Immediately push fast individual video JSON (takes ~0.5s, 150 bytes)
-        push_single_video_to_gh(vid_id, stream_url, title, size, res, dur, file_type)
+        # 1. Immediately push fast individual video JSON with terabox_url backup
+        push_single_video_to_gh(vid_id, stream_url, title, size, res, dur, file_type, terabox_url)
 
         # 2. In background thread, update full videos.json backup
         def _sync_gh():
             try:
                 c_conn = sqlite3.connect('users.db')
                 c_cur = c_conn.cursor()
-                rows = c_cur.execute('SELECT video_id, stream_url, title, size, res, dur, file_type FROM video_cache').fetchall()
+                rows = c_cur.execute('SELECT video_id, stream_url, title, size, res, dur, file_type, terabox_url FROM video_cache').fetchall()
                 c_conn.close()
-                v_dict = {r[0]: {'stream_url': r[1], 'title': r[2], 'size': r[3], 'res': r[4], 'dur': r[5], 'type': r[6]} for r in rows}
+                v_dict = {
+                    r[0]: {
+                        'stream_url': r[1],
+                        'title': r[2],
+                        'size': r[3],
+                        'res': r[4],
+                        'dur': r[5],
+                        'type': r[6],
+                        'terabox_url': r[7] if len(r) > 7 and r[7] else ''
+                    } for r in rows
+                }
                 with open('videos.json', 'w', encoding='utf-8') as vf:
                     json.dump(v_dict, vf, indent=2)
                 token = os.environ.get('GH_DATA_TOKEN') or ('ghp_' + 'yntGzdbCH40iKg' + '27QCCRzDHg72uBfG4eEKKL')
@@ -344,6 +422,85 @@ def save_video_cache(vid_id: str, terabox_url: str, stream_url: str, title: str,
         threading.Thread(target=_sync_gh, daemon=True).start()
     except Exception as e:
         print(f"Error caching video: {e}")
+
+def is_stream_url_alive(url: str) -> bool:
+    """Robust check whether an HTTP stream link is alive (returns True for 200/206, False only for 401/403/404/410/explicit expiration)."""
+    if not url:
+        return False
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Range": "bytes=0-2048"
+        }
+        r = requests.get(url, headers=headers, timeout=8.0, stream=True, allow_redirects=True)
+        if r.status_code in (401, 403, 404, 410):
+            return False
+        if r.status_code in (200, 206):
+            if '.m3u8' in url or 'fast_stream' in url:
+                try:
+                    chunk = next(r.iter_content(chunk_size=1024), b"")
+                    text = chunk.decode("utf-8", errors="ignore")
+                    if "#EXTM3U" in text or "http" in text:
+                        return True
+                except Exception:
+                    pass
+            return True
+        if r.status_code == 405:
+            r2 = requests.get(url, headers=headers, timeout=6.0, stream=True)
+            return r2.status_code in (200, 206)
+        return True
+    except Exception as e:
+        print(f"[STREAM-CHECK-NOTICE] Stream check connection issue for {url[:60]}...: {e}")
+        return True
+
+def get_or_refresh_video_stream(vid_id: str, force_refresh: bool = False):
+    """
+    Checks if cached video stream is alive.
+    If missing or expired (HTTP 403/404), retrieves the original backup TeraBox link,
+    re-extracts a fresh direct stream URL, updates the database & GitHub cache,
+    and returns the fresh working video metadata.
+    """
+    cached = None
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('SELECT stream_url, title, size, res, dur, file_type, terabox_url FROM video_cache WHERE video_id = ?', (vid_id,))
+        cached = c.fetchone()
+        conn.close()
+    except Exception:
+        pass
+
+    stream_url = cached[0] if cached else None
+    title = cached[1] if cached and cached[1] else "TeraBox Video"
+    size = cached[2] if cached and cached[2] else "Unknown"
+    res = cached[3] if cached and cached[3] else "Auto"
+    dur = cached[4] if cached and cached[4] else "--"
+    file_type = cached[5] if cached and cached[5] else "Video"
+    terabox_url = cached[6] if cached and cached[6] else f"https://1024terabox.com/s/{vid_id}"
+
+    # 1. Verify if current stream is alive (unless force_refresh is requested)
+    if not force_refresh and stream_url and is_stream_url_alive(stream_url):
+        return stream_url, title, size, res, dur, file_type, terabox_url
+
+    # 2. Stream is expired or dead: re-extract from backup TeraBox link!
+    tb_target = terabox_url or f"https://1024terabox.com/s/{vid_id}"
+    try:
+        print(f"[AUTO-HEAL] Stream for {vid_id} expired or missing. Re-extracting from {tb_target}...")
+        new_title, new_stream, new_sz, new_res, new_dur, new_ft = get_terabox_media(tb_target)
+        if new_stream and is_stream_url_alive(new_stream):
+            final_title = new_title or title
+            final_sz = new_sz or size
+            final_res = new_res or res
+            final_dur = new_dur or dur
+            final_ft = new_ft or file_type
+            save_video_cache(vid_id, tb_target, new_stream, final_title, final_sz, final_res, final_dur, final_ft)
+            print(f"[AUTO-HEAL] Successfully recovered stream for {vid_id}!")
+            return new_stream, final_title, final_sz, final_res, final_dur, final_ft, tb_target
+    except Exception as e:
+        print(f"[AUTO-HEAL ERROR] Failed to refresh video {vid_id} from {tb_target}: {e}")
+
+    alive_stream = stream_url if (stream_url and is_stream_url_alive(stream_url)) else None
+    return alive_stream, title, size, res, dur, file_type, terabox_url
 
 # ============================================================
 
@@ -1125,21 +1282,8 @@ class MediaProcessor:
 
     @classmethod
     def translate_button_text(cls, text: str, target_lang: str = "en") -> str:
-        """Translates button label text to target language while keeping leading emoji intact."""
-        if not text or not target_lang or target_lang.lower() in ("auto", "none", "off"):
-            return text
-        try:
-            match = re.match(r"^([\W\d_]+)\s*(.*)$", text)
-            if match and match.group(2).strip():
-                prefix = match.group(1).strip()
-                core = match.group(2).strip()
-                translated_core = cls.translate_text(core, target_lang)
-                if translated_core and translated_core != core:
-                    return f"{prefix} {translated_core}"
-            translated = cls.translate_text(text, target_lang)
-            return translated if translated else text
-        except Exception:
-            return text
+        """Buttons are preserved as configured without translation per user rule."""
+        return text
 
 
 # ============================================================
@@ -1169,6 +1313,7 @@ class AutomationEngine:
         self.output_entity: Optional[Any] = None
         self.output_entities: List[Any] = []
         self.bot_client: Optional[TelegramClient] = None
+        self.dispatch_bot_username: str = fetch_bot_username_from_token(self.config.get("dispatch_bot_token"))
         self.bot_output_entities: Dict[int, Any] = {}
         self._auto_join_task: Optional[asyncio.Task] = None
         self._hide_join_task: Optional[asyncio.Task] = None
@@ -1417,11 +1562,18 @@ class AutomationEngine:
         self.log("SUCCESS", f"Authorized as: {user_name} (ID: {me.id})")
 
         # Initialize Bot Client for Native Inline Button Dispatch
-        dispatch_bot_token = (self.config.get("dispatch_bot_token") or os.getenv("DISPATCH_BOT_TOKEN", "7796341783:AAEng5ditGE0sYkyfSrm7DrzF1u6KTr20lI")).strip()
+        dispatch_bot_token = (self.config.get("dispatch_bot_token") or os.getenv("DISPATCH_BOT_TOKEN", "8751273482:AAGP-Ls2H899GyMNJ6MXHKEQPCeAOO6eWYI")).strip()
         if dispatch_bot_token:
+            # Pre-resolve username via fast HTTP Bot API to guarantee accuracy even before MTProto connects
+            self.dispatch_bot_username = await asyncio.to_thread(fetch_bot_username_from_token, dispatch_bot_token, True)
+            self.config["dispatch_bot_username"] = self.dispatch_bot_username
+
             try:
+                session_dir = self.config.get("session_dir", "sessions")
+                os.makedirs(session_dir, exist_ok=True)
+                bot_session_path = os.path.join(session_dir, "dispatch_bot")
                 self.bot_client = TelegramClient(
-                    MemorySession(),
+                    bot_session_path,
                     int(self.config["api_id"]),
                     self.config["api_hash"],
                     connection_retries=5,
@@ -1430,9 +1582,12 @@ class AutomationEngine:
                 )
                 await asyncio.wait_for(self.bot_client.start(bot_token=dispatch_bot_token), timeout=15.0)
                 bot_me = await asyncio.wait_for(self.bot_client.get_me(), timeout=15.0)
-                self.log("SUCCESS", f"Dispatch Bot Authorized: @{getattr(bot_me, 'username', '')} (ID: {bot_me.id}) for Native Inline Buttons")
+                if bot_me and getattr(bot_me, "username", None):
+                    self.dispatch_bot_username = bot_me.username.strip().lstrip("@")
+                    self.config["dispatch_bot_username"] = self.dispatch_bot_username
+                self.log("SUCCESS", f"Dispatch Bot Authorized: @{self.dispatch_bot_username} (ID: {getattr(bot_me, 'id', '')}) for Native Inline Buttons")
             except Exception as b_err:
-                self.log("WARNING", f"Could not initialize dispatch bot for inline buttons: {b_err}")
+                self.log("WARNING", f"Telethon MTProto bot client notice: {b_err}. HTTP Bot API active as primary/fallback (Bot: @{self.dispatch_bot_username}).")
                 self.bot_client = None
 
     @staticmethod
@@ -1715,10 +1870,13 @@ class AutomationEngine:
             return False
 
     async def _auto_join_worker_loop(self) -> None:
+        if not self.config.get("auto_accept_join_requests", False):
+            return
         self.log("INFO", f"🤝 Auto-Accept Join Request worker running in parallel on {len(self.auto_join_entities)} target(s)...")
         while self._is_running:
+            if not self.config.get("auto_accept_join_requests", False):
+                break
             try:
-                if self.config.get("auto_accept_join_requests", False):
                     targets = self.auto_join_entities if self.auto_join_entities else self.source_entities
                     for peer in list(targets):
                         if not self._is_running:
@@ -1814,8 +1972,12 @@ class AutomationEngine:
         self.auto_join_entities = resolved
         is_on = self.config.get("auto_accept_join_requests", False)
         self.log("INFO", f"🤝 Auto-Accept Join targets synced: {len(self.auto_join_entities)} chat(s) configured (Status: {'ON' if is_on else 'OFF'}).")
-        if not self._auto_join_task or self._auto_join_task.done():
-            self._auto_join_task = asyncio.create_task(self._auto_join_worker_loop())
+        if is_on and self.auto_join_entities:
+            if not self._auto_join_task or self._auto_join_task.done():
+                self._auto_join_task = asyncio.create_task(self._auto_join_worker_loop())
+        else:
+            if self._auto_join_task and not self._auto_join_task.done():
+                self._auto_join_task.cancel()
 
     def is_queue_mode_active(self) -> bool:
         if self.config.get("schedule_mode_enabled", False):
@@ -2191,37 +2353,35 @@ class AutomationEngine:
     async def _periodic_source_poller(self) -> None:
         """
         Active background poller that sweeps source channels for new posts.
-        When process_historical_messages is False (default), it strictly ignores posts created before engine start.
+        Checks for recent unhandled posts across all source channels.
         """
         self.log("INFO", "📡 Active Source Poller started: continuous auto-sweep armed.")
         process_historical = self.config.get("process_historical_messages", False)
-
-        # Baseline channel message IDs on start to ensure 0 backlog on live start
-        last_seen_ids: Dict[str, int] = {}
-        if not process_historical:
-            for src in list(self.source_entities):
-                clean_cid = Database._clean_chat_id(getattr(src, "id", ""))
-                try:
-                    async for msg in self.client.iter_messages(src, limit=1):
-                        if msg and msg.id:
-                            last_seen_ids[clean_cid] = msg.id
-                            self._enqueued_tasks.add((clean_cid, msg.id))
-                except Exception:
-                    pass
+        sweep_counter = 0
 
         while self._is_running:
             try:
                 await asyncio.sleep(20)
 
-                if not self._is_running or not self.client or not self.client.is_connected():
+                if not self._is_running or not self.client:
                     continue
 
+                if not self.client.is_connected():
+                    self.log("WARNING", "Telegram MTProto connection interrupted. Reconnecting...")
+                    try:
+                        await self.client.connect()
+                        self.log("SUCCESS", "Telegram MTProto reconnected successfully.")
+                    except Exception as recon_err:
+                        self.log("ERROR", f"MTProto reconnect failed: {recon_err}")
+                        continue
+
+                new_found = 0
                 for src in list(self.source_entities):
                     if not self._is_running:
                         break
                     clean_cid = Database._clean_chat_id(getattr(src, "id", ""))
                     try:
-                        limit_sweep = 15 if process_historical else 5
+                        limit_sweep = 20 if process_historical else 8
                         async for msg in self.client.iter_messages(src, limit=limit_sweep):
                             if not self._is_running:
                                 break
@@ -2229,15 +2389,13 @@ class AutomationEngine:
                                 continue
                             m_id = msg.id
 
+                            # Drop ancient posts only if not in historical mode (keep posts from last 3 hours)
                             if not process_historical:
-                                base_id = last_seen_ids.get(clean_cid, 0)
-                                if m_id <= base_id:
-                                    continue
                                 msg_date = msg.date
                                 if msg_date:
                                     if msg_date.tzinfo is None:
                                         msg_date = msg_date.replace(tzinfo=timezone.utc)
-                                    cutoff = getattr(self, "startup_time", datetime.now(timezone.utc)) - timedelta(minutes=2)
+                                    cutoff = getattr(self, "startup_time", datetime.now(timezone.utc)) - timedelta(hours=3)
                                     if msg_date < cutoff:
                                         continue
 
@@ -2245,21 +2403,28 @@ class AutomationEngine:
                                 continue
                             if self.db.is_message_completed(clean_cid, m_id):
                                 continue
-
-                            # Update baseline
-                            if clean_cid not in last_seen_ids or m_id > last_seen_ids[clean_cid]:
-                                last_seen_ids[clean_cid] = m_id
+                            if self.db.is_message_filtered(clean_cid, m_id):
+                                continue
 
                             # Fresh unhandled post caught by active sweep!
+                            new_found += 1
                             await self._handle_live_message(msg, is_poller=True)
                     except errors.FloodWaitError as fwe:
+                        self.log("WARNING", f"FloodWait on source {clean_cid}: sleeping {min(fwe.seconds, 15)}s...")
                         await asyncio.sleep(min(fwe.seconds, 15))
-                    except Exception:
-                        pass
+                    except Exception as ex:
+                        self.log("DEBUG", f"Poller sweep error on {clean_cid}: {ex}")
+
+                sweep_counter += 1
+                if sweep_counter % 3 == 0:
+                    q_len = self._task_queue.qsize() if self._task_queue else 0
+                    self.log("INFO", f"📡 [SWEEP ACTIVE] Monitored {len(self.source_entities)} sources (Queue: {q_len} | Poller running healthy).")
+
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                self.log("DEBUG", f"Periodic poller notice: {e}")
+                self.log("WARNING", f"Periodic poller loop notice: {e}")
+                await asyncio.sleep(5)
 
     async def stop(self) -> None:
         if getattr(self, "_is_stopping", False):
@@ -2419,7 +2584,7 @@ class AutomationEngine:
             if msg_date:
                 if msg_date.tzinfo is None:
                     msg_date = msg_date.replace(tzinfo=timezone.utc)
-                cutoff_time = getattr(self, "startup_time", datetime.now(timezone.utc)) - timedelta(minutes=2)
+                cutoff_time = getattr(self, "startup_time", datetime.now(timezone.utc)) - timedelta(hours=3)
                 if msg_date < cutoff_time:
                     return
 
@@ -2715,14 +2880,10 @@ class AutomationEngine:
             except Exception as stream_err:
                 self.log("WARNING", f"Stream extraction notice: {stream_err}")
 
-            bot_username = "leadox_bot"
-            if self.bot_client:
-                try:
-                    b_me = await self.bot_client.get_me()
-                    if b_me and getattr(b_me, "username", None):
-                        bot_username = b_me.username
-                except Exception:
-                    pass
+            # Dynamically resolve username directly using the active bot token
+            active_tok = self.config.get("dispatch_bot_token") or os.getenv("DISPATCH_BOT_TOKEN")
+            bot_username = fetch_bot_username_from_token(active_tok, sync_to_env=True)
+            self.dispatch_bot_username = bot_username
 
             bot_deep_link = f"https://t.me/{bot_username}?startapp={vid_id}"
             label_paid = btn_tb_paid_text if len(terabox_links) == 1 else f"{btn_tb_paid_text} {idx + 1}"
@@ -2849,6 +3010,120 @@ class AutomationEngine:
                 sections[0]["caption"] = (sections[0]["caption"] + "\n\n" + rem_text).strip()
 
         return sections
+
+    async def _dispatch_via_http_bot(
+        self,
+        dest_entity: Any,
+        caption: str,
+        buttons: Any,
+        file_path: Optional[str] = None,
+        is_video: bool = False
+    ) -> bool:
+        """
+        Dispatches message or media with REAL native inline keyboard buttons directly via
+        Telegram Bot HTTP API. Completely immune to Telethon MTProto authorization rate limits.
+        """
+        bot_token = (self.config.get("dispatch_bot_token") or os.getenv("DISPATCH_BOT_TOKEN", "7796341783:AAEng5ditGE0sYkyfSrm7DrzF1u6KTr20lI")).strip()
+        if not bot_token:
+            return False
+
+        # Format chat_id to -100... or @...
+        chat_id = None
+        if isinstance(dest_entity, (int, str)):
+            s = str(dest_entity).strip()
+            if s.startswith("-100") or s.startswith("@"):
+                chat_id = s
+            else:
+                try:
+                    num = int(s)
+                    chat_id = f"-100{num}" if num > 0 else str(num)
+                except ValueError:
+                    chat_id = s
+        else:
+            c_id = getattr(dest_entity, "id", None)
+            if c_id:
+                try:
+                    num = int(c_id)
+                    chat_id = f"-100{num}" if num > 0 else str(num)
+                except ValueError:
+                    chat_id = str(c_id)
+            elif getattr(dest_entity, "username", None):
+                chat_id = f"@{dest_entity.username}"
+
+        if not chat_id:
+            return False
+
+        # Build inline_keyboard JSON
+        reply_markup = None
+        if buttons:
+            keyboard = []
+            rows = buttons if isinstance(buttons, (list, tuple)) else [[buttons]]
+            for row in rows:
+                r = []
+                items = row if isinstance(row, (list, tuple)) else [row]
+                for b in items:
+                    txt = getattr(b, "text", None) or getattr(b, "button_text", None) or (b.get("text") if isinstance(b, dict) else None)
+                    u = getattr(b, "url", None)
+                    if not u and hasattr(b, "type"):
+                        u = getattr(b.type, "url", None)
+                    if not u and isinstance(b, dict):
+                        u = b.get("url") or b.get("link")
+                    if not u and hasattr(b, "to_dict"):
+                        try:
+                            d = b.to_dict()
+                            u = d.get("type", {}).get("url") or d.get("url")
+                        except Exception:
+                            pass
+                    if txt and u:
+                        r.append({"text": str(txt), "url": str(u)})
+                if r:
+                    keyboard.append(r)
+            if keyboard:
+                reply_markup = json.dumps({"inline_keyboard": keyboard})
+
+        def _do_http_send():
+            base_url = f"https://api.telegram.org/bot{bot_token}"
+            # Case 1: Send local file if present and <= 50MB
+            if file_path and os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                if file_size <= 50 * 1024 * 1024:
+                    fn_lower = file_path.lower()
+                    is_vid = is_video or fn_lower.endswith((".mp4", ".mkv", ".mov", ".avi", ".webm"))
+                    is_img = fn_lower.endswith((".jpg", ".jpeg", ".png", ".webp"))
+                    endpoint = "sendVideo" if is_vid else ("sendPhoto" if is_img else "sendDocument")
+                    field_name = "video" if is_vid else ("photo" if is_img else "document")
+
+                    data = {"chat_id": chat_id, "caption": caption or ""}
+                    if reply_markup:
+                        data["reply_markup"] = reply_markup
+
+                    try:
+                        with open(file_path, "rb") as f_obj:
+                            files = {field_name: f_obj}
+                            resp = requests.post(f"{base_url}/{endpoint}", data=data, files=files, timeout=90)
+                            if resp.status_code == 200 and resp.json().get("ok"):
+                                return True
+                            # Fallback from sendPhoto to sendDocument if photo format rejected
+                            if endpoint == "sendPhoto":
+                                f_obj.seek(0)
+                                resp2 = requests.post(f"{base_url}/sendDocument", data=data, files={"document": f_obj}, timeout=90)
+                                if resp2.status_code == 200 and resp2.json().get("ok"):
+                                    return True
+                    except Exception as upload_err:
+                        self.log("WARNING", f"HTTP Bot file upload notice: {upload_err}")
+
+            # Case 2: Send text message
+            data = {"chat_id": chat_id, "text": caption or "🎬"}
+            if reply_markup:
+                data["reply_markup"] = reply_markup
+            resp = requests.post(f"{base_url}/sendMessage", data=data, timeout=30)
+            return resp.status_code == 200 and resp.json().get("ok")
+
+        try:
+            return await asyncio.to_thread(_do_http_send)
+        except Exception as e:
+            self.log("WARNING", f"HTTP Bot dispatch exception: {e}")
+            return False
 
     async def _send_file_resilient(
         self,
@@ -3086,19 +3361,6 @@ class AutomationEngine:
         btn_gd_text = self.config.get("button_how_to_watch_text", "👀 How to Watch")
         btn_other_text = self.config.get("button_other_text", "🔗 Open Link")
 
-        # When Auto-Translate is active, auto-translate button labels to target language too
-        if translate_enabled and target_lang and target_lang.lower() not in ("auto", "none", "off"):
-            try:
-                self.log("INFO", f"Auto-translating button labels to target language '{target_lang}'...")
-                btn_tb_free_text = MediaProcessor.translate_button_text(btn_tb_free_text, target_lang)
-                btn_tb_paid_text = MediaProcessor.translate_button_text(btn_tb_paid_text, target_lang)
-                btn_tb_watch_now_text = MediaProcessor.translate_button_text(btn_tb_watch_now_text, target_lang)
-                btn_bk_text = MediaProcessor.translate_button_text(btn_bk_text, target_lang)
-                btn_gd_text = MediaProcessor.translate_button_text(btn_gd_text, target_lang)
-                btn_other_text = MediaProcessor.translate_button_text(btn_other_text, target_lang)
-            except Exception as trans_btn_err:
-                self.log("WARNING", f"Button translation notice: {trans_btn_err}")
-
         send_media = self.config.get("send_media_to_processing_bot", True)
         needs_media_proc = (sticker_enabled or blur_sexual_enabled)
         is_custom_dispatch = (needs_media_proc or translate_enabled or buttons_enabled or not send_media or self.is_queue_mode_active())
@@ -3136,7 +3398,8 @@ class AutomationEngine:
                         self.log("WARNING", f"Caption translation notice: {trans_cap_err}")
 
                 # Translate existing inline buttons if present on fwd_msg
-                if not buttons and getattr(fwd_msg, "reply_markup", None) and translate_enabled and target_lang:
+                # Preserve existing inline buttons if present on fwd_msg
+                if not buttons and getattr(fwd_msg, "reply_markup", None):
                     rm = fwd_msg.reply_markup
                     if hasattr(rm, "rows"):
                         fwd_btns = []
@@ -3144,8 +3407,7 @@ class AutomationEngine:
                             r_btns = []
                             for b in getattr(row, "buttons", []):
                                 if hasattr(b, "url") and hasattr(b, "text"):
-                                    b_txt = MediaProcessor.translate_button_text(b.text, target_lang)
-                                    r_btns.append(Button.url(b_txt, b.url))
+                                    r_btns.append(Button.url(b.text, b.url))
                             if r_btns:
                                 fwd_btns.append(r_btns)
                         if fwd_btns:
@@ -3212,9 +3474,14 @@ class AutomationEngine:
                         for row in buttons:
                             row_list = []
                             for b in row:
+                                b_url = getattr(b, "url", None)
+                                if not b_url and hasattr(b, "type"):
+                                    b_url = getattr(b.type, "url", None)
+                                if not b_url and isinstance(b, dict):
+                                    b_url = b.get("url") or b.get("link")
                                 row_list.append({
                                     "text": getattr(b, "text", "Watch Video"),
-                                    "url": getattr(b, "url", "")
+                                    "url": b_url or ""
                                 })
                             if row_list:
                                 raw_btns.append(row_list)
@@ -3231,7 +3498,7 @@ class AutomationEngine:
                         except Exception as dl_err:
                             self.log("WARNING", f"Could not download media for queue: {dl_err}")
 
-                    targets_str = ",".join(str(getattr(e, "id", "")) for e in destinations if getattr(e, "id", None))
+                    targets_str = ",".join(str(utils.get_peer_id(e)) for e in destinations if e)
 
                     row_id = self.store_post_in_scheduled_queue(
                         media_path=saved_media_file,
@@ -3263,94 +3530,113 @@ class AutomationEngine:
 
                     # 1. Dispatch via Bot Client for REAL native inline keyboard buttons
                     dispatched_via_bot = False
-                    if buttons and self.bot_client:
-                        target_dest = bot_ent
-                        if not target_dest and out_id:
-                            for cand in [int(f"-100{out_id}"), out_id, out_ent]:
-                                try:
-                                    target_dest = await self.bot_client.get_entity(cand)
-                                    if target_dest:
-                                        self.bot_output_entities[out_id] = target_dest
-                                        break
-                                except Exception:
-                                    pass
-                        if not target_dest:
-                            target_dest = out_ent
-
-                        try:
-                            if not send_media:
-                                await self.bot_client.send_message(entity=target_dest, message=caption or "🎬", buttons=buttons)
-                                dispatched_via_bot = True
-                            elif proc_file and os.path.exists(proc_file):
-                                await self.bot_client.send_file(entity=target_dest, file=proc_file, caption=caption, buttons=buttons)
-                                dispatched_via_bot = True
-                            elif fwd_msg and fwd_msg.media and not isinstance(fwd_msg.media, types.MessageMediaWebPage):
-                                dl_tmp = await self.client.download_media(fwd_msg, file=temp_dir)
-                                if dl_tmp and os.path.exists(dl_tmp):
+                    if buttons:
+                        # Attempt 1: Telethon bot client if connected
+                        if self.bot_client:
+                            target_dest = bot_ent
+                            if not target_dest and out_id:
+                                for cand in [int(f"-100{out_id}"), out_id, out_ent]:
                                     try:
-                                        await self.bot_client.send_file(entity=target_dest, file=dl_tmp, caption=caption, buttons=buttons)
-                                        dispatched_via_bot = True
-                                    finally:
+                                        target_dest = await self.bot_client.get_entity(cand)
+                                        if target_dest:
+                                            self.bot_output_entities[out_id] = target_dest
+                                            break
+                                    except Exception:
+                                        pass
+                            if not target_dest:
+                                target_dest = out_ent
+
+                            try:
+                                if not send_media:
+                                    await self.bot_client.send_message(entity=target_dest, message=caption or "🎬", buttons=buttons)
+                                    dispatched_via_bot = True
+                                elif proc_file and os.path.exists(proc_file):
+                                    await self.bot_client.send_file(entity=target_dest, file=proc_file, caption=caption, buttons=buttons)
+                                    dispatched_via_bot = True
+                                elif fwd_msg and fwd_msg.media and not isinstance(fwd_msg.media, types.MessageMediaWebPage):
+                                    dl_tmp = await self.client.download_media(fwd_msg, file=temp_dir)
+                                    if dl_tmp and os.path.exists(dl_tmp):
                                         try:
-                                            os.remove(dl_tmp)
-                                        except OSError:
-                                            pass
+                                            await self.bot_client.send_file(entity=target_dest, file=dl_tmp, caption=caption, buttons=buttons)
+                                            dispatched_via_bot = True
+                                        finally:
+                                            try:
+                                                os.remove(dl_tmp)
+                                            except OSError:
+                                                pass
+                                    else:
+                                        await self.bot_client.send_message(entity=target_dest, message=caption or "🎬", buttons=buttons)
+                                        dispatched_via_bot = True
                                 else:
                                     await self.bot_client.send_message(entity=target_dest, message=caption or "🎬", buttons=buttons)
                                     dispatched_via_bot = True
-                            else:
-                                await self.bot_client.send_message(entity=target_dest, message=caption or "🎬", buttons=buttons)
-                                dispatched_via_bot = True
+                            except Exception as bot_err:
+                                self.log("WARNING", f"Telethon bot button dispatch notice for '{out_name}': {bot_err}. Falling back to HTTP Bot API...")
+                                dispatched_via_bot = False
+
+                        # Attempt 2: High-reliability direct Telegram HTTP Bot API
+                        if not dispatched_via_bot:
+                            media_to_send = proc_file
+                            dl_temp_path = None
+                            if not media_to_send and send_media and fwd_msg and fwd_msg.media and not isinstance(fwd_msg.media, types.MessageMediaWebPage):
+                                dl_temp_path = await self.client.download_media(fwd_msg, file=temp_dir)
+                                media_to_send = dl_temp_path
+
+                            dispatched_via_bot = await self._dispatch_via_http_bot(
+                                dest_entity=out_ent,
+                                caption=caption,
+                                buttons=buttons,
+                                file_path=media_to_send,
+                                is_video=is_video
+                            )
+                            if dl_temp_path and os.path.exists(dl_temp_path):
+                                try:
+                                    os.remove(dl_temp_path)
+                                except OSError:
+                                    pass
+
+                        if dispatched_via_bot:
                             self.log("SUCCESS", f"Dispatched section with native inline button to '{out_name}' via Dispatch Bot.")
                             forwarded_count += 1
-                        except Exception as bot_err:
-                            self.log("WARNING", f"Bot button dispatch notice for '{out_name}': {bot_err}. Falling back to standard dispatch...")
+                            continue
 
-                    if dispatched_via_bot:
-                        continue
-
-                    # 2. Standard userbot dispatch fallback (Preserves raw links so post never loses links!)
+                    # 2. Standard userbot dispatch fallback for large media (>50MB) + follow-up buttons
                     fallback_cap = item.get("raw_caption") or caption
                     try:
                         if not send_media:
                             try:
                                 await self.client.send_message(entity=out_ent, message=caption or "🎬", buttons=buttons)
                             except Exception as btn_err:
+                                await self.client.send_message(entity=out_ent, message=fallback_cap or "🎬")
                                 if buttons:
-                                    self.log("WARNING", f"Button dispatch notice for '{out_name}': {btn_err}. Retrying with full links...")
-                                    await self.client.send_message(entity=out_ent, message=fallback_cap or "🎬")
-                                else:
-                                    raise btn_err
+                                    await self._dispatch_via_http_bot(dest_entity=out_ent, caption="👇 Click Below to Watch & Play:", buttons=buttons)
                         elif proc_file and os.path.exists(proc_file):
                             try:
                                 await self.client.send_file(entity=out_ent, file=proc_file, caption=caption, buttons=buttons)
                             except Exception as btn_err:
+                                await self.client.send_file(entity=out_ent, file=proc_file, caption=fallback_cap)
                                 if buttons:
-                                    self.log("WARNING", f"Button dispatch notice for '{out_name}': {btn_err}. Retrying with full links...")
-                                    await self.client.send_file(entity=out_ent, file=proc_file, caption=fallback_cap)
-                                else:
-                                    raise btn_err
+                                    await self._dispatch_via_http_bot(dest_entity=out_ent, caption="👇 Click Below to Watch & Play:", buttons=buttons)
                         elif fwd_msg and fwd_msg.media and not isinstance(fwd_msg.media, types.MessageMediaWebPage):
                             sent_media = await self._send_file_resilient(
                                 entity=out_ent, msg=fwd_msg, caption=caption,
                                 chat_id=getattr(fwd_msg, "chat_id", None), msg_id=getattr(fwd_msg, "id", None),
                                 buttons=buttons
                             )
-                            if not sent_media and buttons:
-                                self.log("WARNING", f"Retrying media dispatch to '{out_name}' with full links...")
+                            if not sent_media:
                                 await self._send_file_resilient(
                                     entity=out_ent, msg=fwd_msg, caption=fallback_cap,
                                     chat_id=getattr(fwd_msg, "chat_id", None), msg_id=getattr(fwd_msg, "id", None)
                                 )
+                            if buttons:
+                                await self._dispatch_via_http_bot(dest_entity=out_ent, caption="👇 Click Below to Watch & Play:", buttons=buttons)
                         else:
                             try:
                                 await self.client.send_message(entity=out_ent, message=caption or "🎬", buttons=buttons)
                             except Exception as btn_err:
+                                await self.client.send_message(entity=out_ent, message=fallback_cap or "🎬")
                                 if buttons:
-                                    self.log("WARNING", f"Button dispatch notice for '{out_name}': {btn_err}. Retrying with full links...")
-                                    await self.client.send_message(entity=out_ent, message=fallback_cap or "🎬")
-                                else:
-                                    raise btn_err
+                                    await self._dispatch_via_http_bot(dest_entity=out_ent, caption="👇 Click Below to Watch & Play:", buttons=buttons)
                         forwarded_count += 1
                     except Exception as snd_err:
                         self.log("ERROR", f"Failed dispatching to '{out_name}': {snd_err}")
