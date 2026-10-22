@@ -691,12 +691,12 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": [
-      "1dv071PFhHNVAWAIEtaDHBA",
       "1Ievdz1teGPoxpGyOeo1b5g",
       "1OxhobGsA1Qw1KZHRKg5gNA",
-      "1ReS0R9TzipBDHdo2Sson2A"
+      "1ReS0R9TzipBDHdo2Sson2A",
+      "1dv071PFhHNVAWAIEtaDHBA"
     ]
   },
   "8752296581": {
