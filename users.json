@@ -666,7 +666,7 @@
   },
   "7566641861": {
     "username": "User_7566641861",
-    "credits": 2,
+    "credits": 3,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
@@ -674,8 +674,7 @@
     "watched": [
       "1n0gycswMzW7TzaRHCqsmsg",
       "1uKcjhXu_06zqwCozxMvGhQ",
-      "1yESC3W4cA3xsFX-kHHTHtQ",
-      "1FvJZVitKh-rViUTM4W81lw"
+      "1yESC3W4cA3xsFX-kHHTHtQ"
     ]
   },
   "7680909403": {
@@ -1380,14 +1379,15 @@
   },
   "8980576385": {
     "username": "Anujedits97",
-    "credits": 3,
+    "credits": 2,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "en",
     "is_blocked": false,
     "watched": [
       "153BQppG_opIQG4Qn8HovuA",
-      "1VLDBu3s4HoDeZBo5MBXzQQ"
+      "1VLDBu3s4HoDeZBo5MBXzQQ",
+      "new_user"
     ]
   },
   "8991643421": {
