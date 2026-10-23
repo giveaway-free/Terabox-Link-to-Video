@@ -70352,15 +70352,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1O3Yu6dbfoAFH-J2mG6eCGQ"
   },
-  "1nQuFkrsoNIgR4f_ArFGo0A": {
-    "stream_url": "https://iteraplay.tera-api87.workers.dev/fast_stream?token=0AL7RZ00s3OKtSmM3Gf4fEBYFfAzlMXiXfJKY7XtdpPAXv5N1i06C0KYFHw40800hPTqYJEp4HrHxtn_ZR0lKE7DRcuOdTaMbBpkBlOLh-pCNGrd0OQM1YkkhYwPO3DR1BGJcocVzaHPkTXdgGmcdAarzEmljrB27xFFpaFqQ6sj3mloAYbDLk89Lfbgt7josBE1g-Yrq7J1SxJoo5YyNY3EP53I4R-AlN4C6jDbe7vNv7IkfFv4kBBOQIGKnB3JNN9LA_r_OspQJYwxAgQxIHBE0YeAQIWr7T8NWgXSRcxhU7FdDulQupOAlcdgiNiYpSBZwUoIFbgNTQAcCwpdYToBQdQIS0VEnnVPyV-jBNMPfEfela3blYxNKOUf.m3u8",
-    "title": "VID_20231114_223735.mp4",
-    "size": "76.3 MB",
-    "res": "Auto (Adaptive)",
-    "dur": "04:06",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/1nQuFkrsoNIgR4f_ArFGo0A"
-  },
   "1PaDc_2IfAb1JrwLzY53huA": {
     "stream_url": "https://round-butterfly-9e31.qakuxutu.workers.dev/fast_stream?token=aqUMa30pLmpOQmaBrrS1JvVrq-uY0kQ4leh9v_L7_a3bHrfnYxuO8zCU2YxJ6tcB9cet3ayCar20Lcktbhb15xzeOICJvxWBed82vyvhjvjQQbPuHRz-W_EfgvwN-DrXRma26CKCdu9QO9Dgb2QClN7UZcIPi2OUVrsV8E2v2Dfoem9W-PoIe56deL85fn29Er2ZgpARJzbgiSb9QlZpU7xCWqX24wZmhefhX3A_2Q2MDBEoAPd_j-sH86hxDDHVOTk9uHYWv9TOGuC-nXFLimaCpk_vGF8qDCSGwsmF-jZ0XMWbso3uvOU22jSBL5aEN5ntbva9c6iAGbhgPBZSfC-WJggYy8-X1zQP0m4P5kEfr1dmiWDar-1gQillM9Ay.m3u8",
     "title": "2025-10-06-22-11-06(8).mp4",
@@ -79234,5 +79225,14 @@
     "dur": "02:52",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1ALlN0kI3EuSHQ85nvyiS1w"
+  },
+  "1nQuFkrsoNIgR4f_ArFGo0A": {
+    "stream_url": "https://winter-salad-bed2.wafaxacy.workers.dev/fast_stream?token=QQZxdJTa0QrnbcdCSwo9ylTtwzvKklx7-LmkSYNGUtoIksw9EQLy9E95fFCZtsexnuITvJvsCq_gVFj06Mhjmxk-tEupzHC4pv_joFwk5luzBUUzStlvsHqvI_hCMqSeWBpyNraDWGFI5yhd3eqGr8RzvoIJrpom9zEc0I2FHmUTR5sxFkP30b6gExBXrpCr2ZcTGSXSZI1Nl3f0QF__KU5HEfz8eKJmt6LGyTIf5Sj-bj9RS8jl-pFKR7vSrLMP91gyrmTdZSxlMm0dOga2XYhrPLGXWGYH5i6SggdJAHnYFspeJYZaAFpO6DZklrTiVhY-ktxaa3yrD7uySEHIj1TMVfaGrkmn1Gpo0rejwUxwBZvdi9b7_z-i.m3u8",
+    "title": "VID_20231114_223735.mp4",
+    "size": "76.34 MB",
+    "res": "720p",
+    "dur": "04:06",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1nQuFkrsoNIgR4f_ArFGo0A"
   }
 }
