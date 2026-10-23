@@ -1874,7 +1874,7 @@
     videoWrapper.addEventListener('mousemove', showControlsTemporarily);
     videoWrapper.addEventListener('touchstart', showControlsTemporarily);
 
-    let streamLoadFailures = 0;
+        let streamLoadFailures = 0;
     let isAutoHealingStream = false;
 
     async function triggerStreamExpiredRecovery(errDetail) {
@@ -1886,6 +1886,9 @@
         }
 
         const sParam = window.CURRENT_START_PARAM || (typeof getTelegramStartParam === 'function' ? getTelegramStartParam() : '') || (new URLSearchParams(window.location.search).get('startapp') || '');
+        const surl = (sParam && sParam.startsWith('1')) ? sParam.substring(1) : sParam;
+        const currentTitle = document.getElementById('video-title') ? document.getElementById('video-title').innerText : "TeraBox Video";
+
         const vWrap = document.getElementById('video-wrapper');
         const lBox = document.getElementById('loading-box');
         const expBox = document.getElementById('expired-box');
@@ -1903,12 +1906,12 @@
             if (vWrap) vWrap.style.display = 'none';
             if (expBox) expBox.style.display = 'none';
 
-            // Check GitHub for up to 6 seconds in case background healer or bot refreshed it
-            for (let poll = 0; poll < 4; poll++) {
+            // Check GitHub for up to 2 seconds in case background healer or bot refreshed it
+            for (let poll = 0; poll < 2; poll++) {
                 try {
                     const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
                     const ghVidRes = await fetch(ghVidUrl, {
-                        headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': 	oken  },
+                        headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': `token ${GH_DATA_TOKEN}` },
                         cache: 'no-store'
                     });
                     if (ghVidRes.ok) {
@@ -1918,18 +1921,28 @@
                             if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
                                 isAutoHealingStream = false;
                                 if (lBox) lBox.style.display = 'none';
-                                playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
+                                playVideo(sVid.stream_url, sVid.title || currentTitle, sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
                                 return;
                             }
                         }
                     }
                 } catch(e) {}
-                await new Promise(r => setTimeout(r, 1500));
+                await new Promise(r => setTimeout(r, 1000));
             }
             isAutoHealingStream = false;
         }
 
-        // If auto-heal didn't find new link yet, show the 1-Click Refresh box
+        // Direct stream recovery didn't find a new direct stream in 2s:
+        // Seamlessly switch to resilient official TeraBox embed player!
+        if (surl) {
+            if (lBox) lBox.style.display = 'none';
+            if (expBox) expBox.style.display = 'none';
+            console.log("Switching to official TeraBox embed player fallback for surl:", surl);
+            playEmbedVideo(surl, currentTitle);
+            return;
+        }
+
+        // If no surl is available, show the 1-Click Refresh box
         if (vWrap) vWrap.style.display = 'none';
         if (lBox) lBox.style.display = 'none';
         if (expBox) {
@@ -1955,13 +1968,13 @@
                         window.open(healUrl, '_blank');
                     }
 
-                    // 2. Poll GitHub for 12 seconds while bot processes it
-                    for (let p = 0; p < 9; p++) {
+                    // 2. Poll GitHub while bot processes it
+                    for (let p = 0; p < 6; p++) {
                         await new Promise(r => setTimeout(r, 1200));
                         try {
                             const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
                             const ghVidRes = await fetch(ghVidUrl, {
-                                headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': 	oken  },
+                                headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': `token ${GH_DATA_TOKEN}` },
                                 cache: 'no-store'
                             });
                             if (ghVidRes.ok) {
@@ -1972,7 +1985,7 @@
                                         rBtn.disabled = false;
                                         rBtn.innerText = origBtnText;
                                         expBox.style.display = 'none';
-                                        playVideo(sVid.stream_url, sVid.title || "TeraBox Video", sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
+                                        playVideo(sVid.stream_url, sVid.title || currentTitle, sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
                                         return;
                                     }
                                 }
@@ -1980,12 +1993,11 @@
                         } catch(e) {}
                     }
 
-                    // 3. Fallback: If still on same URL, resume playback directly
-                    if (currentStreamUrl) {
+                    // 3. Fallback to embed player
+                    if (surl) {
                         expBox.style.display = 'none';
-                        playVideo(currentStreamUrl, document.getElementById('video-title').innerText || "TeraBox Video", "Unknown", "HD", "--");
+                        playEmbedVideo(surl, currentTitle);
                     }
-
                     rBtn.disabled = false;
                     rBtn.innerText = origBtnText;
                 };
@@ -1994,6 +2006,20 @@
     }
 
     function playVideo(streamUrl, title, size, res, dur) {
+        if (streamUrl && (streamUrl.includes('/embed') || streamUrl.includes('sharing/embed') || streamUrl.includes('terabox.app/sharing'))) {
+            let surl = '';
+            try {
+                const u = new URL(streamUrl);
+                surl = u.searchParams.get('surl') || '';
+            } catch(e) {}
+            if (!surl) {
+                const sParam = window.CURRENT_START_PARAM || (typeof getTelegramStartParam === 'function' ? getTelegramStartParam() : '') || (new URLSearchParams(window.location.search).get('startapp') || '');
+                surl = (sParam && sParam.startsWith('1')) ? sParam.substring(1) : sParam;
+            }
+            playEmbedVideo(surl, title);
+            return;
+        }
+
         currentStreamUrl = streamUrl;
         lastMidrollTime = 0;
         streamLoadFailures = 0;
@@ -2075,20 +2101,12 @@
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
                             hlsNetworkRetries++;
-                            if (hlsNetworkRetries <= 4) {
-                                console.log("HLS network glitch, retrying " + hlsNetworkRetries + "/4...");
-                                setTimeout(() => { hls.startLoad(); }, 1200 * hlsNetworkRetries);
+                            if (hlsNetworkRetries <= 3) {
+                                console.log("HLS network glitch, retrying " + hlsNetworkRetries + "/3...");
+                                setTimeout(() => { hls.startLoad(); }, 1000 * hlsNetworkRetries);
                             } else {
-                                try {
-                                    const testRes = await fetch(streamUrl, { method: 'GET', headers: { 'Range': 'bytes=0-100' }, cache: 'no-store' });
-                                    if (testRes.status === 403 || testRes.status === 404 || testRes.status === 410) {
-                                        triggerStreamExpiredRecovery(data);
-                                        return;
-                                    }
-                                } catch (_) {}
-                                console.warn("HLS fatal network error, re-initializing loader...");
-                                hls.loadSource(streamUrl);
-                                hls.startLoad();
+                                console.warn("HLS network retries exhausted, triggering stream recovery...");
+                                triggerStreamExpiredRecovery(data);
                             }
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
@@ -2154,29 +2172,57 @@
     });
 
     function playEmbedVideo(surl, title = "TeraBox Video") {
+        currentStreamUrl = `https://www.terabox.app/sharing/embed?surl=${surl}`;
+        lastMidrollTime = 0;
+        streamLoadFailures = 0;
+
+        const _expB = document.getElementById('expired-box');
+        if (_expB) _expB.style.display = 'none';
+
         document.getElementById('no-video-box').style.display = 'none';
         document.getElementById('loading-box').style.display = 'none';
         document.getElementById('paywall-box').style.display = 'none';
         document.getElementById('join-bot-box').style.display = 'none';
-        videoWrapper.style.display = 'none';
 
+        if (window._hlsInstance) {
+            try { window._hlsInstance.destroy(); } catch(e) {}
+            window._hlsInstance = null;
+        }
+        if (video) {
+            try { video.pause(); video.src = ""; } catch(e) {}
+        }
+
+        videoWrapper.style.display = 'none';
         iframeWrapper.style.display = 'block';
         embedIframe.src = `https://www.terabox.app/sharing/embed?surl=${surl}`;
+
         document.getElementById('video-title').style.display = 'block';
         document.getElementById('video-title').innerText = title;
         document.getElementById('grid-info').style.display = 'grid';
-        document.getElementById('info-res').innerText = 'HD Embed';
+        document.getElementById('info-res').innerText = 'HD Cloud';
         document.getElementById('info-type').innerText = 'Cloud Stream';
+        document.getElementById('download-btn').style.display = 'flex';
+
+        applyPlayerLanguage(currentLang);
+        if (typeof window.updateBadgeStatus === 'function') {
+            window.updateBadgeStatus();
+        }
     }
 
     document.getElementById('download-btn').addEventListener('click', function(e) {
         e.preventDefault();
         if (currentStreamUrl) {
             showRewardedPopup().then(() => {
+                let dlUrl = currentStreamUrl;
+                if (currentStreamUrl.includes('/embed') || currentStreamUrl.includes('sharing/embed')) {
+                    const sParam = window.CURRENT_START_PARAM || (new URLSearchParams(window.location.search).get('startapp') || '');
+                    const s = (sParam && sParam.startsWith('1')) ? sParam.substring(1) : sParam;
+                    dlUrl = `https://1024terabox.com/s/1${s}`;
+                }
                 if (tg && tg.openLink) {
-                    tg.openLink(currentStreamUrl);
+                    tg.openLink(dlUrl);
                 } else {
-                    window.open(currentStreamUrl, '_blank');
+                    window.open(dlUrl, '_blank');
                 }
             });
         }
@@ -3020,6 +3066,13 @@
             }
         } catch (err) {
             console.warn("Fast stream backend notice:", err);
+        }
+
+        // Resilient fallback: If extractor fails or is busy, immediately play via official TeraBox embed
+        if (startParam) {
+            const surl = startParam.startsWith('1') ? startParam.substring(1) : startParam;
+            playEmbedVideo(surl, "TeraBox Video");
+            return;
         }
 
         // Clean UI fallback if video is still extracting
