@@ -677,12 +677,14 @@
   },
   "8456677654": {
     "username": "User_8456677654",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1CXJZMqw13Tv2VrRJoXf7dA"
+    ]
   },
   "8499778526": {
     "username": "N",
