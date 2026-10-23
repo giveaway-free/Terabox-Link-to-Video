@@ -255,7 +255,53 @@ def detect_resolution(title: str, raw_data: Any, stream_url: str) -> str:
             return match_url.group(1).lower()
     return "Auto (Adaptive)"
 
+def extract_via_iteraplay(tb_url: str):
+    """
+    Directly extracts high-speed HLS (.m3u8) video streaming links from public TeraBox URLs.
+    Fast, resilient, with spoofed headers to prevent guest quota exhaustion.
+    """
+    try:
+        ip = f"{random.randint(11, 200)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Origin": "https://iteraplay.com",
+            "Referer": "https://iteraplay.com/",
+            "X-Forwarded-For": ip,
+            "Client-IP": ip,
+            "X-Real-IP": ip
+        }
+        session = requests.Session()
+        session.headers.update(headers)
+        session.get("https://iteraplay.com", timeout=8)
+        r = session.post("https://iteraplay.com/api/stream", json={"url": tb_url}, timeout=12)
+        if r.status_code == 200:
+            data = r.json()
+            if data.get("status") == "success" and data.get("list"):
+                item = data["list"][0]
+                title = item.get("name") or "TeraBox Video"
+                size = item.get("size_formatted") or "Unknown"
+                duration = item.get("duration") or "--"
+                resolution = item.get("quality") or "HD"
+                fast_streams = item.get("fast_stream_url") or {}
+                stream_url = (
+                    fast_streams.get("480p") or
+                    fast_streams.get("720p") or
+                    fast_streams.get("360p") or
+                    (list(fast_streams.values())[0] if fast_streams else None)
+                )
+                if stream_url:
+                    return title, stream_url, size, resolution, duration, "Video"
+    except Exception as e:
+        print(f"[ITERAPLAY-EXTRACTOR-ERR] {e}")
+    return None, None, None, None, None, None
+
 def get_terabox_media(terabox_url: str):
+    # 1. Fast direct stream extractor (HLS .m3u8)
+    t, s, sz, res, dur, ft = extract_via_iteraplay(terabox_url)
+    if s:
+        return t, s, sz, res, dur, ft
+
+    # 2. Render backend fallback
     backend_url = "https://teraplayer-backend-temp.onrender.com/api/preview"
     headers = {
         "Content-Type": "application/json",
@@ -456,8 +502,8 @@ def is_stream_url_alive(url: str) -> bool:
 def get_or_refresh_video_stream(vid_id: str, force_refresh: bool = False):
     """
     Checks if cached video stream is alive.
-    If missing or expired (HTTP 403/404), retrieves the original backup TeraBox link,
-    re-extracts a fresh direct stream URL, updates the database & GitHub cache,
+    If missing, expired (HTTP 403/404), or an invalid embed link, retrieves the original backup TeraBox link,
+    re-extracts a fresh direct .m3u8 stream URL, updates the database & GitHub cache,
     and returns the fresh working video metadata.
     """
     cached = None
@@ -478,14 +524,14 @@ def get_or_refresh_video_stream(vid_id: str, force_refresh: bool = False):
     file_type = cached[5] if cached and cached[5] else "Video"
     terabox_url = cached[6] if cached and cached[6] else f"https://1024terabox.com/s/{vid_id}"
 
-    # 1. Verify if current stream is alive (unless force_refresh is requested)
-    if not force_refresh and stream_url and is_stream_url_alive(stream_url):
+    # 1. Verify if current stream is alive (must NOT be an embed link)
+    if not force_refresh and stream_url and "embed" not in stream_url and is_stream_url_alive(stream_url):
         return stream_url, title, size, res, dur, file_type, terabox_url
 
-    # 2. Stream is expired or dead: re-extract from backup TeraBox link!
+    # 2. Stream is expired, embed, or dead: re-extract direct .m3u8 from backup TeraBox link!
     tb_target = terabox_url or f"https://1024terabox.com/s/{vid_id}"
     try:
-        print(f"[AUTO-HEAL] Stream for {vid_id} expired or missing. Re-extracting from {tb_target}...")
+        print(f"[AUTO-HEAL] Re-extracting fresh direct stream for {vid_id} from {tb_target}...")
         new_title, new_stream, new_sz, new_res, new_dur, new_ft = get_terabox_media(tb_target)
         if new_stream and is_stream_url_alive(new_stream):
             final_title = new_title or title
@@ -494,20 +540,13 @@ def get_or_refresh_video_stream(vid_id: str, force_refresh: bool = False):
             final_dur = new_dur or dur
             final_ft = new_ft or file_type
             save_video_cache(vid_id, tb_target, new_stream, final_title, final_sz, final_res, final_dur, final_ft)
-            print(f"[AUTO-HEAL] Successfully recovered stream for {vid_id}!")
+            print(f"[AUTO-HEAL] Successfully recovered direct stream for {vid_id}!")
             return new_stream, final_title, final_sz, final_res, final_dur, final_ft, tb_target
     except Exception as e:
         print(f"[AUTO-HEAL ERROR] Failed to refresh video {vid_id} from {tb_target}: {e}")
 
-    # 3. Resilient Fallback: Official TeraBox embed player stream
-    # When direct fast_stream extractors are rate-limited, blocked, or expired,
-    # the official TeraBox embed player stream is 100% resilient and plays the video without expiring.
-    surl = vid_id[1:] if vid_id.startswith('1') else vid_id
-    fallback_embed = f"https://www.terabox.app/sharing/embed?surl={surl}"
-    print(f"[AUTO-HEAL] Using TeraBox embed fallback stream for {vid_id}: {fallback_embed}")
-    save_video_cache(vid_id, tb_target, fallback_embed, title, size, "HD Embed", dur, file_type)
-    return fallback_embed, title, size, "HD Embed", dur, file_type, tb_target
-
+    alive_stream = stream_url if (stream_url and "embed" not in stream_url and is_stream_url_alive(stream_url)) else None
+    return alive_stream, title, size, res, dur, file_type, terabox_url
 # ============================================================
 
 
