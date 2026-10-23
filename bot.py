@@ -1578,12 +1578,10 @@ def handle_direct_video_watch(message, vid_id):
         file_type = cached[5] if cached and cached[5] else "Video"
 
     if not stream_url:
-        bot.edit_message_text(
-            "❌ ভিডিও স্ট্রিম লিংক লোড করা সম্ভব হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
-            chat_id=message.chat.id,
-            message_id=status_msg.message_id
-        )
-        return
+        surl = vid_id[1:] if vid_id.startswith('1') else vid_id
+        stream_url = f"https://www.terabox.app/sharing/embed?surl={surl}"
+        resolution = "HD Embed"
+        print(f"[BOT-DIRECT-WATCH] Fallback to embed player for {vid_id}: {stream_url}")
 
     # 4. Check Subscription, Already Unlocked status, and Credits (Never block!)
     is_paid = check_paid_status(user_id)
@@ -1624,7 +1622,8 @@ def handle_direct_video_watch(message, vid_id):
         f"res={encoded_res}&"
         f"dur={encoded_dur}&"
         f"type={encoded_type}&"
-        f"lang={u_lang}"
+        f"lang={u_lang}&"
+        f"startapp={vid_id}"
         f"{ad_param}"
     )
 
