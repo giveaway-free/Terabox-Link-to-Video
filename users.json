@@ -194,12 +194,14 @@
   },
   "5873102250": {
     "username": "User_5873102250",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1BvRrpY2y1Wo73SomLrhlRA"
+    ]
   },
   "5874995505": {
     "username": "User_5874995505",
