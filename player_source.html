@@ -962,8 +962,8 @@
             no_video_title: "🎬 TeraStream Mini Player",
             no_video_desc: "ভিডিও স্ট্রিম করতে চ্যানেল থেকে ভিডিও লিংকে ক্লিক করুন।",
             expired_title: "⏳ ভিডিও লিঙ্ক মেয়াদোত্তীর্ণ (Link Expired)",
-            expired_desc: "ভিডিওটির প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে ক্লিক করলে বটের মাধ্যমে স্বয়ংক্রিয়ভাবে ব্যাকআপ টেরা বক্স লিঙ্ক থেকে নতুন লিঙ্ক তৈরি হয়ে যাবে। (কোনো সাবস্ক্রিপশন ছাড়াই দেখা যাবে)",
-            expired_refresh_btn: "🔄 ১-ক্লিকে রিফ্রেশ ও প্লে করুন (Refresh Link)",
+            expired_desc: "ভিডিওটির প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে চাপ দিলে কোনো রিডাইরেক্ট ছাড়াই সরাসরি নতুন লিঙ্ক নিয়ে ভিডিও চালু হয়ে যাবে।",
+            expired_refresh_btn: "⚡ Auto-Refresh & Play (1-Click)",
             expired_reload_btn: "🔁 পেজ রিলোড করুন",
             expand_btn: "↗ Expand",
             close_btn: "✕ Close"
@@ -1892,21 +1892,31 @@
         const lBox = document.getElementById('loading-box');
         const expBox = document.getElementById('expired-box');
 
-        // Check if freshly healed stream from GitHub is available
+        // Check if freshly healed stream from GitHub is available or request heal immediately
         if (sParam && !isAutoHealingStream) {
             isAutoHealingStream = true;
+            try {
+                const qName = `${encodeURIComponent(sParam)}__${Date.now()}.json`;
+                fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/heal_queue/${qName}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${GH_DATA_TOKEN}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+                    body: JSON.stringify({ message: `Auto heal ${sParam}`, content: btoa(JSON.stringify({ video_id: sParam, time: Date.now() })), branch: 'data' })
+                }).catch(() => {});
+                fetch(`/api/heal?video_id=${encodeURIComponent(sParam)}`).catch(() => {});
+            } catch(e) {}
+
             if (lBox) {
                 lBox.style.display = 'block';
                 const lTitle = document.getElementById('loading-title');
                 const lDesc = document.getElementById('loading-desc');
-                if (lTitle) lTitle.innerText = (currentLang === 'bn' ? "⚡ ভিডিও স্ট্রিম রিফ্রেশ হচ্ছে..." : "⚡ Refreshing Video Stream...");
-                if (lDesc) lDesc.innerText = (currentLang === 'bn' ? "পুরোনো স্ট্রিম লিঙ্কটির মেয়াদ শেষ হয়ে গেছে। ব্যাকআপ লিঙ্ক থেকে নতুন ডিরেক্ট স্ট্রিম লোড হচ্ছে..." : "Stream link expired. Auto-recovering fresh direct stream link from backup...");
+                if (lTitle) lTitle.innerText = (currentLang === 'bn' ? "⚡ নতুন ডিরেক্ট স্ট্রিম তৈরি হচ্ছে..." : "⚡ Generating Direct Stream...");
+                if (lDesc) lDesc.innerText = (currentLang === 'bn' ? "২-৩ সেকেন্ড অপেক্ষা করুন, প্লেয়ারে সরাসরি ভিডিও চালু হচ্ছে..." : "Auto-recovering fresh direct stream link from backup...");
             }
             if (vWrap) vWrap.style.display = 'none';
             if (expBox) expBox.style.display = 'none';
 
-            // Check GitHub for up to 3 seconds in case background healer refreshed it
-            for (let poll = 0; poll < 3; poll++) {
+            // Check GitHub for up to 4 seconds in case background healer refreshed it
+            for (let poll = 0; poll < 4; poll++) {
                 try {
                     const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
                     const ghVidRes = await fetch(ghVidUrl, {
@@ -1926,40 +1936,56 @@
                         }
                     }
                 } catch(e) {}
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 800));
             }
             isAutoHealingStream = false;
         }
 
-        // Show the 1-Click Refresh box to request fresh direct stream via bot
+        // Show the 1-Click In-App Live Refresh box (ZERO REDIRECT)
         if (vWrap) vWrap.style.display = 'none';
         if (lBox) lBox.style.display = 'none';
         if (expBox) {
             expBox.style.display = 'block';
             const t = I18N[currentLang] || I18N.en;
-            const expTitle = document.getElementById('expired-box-title'); if (expTitle) expTitle.innerText = t.expired_title || "⏳ Video Stream Link Expired";
-            const expDesc = document.getElementById('expired-box-desc'); if (expDesc) expDesc.innerText = t.expired_desc || "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link from the backup TeraBox link via the bot.";
-            const rBtn = document.getElementById('btn-refresh-stream'); if (rBtn) rBtn.innerText = t.expired_refresh_btn || "🔄 Auto-Refresh & Play (1-Click)";
+            const expTitle = document.getElementById('expired-box-title'); if (expTitle) expTitle.innerText = t.expired_title || "⚠️ Video Stream Link Expired";
+            const expDesc = document.getElementById('expired-box-desc'); if (expDesc) expDesc.innerText = t.expired_desc || (currentLang === 'bn' ? "ভিডিওটির প্লে লিঙ্কটি মেয়াদোত্তীর্ণ হয়ে গেছে। নিচের বাটনে চাপ দিলে কোনো রিডাইরেক্ট ছাড়াই সরাসরি নতুন লিঙ্ক নিয়ে ভিডিও চালু হয়ে যাবে।" : "The direct stream link for this video has expired. Tap below to automatically regenerate a fresh stream link directly in-app.");
+            const rBtn = document.getElementById('btn-refresh-stream'); if (rBtn) rBtn.innerText = t.expired_refresh_btn || "⚡ Auto-Refresh & Play (1-Click)";
             const expReloadBtn = document.getElementById('btn-expired-reload'); if (expReloadBtn) expReloadBtn.innerText = t.expired_reload_btn || "🔁 Reload Page";
 
-            const activeBot = getActiveBotUsername();
             if (rBtn) {
                 rBtn.onclick = async () => {
                     const origBtnText = rBtn.innerText;
                     rBtn.disabled = true;
-                    rBtn.innerText = (currentLang === 'bn' ? "⚡ রিফ্রেশ হচ্ছে, অপেক্ষা করুন..." : "⚡ Refreshing, please wait...");
+                    // EXACT USER SPECIFICATION: Button text changes immediately
+                    rBtn.innerText = (currentLang === 'bn' ? "⚡ নতুন ডিরেক্ট স্ট্রিম তৈরি হচ্ছে, ২-৩ সেকেন্ড অপেক্ষা করুন..." : "⚡ Generating new direct stream, please wait 2-3s...");
 
-                    // 1. Open bot to trigger instant on-demand healing
-                    const healUrl = `https://t.me/${activeBot}?start=v_${sParam}`;
-                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
-                        window.Telegram.WebApp.openTelegramLink(healUrl);
-                    } else {
-                        window.open(healUrl, '_blank');
-                    }
+                    // ZERO REDIRECT! NO openTelegramLink or bot opening!
+                    // 1. Send live heal request to GitHub queue
+                    try {
+                        const queueItemName = `${encodeURIComponent(sParam)}__${Date.now()}.json`;
+                        fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/heal_queue/${queueItemName}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `token ${GH_DATA_TOKEN}`,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/vnd.github.v3+json'
+                            },
+                            body: JSON.stringify({
+                                message: `Live heal ${sParam}`,
+                                content: btoa(JSON.stringify({ video_id: sParam, time: Date.now() })),
+                                branch: 'data'
+                            })
+                        }).catch(() => {});
+                    } catch(e) {}
 
-                    // 2. Poll GitHub while bot processes it
-                    for (let p = 0; p < 8; p++) {
-                        await new Promise(r => setTimeout(r, 1200));
+                    // Also ping /api/heal if server is reachable
+                    try {
+                        fetch(`/api/heal?video_id=${encodeURIComponent(sParam)}`).catch(() => {});
+                    } catch(e) {}
+
+                    // 2. Poll GitHub data branch for the fresh .m3u8 stream
+                    for (let p = 0; p < 14; p++) {
+                        await new Promise(r => setTimeout(r, 750));
                         try {
                             const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
                             const ghVidRes = await fetch(ghVidUrl, {
@@ -1973,6 +1999,7 @@
                                     if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl && !sVid.stream_url.includes('embed')) {
                                         rBtn.disabled = false;
                                         rBtn.innerText = origBtnText;
+                                        // Expired box disappears and video plays directly in native player!
                                         expBox.style.display = 'none';
                                         playVideo(sVid.stream_url, sVid.title || currentTitle, sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
                                         return;
