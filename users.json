@@ -515,7 +515,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "en",
-    "is_blocked": true,
+    "is_blocked": false,
     "watched": [
       "13pZjjAYabnrWqZumovcCWw",
       "1A6HefXH2uEyQQnygVTWJvQ",
