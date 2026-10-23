@@ -966,7 +966,9 @@
             expired_refresh_btn: "⚡ Auto-Refresh & Play (1-Click)",
             expired_reload_btn: "🔁 পেজ রিলোড করুন",
             expand_btn: "↗ Expand",
-            close_btn: "✕ Close"
+            close_btn: "✕ Close",
+            generating_stream_title: "⚡ নতুন ডিরেক্ট স্ট্রিম তৈরি হচ্ছে...",
+            generating_stream_desc: "২-৩ সেকেন্ড অপেক্ষা করুন, স্বয়ংক্রিয়ভাবে ভিডিও চালু হচ্ছে..."
         },
         en: {
             size: "📦 SIZE",
@@ -1040,7 +1042,9 @@
             expired_refresh_btn: "🔄 Auto-Refresh & Play (1-Click)",
             expired_reload_btn: "🔁 Reload Page",
             expand_btn: "↗ Expand",
-            close_btn: "✕ Close"
+            close_btn: "✕ Close",
+            generating_stream_title: "⚡ Generating New Direct Stream...",
+            generating_stream_desc: "Please wait 2-3s, video will play automatically..."
         },
         hi: {
             size: "📦 आकार",
@@ -1114,16 +1118,18 @@
             expired_refresh_btn: "🔄 1-क्लिक रिफ्रेश और प्ले करें (Refresh Link)",
             expired_reload_btn: "🔁 पेज रीलोड करें",
             expand_btn: "↗ बड़ा करें",
-            close_btn: "✕ बंद"
+            close_btn: "✕ बंद",
+            generating_stream_title: "⚡ नया डायरेक्ट स्ट्रीम बन रहा है...",
+            generating_stream_desc: "२-३ सेकंड प्रतीक्षा करें, वीडियो स्वतः शुरू हो जाएगा..."
         }
     };
 
-    let currentLang = "en";
+    let currentLang = "bn";
     function applyPlayerLanguage(lang) {
         if (lang === 'en' || lang === 'hi' || lang === 'bn') {
             currentLang = lang;
         } else {
-            currentLang = 'en';
+            currentLang = 'bn';
         }
         localStorage.setItem('player_lang', currentLang);
         
@@ -1187,10 +1193,16 @@
         }
 
         const loadingTitle = document.getElementById('loading-title');
+        const loadingDesc = document.getElementById('loading-desc');
         const loadingBox = document.getElementById('loading-box');
-        if (loadingBox && loadingBox.style.display !== 'none' && loadingTitle) {
-            if (loadingTitle.innerText.includes("Verifying") || loadingTitle.innerText.includes("যাচাই") || loadingTitle.innerText.includes("सत्यापन")) {
-                loadingTitle.innerText = t.checking;
+        if (loadingBox && loadingBox.style.display !== 'none') {
+            if (loadingTitle) {
+                if (loadingTitle.innerText.includes("Verifying") || loadingTitle.innerText.includes("যাচাই") || loadingTitle.innerText.includes("सत्यापन")) {
+                    loadingTitle.innerText = t.checking;
+                } else if (loadingTitle.innerText.includes("Generating") || loadingTitle.innerText.includes("তৈরি") || loadingTitle.innerText.includes("बन रहा") || loadingTitle.innerText.includes("Stream") || loadingTitle.innerText.includes("স্ট্রিম") || loadingTitle.innerText.includes("स्ट्रीम") || loadingTitle.innerText.includes("Refreshing") || loadingTitle.innerText.includes("রিফ্রেশ")) {
+                    loadingTitle.innerText = t.generating_stream_title;
+                    if (loadingDesc) loadingDesc.innerText = t.generating_stream_desc;
+                }
             }
         }
 
@@ -1230,9 +1242,9 @@
             } else if (tgLangCode) {
                 if (tgLangCode.startsWith('hi')) currentLang = 'hi';
                 else if (tgLangCode.startsWith('bn')) currentLang = 'bn';
-                else currentLang = 'en';
+                else currentLang = 'bn';
             } else {
-                currentLang = 'en';
+                currentLang = 'bn';
             }
         }
         applyPlayerLanguage(currentLang);
@@ -1908,10 +1920,11 @@
         // 100% FULLY AUTOMATIC: Zero buttons, zero clicks. Show animated loading indicator.
         if (lBox) {
             lBox.style.display = 'block';
+            const t = I18N[currentLang] || I18N.bn;
             const lTitle = document.getElementById('loading-title');
             const lDesc = document.getElementById('loading-desc');
-            if (lTitle) lTitle.innerText = (currentLang === 'bn' ? "⚡ নতুন ডিরেক্ট স্ট্রিম তৈরি হচ্ছে..." : "⚡ Generating New Direct Stream...");
-            if (lDesc) lDesc.innerText = (currentLang === 'bn' ? "২-৩ সেকেন্ড অপেক্ষা করুন, স্বয়ংক্রিয়ভাবে ভিডিও চালু হচ্ছে..." : "Please wait 2-3s, video will play automatically...");
+            if (lTitle) lTitle.innerText = t.generating_stream_title || "⚡ নতুন ডিরেক্ট স্ট্রিম তৈরি হচ্ছে...";
+            if (lDesc) lDesc.innerText = t.generating_stream_desc || "২-৩ সেকেন্ড অপেক্ষা করুন, স্বয়ংক্রিয়ভাবে ভিডিও চালু হচ্ছে...";
         }
 
         // 1. Immediately fire background live heal request
