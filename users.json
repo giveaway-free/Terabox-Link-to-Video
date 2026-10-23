@@ -846,7 +846,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": [
       "1Ievdz1teGPoxpGyOeo1b5g",
       "1OxhobGsA1Qw1KZHRKg5gNA",
@@ -1057,10 +1057,10 @@
     "lang": "bn",
     "is_blocked": false,
     "watched": [
-      "1eG1H_bzwmWSTqCGG02qE6g",
       "1KscYLLp07qREBhiaqyBY_Q",
-      "1jb3InIzHcW0H7mD06KySgw",
       "1YUuzdU1Hy0jkLNSF_iSkCA",
+      "1eG1H_bzwmWSTqCGG02qE6g",
+      "1jb3InIzHcW0H7mD06KySgw",
       "1xIqc2jQcH6s1lb9qdc0dJw"
     ]
   },
