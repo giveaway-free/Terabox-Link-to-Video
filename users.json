@@ -596,9 +596,9 @@
     "watched": [
       "10g7g2Bg1azrnWN4dXa-SqQ",
       "164g8NvjuW-zkJPxjKDh6lg",
+      "1Fl2jDAJXFpv0l6BH4Sz-fA",
       "1Qm_YAK259Ef1oHtv37JFqQ",
-      "1ZCTjeNEdMubDKeOZ_U0LrA",
-      "1Fl2jDAJXFpv0l6BH4Sz-fA"
+      "1ZCTjeNEdMubDKeOZ_U0LrA"
     ]
   },
   "7292362081": {
@@ -643,7 +643,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": [
       "11LWsWF25GeCjIExvv1zQew",
       "1Q8R_yeQK5iOIaSe4riyTjA",
