@@ -523,14 +523,12 @@
   },
   "7275114198": {
     "username": "User_7275114198",
-    "credits": 4,
+    "credits": 5,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": [
-      "164g8NvjuW-zkJPxjKDh6lg"
-    ]
+    "watched": []
   },
   "7488289885": {
     "username": "Dark_secrect",
