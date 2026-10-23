@@ -513,14 +513,12 @@
   },
   "7880054850": {
     "username": "User_7880054850",
-    "credits": 4,
+    "credits": 5,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": [
-      "1ehZUyUfZiOaBttiqbzLBPg"
-    ]
+    "watched": []
   },
   "8058439307": {
     "username": "User_8058439307",
