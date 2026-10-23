@@ -78326,15 +78326,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1H69pOBUYLUuA3lA24z0S2A"
   },
-  "16pogc0Rr80q4AjSMG9sXGA": {
-    "stream_url": "https://iteraplay.tera-api45.workers.dev/fast_stream?token=1C1RaZIsaQlWixM3tUuBiLjFrCZKCInSyMnv8UwNaOAKuruCagcKNsitpNTygd18mQTThehfgopLvdjDDkai0sW2b_dPL7909d7KnLuhfP4byRQ5cpGB0DbK9wHcM1kCvxvotU79Pqztj4kfqIADjMJ4kX_39-wSmpXRj4sIaWgmuxWarVUrSMZSq-TrOspwjWOZKChoJVjmxK0z9UcUDFaoRgrhO660G7xBlhfjz41s9Qsx1czrgFbhSv5rmLmw80ILzYn2M450xEgaEVyNkWpn0os1A1JtdwtbdkMEME8wG1PRzM95dBiEw0YrTTX2vhyZjtosA_JRTyKB7e50g6hahd2ilSwXLxb6kZs8fQfiKA.m3u8",
-    "title": "IMG_1399.MOV",
-    "size": "3.0 MB",
-    "res": "Auto (Adaptive)",
-    "dur": "00:15",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/16pogc0Rr80q4AjSMG9sXGA"
-  },
   "16n39qVmEvtNyYghjKERcfg": {
     "stream_url": "https://patient-morning-72a7.itp2.workers.dev/fast_stream?token=ofKWgj0BvBP-8WC5lR9cZluvnaUl00eVvaWxjwt30Qq0rH0pnJZ4ajcbORFf1hOHaj2N71OfhOr2fqTzyVpWa8e9DcvmIqT9EP2QwONFLeGCZaf3bQjZPL07QpzAnXj7SBr4p4L90vO7FZjQ4qC_8X_Uc_MiO0LJVogKpSVuxSY52GMuiRBcldPuEhEfRDEdeWb1Uf8yFbcoINzELXc4BOW2PeZyPyL2eXsAZbOovvGx_xFdTOWLAYqI-ofjggTswE7PCjyAwIa9jEuFEGxdaYAjlp6VZ6sOIKA18EK4cay5BsbOay0dfIxXCVHcpvBETrsCeW4ubpgpX6pAF3sI5ihoYvN27UjohLtdViw12vhV7lGA5ZaN-p0WSRkUoGHkyJEC587M.m3u8",
     "title": "IG   Ashleelstud (5).mp4",
@@ -78838,5 +78829,14 @@
     "dur": "02:51",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1UHVRT8fCMUcO8Hco7aaRlQ"
+  },
+  "16pogc0Rr80q4AjSMG9sXGA": {
+    "stream_url": "https://www.terabox.app/sharing/embed?surl=6pogc0Rr80q4AjSMG9sXGA",
+    "title": "IMG_1399.MOV",
+    "size": "3.0 MB",
+    "res": "HD Embed",
+    "dur": "00:15",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/16pogc0Rr80q4AjSMG9sXGA"
   }
 }
