@@ -715,7 +715,7 @@
     </div>
 
     <!-- Fallback Embed Player Iframe -->
-    <div id="iframe-wrapper" class="iframe-wrapper">
+    <div id="iframe-wrapper" class="iframe-wrapper" style="display:none!important;">
         <iframe id="embed-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
     </div>
 
@@ -1874,7 +1874,7 @@
     videoWrapper.addEventListener('mousemove', showControlsTemporarily);
     videoWrapper.addEventListener('touchstart', showControlsTemporarily);
 
-        let streamLoadFailures = 0;
+            let streamLoadFailures = 0;
     let isAutoHealingStream = false;
 
     async function triggerStreamExpiredRecovery(errDetail) {
@@ -1886,14 +1886,13 @@
         }
 
         const sParam = window.CURRENT_START_PARAM || (typeof getTelegramStartParam === 'function' ? getTelegramStartParam() : '') || (new URLSearchParams(window.location.search).get('startapp') || '');
-        const surl = (sParam && sParam.startsWith('1')) ? sParam.substring(1) : sParam;
         const currentTitle = document.getElementById('video-title') ? document.getElementById('video-title').innerText : "TeraBox Video";
 
         const vWrap = document.getElementById('video-wrapper');
         const lBox = document.getElementById('loading-box');
         const expBox = document.getElementById('expired-box');
 
-        // Check if we can immediately auto-heal or fetch freshly healed stream from GitHub
+        // Check if freshly healed stream from GitHub is available
         if (sParam && !isAutoHealingStream) {
             isAutoHealingStream = true;
             if (lBox) {
@@ -1901,13 +1900,13 @@
                 const lTitle = document.getElementById('loading-title');
                 const lDesc = document.getElementById('loading-desc');
                 if (lTitle) lTitle.innerText = (currentLang === 'bn' ? "⚡ ভিডিও স্ট্রিম রিফ্রেশ হচ্ছে..." : "⚡ Refreshing Video Stream...");
-                if (lDesc) lDesc.innerText = (currentLang === 'bn' ? "পুরোনো স্ট্রিম লিঙ্কটির মেয়াদ শেষ হয়ে গেছে। ব্যাকআপ লিঙ্ক থেকে নতুন স্ট্রিম তৈরি হচ্ছে..." : "Stream link expired. Auto-recovering fresh stream link from backup...");
+                if (lDesc) lDesc.innerText = (currentLang === 'bn' ? "পুরোনো স্ট্রিম লিঙ্কটির মেয়াদ শেষ হয়ে গেছে। ব্যাকআপ লিঙ্ক থেকে নতুন ডিরেক্ট স্ট্রিম লোড হচ্ছে..." : "Stream link expired. Auto-recovering fresh direct stream link from backup...");
             }
             if (vWrap) vWrap.style.display = 'none';
             if (expBox) expBox.style.display = 'none';
 
-            // Check GitHub for up to 2 seconds in case background healer or bot refreshed it
-            for (let poll = 0; poll < 2; poll++) {
+            // Check GitHub for up to 3 seconds in case background healer refreshed it
+            for (let poll = 0; poll < 3; poll++) {
                 try {
                     const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
                     const ghVidRes = await fetch(ghVidUrl, {
@@ -1918,7 +1917,7 @@
                         const jData = await ghVidRes.json();
                         if (jData && jData.content) {
                             const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
-                            if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
+                            if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl && !sVid.stream_url.includes('embed')) {
                                 isAutoHealingStream = false;
                                 if (lBox) lBox.style.display = 'none';
                                 playVideo(sVid.stream_url, sVid.title || currentTitle, sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
@@ -1932,17 +1931,7 @@
             isAutoHealingStream = false;
         }
 
-        // Direct stream recovery didn't find a new direct stream in 2s:
-        // Seamlessly switch to resilient official TeraBox embed player!
-        if (surl) {
-            if (lBox) lBox.style.display = 'none';
-            if (expBox) expBox.style.display = 'none';
-            console.log("Switching to official TeraBox embed player fallback for surl:", surl);
-            playEmbedVideo(surl, currentTitle);
-            return;
-        }
-
-        // If no surl is available, show the 1-Click Refresh box
+        // Show the 1-Click Refresh box to request fresh direct stream via bot
         if (vWrap) vWrap.style.display = 'none';
         if (lBox) lBox.style.display = 'none';
         if (expBox) {
@@ -1969,7 +1958,7 @@
                     }
 
                     // 2. Poll GitHub while bot processes it
-                    for (let p = 0; p < 6; p++) {
+                    for (let p = 0; p < 8; p++) {
                         await new Promise(r => setTimeout(r, 1200));
                         try {
                             const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
@@ -1981,7 +1970,7 @@
                                 const jData = await ghVidRes.json();
                                 if (jData && jData.content) {
                                     const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
-                                    if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl) {
+                                    if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl && !sVid.stream_url.includes('embed')) {
                                         rBtn.disabled = false;
                                         rBtn.innerText = origBtnText;
                                         expBox.style.display = 'none';
@@ -1992,12 +1981,6 @@
                             }
                         } catch(e) {}
                     }
-
-                    // 3. Fallback to embed player
-                    if (surl) {
-                        expBox.style.display = 'none';
-                        playEmbedVideo(surl, currentTitle);
-                    }
                     rBtn.disabled = false;
                     rBtn.innerText = origBtnText;
                 };
@@ -2006,20 +1989,6 @@
     }
 
     function playVideo(streamUrl, title, size, res, dur) {
-        if (streamUrl && (streamUrl.includes('/embed') || streamUrl.includes('sharing/embed') || streamUrl.includes('terabox.app/sharing'))) {
-            let surl = '';
-            try {
-                const u = new URL(streamUrl);
-                surl = u.searchParams.get('surl') || '';
-            } catch(e) {}
-            if (!surl) {
-                const sParam = window.CURRENT_START_PARAM || (typeof getTelegramStartParam === 'function' ? getTelegramStartParam() : '') || (new URLSearchParams(window.location.search).get('startapp') || '');
-                surl = (sParam && sParam.startsWith('1')) ? sParam.substring(1) : sParam;
-            }
-            playEmbedVideo(surl, title);
-            return;
-        }
-
         currentStreamUrl = streamUrl;
         lastMidrollTime = 0;
         streamLoadFailures = 0;
@@ -2171,43 +2140,7 @@
         lastMidrollTime = Math.floor(video.currentTime);
     });
 
-    function playEmbedVideo(surl, title = "TeraBox Video") {
-        currentStreamUrl = `https://www.terabox.app/sharing/embed?surl=${surl}`;
-        lastMidrollTime = 0;
-        streamLoadFailures = 0;
 
-        const _expB = document.getElementById('expired-box');
-        if (_expB) _expB.style.display = 'none';
-
-        document.getElementById('no-video-box').style.display = 'none';
-        document.getElementById('loading-box').style.display = 'none';
-        document.getElementById('paywall-box').style.display = 'none';
-        document.getElementById('join-bot-box').style.display = 'none';
-
-        if (window._hlsInstance) {
-            try { window._hlsInstance.destroy(); } catch(e) {}
-            window._hlsInstance = null;
-        }
-        if (video) {
-            try { video.pause(); video.src = ""; } catch(e) {}
-        }
-
-        videoWrapper.style.display = 'none';
-        iframeWrapper.style.display = 'block';
-        embedIframe.src = `https://www.terabox.app/sharing/embed?surl=${surl}`;
-
-        document.getElementById('video-title').style.display = 'block';
-        document.getElementById('video-title').innerText = title;
-        document.getElementById('grid-info').style.display = 'grid';
-        document.getElementById('info-res').innerText = 'HD Cloud';
-        document.getElementById('info-type').innerText = 'Cloud Stream';
-        document.getElementById('download-btn').style.display = 'flex';
-
-        applyPlayerLanguage(currentLang);
-        if (typeof window.updateBadgeStatus === 'function') {
-            window.updateBadgeStatus();
-        }
-    }
 
     document.getElementById('download-btn').addEventListener('click', function(e) {
         e.preventDefault();
@@ -3068,12 +3001,7 @@
             console.warn("Fast stream backend notice:", err);
         }
 
-        // Resilient fallback: If extractor fails or is busy, immediately play via official TeraBox embed
-        if (startParam) {
-            const surl = startParam.startsWith('1') ? startParam.substring(1) : startParam;
-            playEmbedVideo(surl, "TeraBox Video");
-            return;
-        }
+
 
         // Clean UI fallback if video is still extracting
         document.getElementById('loading-title').innerText = tNow.video_ready_title;
