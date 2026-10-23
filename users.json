@@ -19,7 +19,7 @@
   },
   "553826070": {
     "username": "tuserahammed",
-    "credits": 2,
+    "credits": 0,
     "is_paid": 1,
     "paid_expiry": "2026-11-15 20:41:36",
     "lang": "en",
@@ -652,7 +652,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": []
   },
   "7488289885": {
