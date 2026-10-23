@@ -1578,9 +1578,7 @@ def handle_direct_video_watch(message, vid_id):
         file_type = cached[5] if cached and cached[5] else "Video"
 
     if not stream_url:
-        surl = vid_id[1:] if vid_id.startswith('1') else vid_id
-        stream_url = f"https://www.terabox.app/sharing/embed?surl={surl}"
-        resolution = "HD Embed"
+        stream_url, title, size, resolution, duration, file_type, terabox_url = get_or_refresh_video_stream(vid_id, force_refresh=True)
         print(f"[BOT-DIRECT-WATCH] Fallback to embed player for {vid_id}: {stream_url}")
 
     # 4. Check Subscription, Already Unlocked status, and Credits (Never block!)
