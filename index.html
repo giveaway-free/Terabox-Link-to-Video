@@ -1964,6 +1964,10 @@
                         const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
                         if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl && !sVid.stream_url.includes('embed')) {
                             isAutoHealingStream = false;
+                            if (!isVip && MONETAG_ADS_ENABLED) {
+                                isAdMode = true;
+                                try { localStorage.removeItem("unlocked_" + sParam); } catch (_) {}
+                            }
                             if (lBox) lBox.style.display = 'none';
                             playVideo(sVid.stream_url, sVid.title || currentTitle, sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
                             return;
@@ -1992,6 +1996,10 @@
                     let resolution = extractResFromTitle(title);
                     if (streamUrl && !streamUrl.includes('embed')) {
                         isAutoHealingStream = false;
+                        if (!isVip && MONETAG_ADS_ENABLED) {
+                            isAdMode = true;
+                            try { localStorage.removeItem("unlocked_" + sParam); } catch (_) {}
+                        }
                         if (lBox) lBox.style.display = 'none';
                         playVideo(streamUrl, title, size, resolution, duration);
                         return;
