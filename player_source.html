@@ -1917,7 +1917,6 @@
         }
         isAutoHealingStream = true;
 
-        // 100% FULLY AUTOMATIC: Zero buttons, zero clicks. Show animated loading indicator.
         if (lBox) {
             lBox.style.display = 'block';
             const t = I18N[currentLang] || I18N.bn;
@@ -1927,91 +1926,97 @@
             if (lDesc) lDesc.innerText = t.generating_stream_desc || "২-৩ সেকেন্ড অপেক্ষা করুন, স্বয়ংক্রিয়ভাবে ভিডিও চালু হচ্ছে...";
         }
 
-        // 1. Immediately fire background live heal request
-        try {
-            const qName = `${encodeURIComponent(sParam)}__${Date.now()}.json`;
-            fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/heal_queue/${qName}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GH_DATA_TOKEN}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/vnd.github.v3+json'
-                },
-                body: JSON.stringify({
-                    message: `Auto heal ${sParam}`,
-                    content: btoa(JSON.stringify({ video_id: sParam, time: Date.now() })),
-                    branch: 'data'
-                })
-            }).catch(() => {});
-        } catch(e) {}
+        // PARALLEL ARCHITECTURE: Launch Ad IMMEDIATELY for free users while video generates in background!
+        let adPromise = Promise.resolve();
+        if (!isVip && MONETAG_ADS_ENABLED) {
+            isAdMode = true;
+            try { localStorage.removeItem("unlocked_" + sParam); } catch (_) {}
+            adPromise = showRewardedAdWithEnforcement();
+        }
 
-        try {
-            fetch(`/api/heal?video_id=${encodeURIComponent(sParam)}`).catch(() => {});
-        } catch(e) {}
-
-        // 2. Poll GitHub data branch for the fresh .m3u8 stream (up to 20 attempts = 15 seconds)
-        for (let poll = 0; poll < 20; poll++) {
-            await new Promise(r => setTimeout(r, 750));
+        // Simultaneously trigger & poll background stream generation
+        const streamPromise = (async () => {
             try {
-                const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
-                const ghVidRes = await fetch(ghVidUrl, {
-                    headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': `token ${GH_DATA_TOKEN}` },
-                    cache: 'no-store'
-                });
-                if (ghVidRes.ok) {
-                    const jData = await ghVidRes.json();
-                    if (jData && jData.content) {
-                        const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
-                        if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl && !sVid.stream_url.includes('embed')) {
-                            isAutoHealingStream = false;
-                            if (!isVip && MONETAG_ADS_ENABLED) {
-                                isAdMode = true;
-                                try { localStorage.removeItem("unlocked_" + sParam); } catch (_) {}
+                const qName = `${encodeURIComponent(sParam)}__${Date.now()}.json`;
+                fetch(`https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/heal_queue/${qName}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GH_DATA_TOKEN}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: `Auto heal ${sParam}`,
+                        content: btoa(JSON.stringify({ video_id: sParam, time: Date.now() })),
+                        branch: 'data'
+                    })
+                }).catch(() => {});
+            } catch(e) {}
+
+            try {
+                fetch(`/api/heal?video_id=${encodeURIComponent(sParam)}`).catch(() => {});
+            } catch(e) {}
+
+            // Poll GitHub data branch for the fresh .m3u8 stream
+            for (let poll = 0; poll < 20; poll++) {
+                await new Promise(r => setTimeout(r, 750));
+                try {
+                    const ghVidUrl = `https://api.github.com/repos/giveaway-free/Terabox-Link-to-Video/contents/v/${encodeURIComponent(sParam)}.json?ref=data&_t=${Date.now()}`;
+                    const ghVidRes = await fetch(ghVidUrl, {
+                        headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': `token ${GH_DATA_TOKEN}` },
+                        cache: 'no-store'
+                    });
+                    if (ghVidRes.ok) {
+                        const jData = await ghVidRes.json();
+                        if (jData && jData.content) {
+                            const sVid = JSON.parse(decodeURIComponent(escape(atob(jData.content.replace(/\s/g, '')))));
+                            if (sVid && sVid.stream_url && sVid.stream_url !== currentStreamUrl && !sVid.stream_url.includes('embed')) {
+                                return sVid;
                             }
-                            if (lBox) lBox.style.display = 'none';
-                            playVideo(sVid.stream_url, sVid.title || currentTitle, sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--");
-                            return;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            // Fallback: Direct extractor call if queue took longer
+            try {
+                const targetTbUrl = `https://1024terabox.com/s/${sParam}`;
+                const apiRes = await fetch(EXTRACTOR_API, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: targetTbUrl, password: "" })
+                });
+                if (apiRes.ok) {
+                    const data = await apiRes.json();
+                    if (data && (data.download_url || data.stream_url || (data.list && data.list.length > 0))) {
+                        let item = (data.list && data.list.length > 0) ? data.list[0] : data;
+                        let title = item.server_filename || item.title || data.title || currentTitle;
+                        let streamUrl = item.dlink || item.fast_download_url || data.download_url || data.stream_url;
+                        let size = item.size || data.size ? formatSize(item.size || data.size) : "Unknown";
+                        let duration = item.duration || data.duration ? formatDuration(item.duration || data.duration) : "--";
+                        let resolution = extractResFromTitle(title);
+                        if (streamUrl && !streamUrl.includes('embed')) {
+                            return { stream_url: streamUrl, title: title, size: size, res: resolution, dur: duration };
                         }
                     }
                 }
             } catch(e) {}
-        }
+            return null;
+        })();
 
-        // 3. Fallback: Direct extractor call if queue took longer
-        try {
-            const targetTbUrl = `https://1024terabox.com/s/${sParam}`;
-            const apiRes = await fetch(EXTRACTOR_API, {
-                method: 'POST',
-                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: targetTbUrl, password: "" })
-            });
-            if (apiRes.ok) {
-                const data = await apiRes.json();
-                if (data && (data.download_url || data.stream_url || (data.list && data.list.length > 0))) {
-                    let item = (data.list && data.list.length > 0) ? data.list[0] : data;
-                    let title = item.server_filename || item.title || data.title || currentTitle;
-                    let streamUrl = item.dlink || item.fast_download_url || data.download_url || data.stream_url;
-                    let size = item.size || data.size ? formatSize(item.size || data.size) : "Unknown";
-                    let duration = item.duration || data.duration ? formatDuration(item.duration || data.duration) : "--";
-                    let resolution = extractResFromTitle(title);
-                    if (streamUrl && !streamUrl.includes('embed')) {
-                        isAutoHealingStream = false;
-                        if (!isVip && MONETAG_ADS_ENABLED) {
-                            isAdMode = true;
-                            try { localStorage.removeItem("unlocked_" + sParam); } catch (_) {}
-                        }
-                        if (lBox) lBox.style.display = 'none';
-                        playVideo(streamUrl, title, size, resolution, duration);
-                        return;
-                    }
-                }
-            }
-        } catch(e) {}
+        // Wait for BOTH: The ad completion AND the stream generation!
+        const [_, sVid] = await Promise.all([adPromise, streamPromise]);
 
         isAutoHealingStream = false;
+        if (lBox) lBox.style.display = 'none';
+
+        if (sVid && sVid.stream_url) {
+            // Video is already extracted and waiting — plays immediately without a second ad!
+            playVideo(sVid.stream_url, sVid.title || currentTitle, sVid.size || "Unknown", sVid.res || "HD", sVid.dur || "--", true);
+        }
     }
 
-    function playVideo(streamUrl, title, size, res, dur) {
+    function playVideo(streamUrl, title, size, res, dur, skipAd = false) {
         currentStreamUrl = streamUrl;
         lastMidrollTime = 0;
         streamLoadFailures = 0;
@@ -2046,7 +2051,7 @@
         }
 
         function startPlaybackWithAd() {
-            if (isAdMode) {
+            if (!skipAd && isAdMode && !isVip && MONETAG_ADS_ENABLED) {
                 showRewardedAdWithEnforcement().then(() => {
                     video.play().then(() => updatePlayIcon(true)).catch(() => updatePlayIcon(false));
                 });
