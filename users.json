@@ -529,11 +529,11 @@
     "lang": "bn",
     "is_blocked": false,
     "watched": [
-      "1a2dDgNt-roc_tHXKEomFgQ",
-      "1zw0ag3_kjwQVtGo3RzUxGg",
-      "1mlE6GNSinRFMWsCphajGfw",
       "1OoZxguk9SN1NU6LUXGK-mw",
-      "1xLPRK5Kh574qW0Li6t5Hgw"
+      "1a2dDgNt-roc_tHXKEomFgQ",
+      "1mlE6GNSinRFMWsCphajGfw",
+      "1xLPRK5Kh574qW0Li6t5Hgw",
+      "1zw0ag3_kjwQVtGo3RzUxGg"
     ]
   },
   "7275114198": {
@@ -587,7 +587,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": []
   },
   "7880054850": {
