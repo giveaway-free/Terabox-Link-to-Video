@@ -602,12 +602,14 @@
   },
   "7292362081": {
     "username": "User_7292362081",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1eKAGqv9UXEiitKZUeOmgRQ"
+    ]
   },
   "7471854456": {
     "username": "User_7471854456",
