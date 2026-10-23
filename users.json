@@ -523,12 +523,14 @@
   },
   "7253363421": {
     "username": "User_7253363421",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1zw0ag3_kjwQVtGo3RzUxGg"
+    ]
   },
   "7275114198": {
     "username": "User_7275114198",
