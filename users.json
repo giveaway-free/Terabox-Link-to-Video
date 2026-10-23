@@ -789,12 +789,14 @@
   },
   "8764215655": {
     "username": "User_8764215655",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1PmgFdcrdr0gWxvYjmA0V7Q"
+    ]
   },
   "8794535498": {
     "username": "User_8794535498",
