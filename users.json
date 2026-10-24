@@ -19,7 +19,7 @@
   },
   "553826070": {
     "username": "tuserahammed",
-    "credits": 0,
+    "credits": 2,
     "is_paid": 1,
     "paid_expiry": "2026-11-15 20:41:36",
     "lang": "en",
@@ -667,8 +667,8 @@
     "lang": "bn",
     "is_blocked": false,
     "watched": [
-      "1_nu7QKKtFOPCwD5e2yGlOw",
-      "1ZGItpPB014ubO8VzEhnwTg"
+      "1ZGItpPB014ubO8VzEhnwTg",
+      "1_nu7QKKtFOPCwD5e2yGlOw"
     ]
   },
   "7471854456": {
@@ -827,6 +827,15 @@
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": true,
+    "watched": []
+  },
+  "7873145103": {
+    "username": "darkxsoftt",
+    "credits": 5,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "lang": "bn",
+    "is_blocked": false,
     "watched": []
   },
   "7880054850": {
