@@ -1446,14 +1446,15 @@
   },
   "8991643421": {
     "username": "User_8991643421",
-    "credits": 3,
+    "credits": 2,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
     "watched": [
       "1WZfLHJPlOgPGxae_NAOHHQ",
-      "163oARwGHNwPMUra6Y_G7QQ"
+      "163oARwGHNwPMUra6Y_G7QQ",
+      "1mSmTocGbjjYn4thTHdC6sg"
     ]
   }
 }
