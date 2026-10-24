@@ -689,6 +689,15 @@
     "is_blocked": true,
     "watched": []
   },
+  "7680461349": {
+    "username": "User_7680461349",
+    "credits": 5,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "lang": "bn",
+    "is_blocked": false,
+    "watched": []
+  },
   "7680909403": {
     "username": "User_7680909403",
     "credits": 0,
@@ -1399,8 +1408,8 @@
     "watched": [
       "153BQppG_opIQG4Qn8HovuA",
       "1VLDBu3s4HoDeZBo5MBXzQQ",
-      "new_user",
-      "1jLRyYnL3-gMvngtxWuFXfQ"
+      "1jLRyYnL3-gMvngtxWuFXfQ",
+      "new_user"
     ]
   },
   "8991643421": {
