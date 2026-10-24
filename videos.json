@@ -65393,15 +65393,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1Zi1EV7hClqodOBubH7kUEw"
   },
-  "1g6q6ekp0aUfO8QVBN17H1w": {
-    "stream_url": "https://iteraplay.tera-api17.workers.dev/fast_stream?token=oh2Ul2nXSIQArsSdnqqxIQieTzIU9HFO2TYL0R6TXwEcxDf__bDTpiWOWs-NqM08fzczUrH17exRJ5Ko-8Ipic4cAepipg-cOnEeU6pBiEhQ0mS6R2flJ85_kgw-Y3y1hVuP6dnjz_Wq-pQl84tgV8aAMcADOI3nbWsAO44F9YVMn_SInHkCvTU6GjAolFlyY6d736sremVKQpKUD9AbXIPcs2pJi7eQ70vYXJ0FeUd1EqTp-i7looRoq6-sY-X0RBY5naHoij4iL8LKQxMCgrED7GmFr9XqzUOS3MSy8cF6UN6Tvgjr4JvOSZBclRqmGssWOS4i1jLJhNH1gPXJip9Lc_9fyAFDftILL7fF.m3u8",
-    "title": "Jffg.mp4",
-    "size": "2.2 MB",
-    "res": "Auto (Adaptive)",
-    "dur": "00:12",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/1g6q6ekp0aUfO8QVBN17H1w"
-  },
   "1KNhkuEx6ytrkEWumvj-NJA": {
     "stream_url": "https://cold-grass-4e5e.zycohuro.workers.dev/fast_stream?token=KVGiQmrfxkzGHkA8xzLX3O-ndXlg_W2S8NKF-HTlwN0frThs4LggDuqLlZCX2KGESqvXwlFB0FuCwRdO1sUTheCFLlXrblFI77fSOm3imiUy4Iaw9E04RdIf5fH5uoi0GPrJ-M4bC1XdHExoNTRer3PRcKpwj6zPJ6GaSoMJMWo3hQBmrtCnLAYx8VexvGSr06joD1ygXSE0lGYGVakmzVHZPOSCw9GBWshSeJ0k_pWJWGZvGkDlC2cnHfXOTHwc9ugOslbvTE4axN41_rC6NFUbo-UcqRYQihnZ_L-NL8Q7xXR5MEcOmHNXqgWNw45jX59cTubpFOw6F5zbFXTdioBAHWMZDWYpVxB3-7hfz-ajlsIOORTtgEFSiK5_j48Gk4fH8zhpS4w.m3u8",
     "title": "COLLECTION 2_20240503_020159.mp4",
@@ -88180,5 +88171,14 @@
     "dur": "12:33",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/15iDDb9hVDeULWDI0FgEnDA"
+  },
+  "1g6q6ekp0aUfO8QVBN17H1w": {
+    "stream_url": "https://ancient-feather-c062.tatymo.workers.dev/fast_stream?token=whmFAyRGUD_LWpRmzmBrlOKbdJqbWszUrz7w3zbS_hzJYCNHG_M8-ViUlfHTObVz0wXCIWepQDjfaX8VXxe8c6wTuovSAbQCNmmOCOrzAH8j4wfBIEVXyXVZ6GVePeTzgiv9MjjS-I6Vkc01IyRdc7CSZcCxvqnJnmRuaNacuZyWE5ZO03cY4tfkpx6CT_ep6N4ORJGZ_mE4s9d4IVvUfaRFHhHE1DMfb2B7UMvD_CxB3ifSdHPVD4nV3Xcx9DAfwVrxJZdWe-bwaQCu6CeY2dLrdhbPkzIxo03Mb9j9i6jKqflsWjiwFcpArlgw-QvA5fcGtw7ENiI4yooVvLKsyb5Oe0SafLvM5W9Tvuc_.m3u8",
+    "title": "Jffg.mp4",
+    "size": "2.18 MB",
+    "res": "720p",
+    "dur": "00:12",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1g6q6ekp0aUfO8QVBN17H1w"
   }
 }
