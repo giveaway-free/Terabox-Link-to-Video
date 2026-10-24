@@ -80081,15 +80081,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1is5M8nHNR3mQ1ueoTrsxqA"
   },
-  "1Rw76aWZo9emR2GRk2y-Snw": {
-    "stream_url": "https://iteraplay.tera-api55.workers.dev/fast_stream?token=eLd6ANXBWLwfgoZIm5BZZdDzEDm71Bc9ydK2NNt8HdNwxTwJxhwc-cpZ9fcDKPY44f8pHHWxkZ0GYz29UWoATwEI5PT6d--1TxR-5glT_6qES8is9A_6-w69q7Bt24ETYaL0hx2wYRsapTYm5_WWVkVpPHYObwilAaFGlm3bfZ04dKeafSNX0knOlBdx7_NCb0At0fHaUdVW88_X9LPrAev5RmDGdcO1qrjLaU2rhuDBdN7kapLTK2nI3S-SvLBPyirONCDNfcJfJUAvZ1mHA-peuIfTvPud1ZyDGEOfma_y57T1CH6wEX5gQ-k8jrjO647KlokccmZFrl-8Oyjbt3__TH83TddT9PLDzW9S0g.m3u8",
-    "title": "vid_5.mp4",
-    "size": "17.06 MB",
-    "res": "360p",
-    "dur": "01:43",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/1Rw76aWZo9emR2GRk2y-Snw"
-  },
   "1U2yejdROY9zhwZIcAtoIqQ": {
     "stream_url": "https://shiny-cake-a7d9.cugamymi.workers.dev/fast_stream?token=vPL1nSzneIZOAYgdUuP3JxJ6zwZw7cTgj_uLncTTFLH74AlGHQ3ScjgFXqWoYY-lBa47d_1BIaRXb9R-5CahkayCmCJk4lL4TncTtkJJNAPk3MZCUGWOmSM8zp_uIWA2bIPf1gJEzW68Lhs4eFjkFNdqBOHr3fBA4IoBEsRiNUcH7Hl0mG7DcTOg9YHv0O6jPvmQT87oTIskSPKtOJ3Q60c9dVoPQUYLPZAnyg3_zMUNjg89-1PRM2_nwuWRMeEYbCaQ41488mwDqqzN8jHM6IAB_M4N9Um12aPUUjNdkmSpZsF_umFBMRsGqD8-bBrdJ2XWIoGRkM1X_LLxTyeIqVUof_sw1E3XSaASRnmK6V25IQmt2Y2AxokLabgP.m3u8",
     "title": "VID-20220705-WA0081.mp4",
@@ -86776,5 +86767,14 @@
     "dur": "01:32",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1ohgZJbOaFhTwghaPi23ILw"
+  },
+  "1Rw76aWZo9emR2GRk2y-Snw": {
+    "stream_url": "https://iteraplay.tera-api39-new.workers.dev/fast_stream?token=s1BOxWADAzdDSxGcQi9-k5m7WQCVw0jP_JE-zrg6d3F3EAusFJDCLpUB9U2R9eTT8ai7wBwjehP8lyUHLZ3QiwyoU59jQuB0jShepG209PqX_4pk6dyyQw1QK_pe2UbqMWUe7X1YAvTyxpnU20b-K36gDethV41YqBDutdDE8dUL9RAP_07OEVXnxY35DzmjN6yRJOUB_OLWoRsnd54JdClUugpm8Fdx2ggsxIC6m0nu4Ekv5H1bJYm-5rjA5Ki84VEDQN22gKqpwd7uq43QbvVirFvbx_ho5YXlGKl_AFCTOjQoU9U9hJYhALB-oehED0kET9imKsQHyC6Z2nhd60y_jS9agMYtM-UE-g.m3u8",
+    "title": "vid_5.mp4",
+    "size": "17.06 MB",
+    "res": "360p",
+    "dur": "01:43",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1Rw76aWZo9emR2GRk2y-Snw"
   }
 }
