@@ -88531,5 +88531,14 @@
     "dur": "03:40",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1_UlMH1vVG8p4XOfDn4eAfw"
+  },
+  "1rdMxowJBDclSh8rbqZqjFQ": {
+    "stream_url": "https://iteraplay.tera-api38.workers.dev/fast_stream?token=IUgbkPSmTR1aQKLPrilS5ieVpI-rjVHNnjuSqLaogqF2145PavT6EwcBysJg2NrusFMlGKXE4zMIKTQ6Z5pNsdXeQSuDm3XDOVuI6QcfJbULa1E7p4dbvEsiJnBL3sPRCjdcAfhCgigNLTs3wHWzV4LAK7C3zEuyG9pywNmxsxd9dREjrPE-CnQ5XWUPjY1rfgQEUUUV3rX2K3lAgUp5qRJo357JI2hLIFwYTKCi_ELCXq_8JIzAW0YMT0tRF9uMQrQ4LaeN9vExubZ8szqLkTuhiCIOvxRRbE4US3aai3rPof_ClmQSDCFvSfIz46AzVeGC7Cr7DbJ51R7XBcINDXhe_Hx4rg_x0f0mRGHUgw.m3u8",
+    "title": "40893.mp4",
+    "size": "12.40 MB",
+    "res": "1080p",
+    "dur": "01:31",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1rdMxowJBDclSh8rbqZqjFQ"
   }
 }
