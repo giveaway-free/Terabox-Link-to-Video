@@ -691,12 +691,14 @@
   },
   "7680461349": {
     "username": "User_7680461349",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1zfgaBh6lQIBdTdo-Ty98LA"
+    ]
   },
   "7680909403": {
     "username": "User_7680909403",
