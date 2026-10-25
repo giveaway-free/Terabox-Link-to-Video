@@ -1818,12 +1818,14 @@
   },
   "8973679535": {
     "username": "User_8973679535",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "15LkQmJfByC8H73zcF3KHWw"
+    ]
   },
   "8978355702": {
     "username": "User_8978355702",
