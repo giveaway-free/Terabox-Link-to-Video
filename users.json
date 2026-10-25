@@ -19,7 +19,7 @@
   },
   "553826070": {
     "username": "tuserahammed",
-    "credits": 6,
+    "credits": 8,
     "is_paid": 1,
     "paid_expiry": "2026-11-15 20:41:36",
     "lang": "en",
@@ -186,6 +186,15 @@
       "1UuNMDfbUb96T2wOhCcE9jQ",
       "1pJFy0SYdZmuvREUlIWgPDA"
     ]
+  },
+  "5469057186": {
+    "username": "Gundaa2000",
+    "credits": 5,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "lang": "bn",
+    "is_blocked": false,
+    "watched": []
   },
   "5515842257": {
     "username": "User_5515842257",
