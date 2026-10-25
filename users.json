@@ -1554,12 +1554,14 @@
   },
   "8926479969": {
     "username": "User_8926479969",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1CADXkcJQFvN5orFRI6GCWA"
+    ]
   },
   "8933756224": {
     "username": "User_8933756224",
