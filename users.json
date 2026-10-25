@@ -19,7 +19,7 @@
   },
   "553826070": {
     "username": "tuserahammed",
-    "credits": 0,
+    "credits": 2,
     "is_paid": 1,
     "paid_expiry": "2026-11-15 20:41:36",
     "lang": "en",
@@ -282,6 +282,15 @@
       "1Qh3TECC0hukWWS-R6MOA5Q",
       "1rsh-sniU-6cOINgTThn4xw"
     ]
+  },
+  "6143902650": {
+    "username": "Badboy2080",
+    "credits": 5,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "lang": "bn",
+    "is_blocked": false,
+    "watched": []
   },
   "6151536170": {
     "username": "User_6151536170",
