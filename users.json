@@ -189,14 +189,13 @@
   },
   "5469057186": {
     "username": "Gundaa2000",
-    "credits": 3,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
     "watched": [
-      "1p7YKkqedUk12HUhdT_wM_w",
-      "1ejCtiHCTT46UvKTeajWmLw"
+      "1p7YKkqedUk12HUhdT_wM_w"
     ]
   },
   "5515842257": {
@@ -340,7 +339,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": []
   },
   "6301137758": {
@@ -1698,7 +1697,7 @@
   },
   "8964327928": {
     "username": "User_8964327928",
-    "credits": 4,
+    "credits": 5,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
