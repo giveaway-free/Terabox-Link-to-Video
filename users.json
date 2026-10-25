@@ -1340,13 +1340,13 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": [
       "1AQxjaIz7ejs_Ovzv7efEVQ",
-      "1iCqO1NMvgR2NiIrmCTVq_g",
-      "1cdpWz7q4vbn4Z4CcUNcnVQ",
+      "1GSNQaUD3Q1BgdFUO6yHbqA",
       "1Q6RymddTRq3l_pQBZ6bMxA",
-      "1GSNQaUD3Q1BgdFUO6yHbqA"
+      "1cdpWz7q4vbn4Z4CcUNcnVQ",
+      "1iCqO1NMvgR2NiIrmCTVq_g"
     ]
   },
   "8650612551": {
