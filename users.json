@@ -189,12 +189,14 @@
   },
   "5469057186": {
     "username": "Gundaa2000",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1p7YKkqedUk12HUhdT_wM_w"
+    ]
   },
   "5515842257": {
     "username": "User_5515842257",
