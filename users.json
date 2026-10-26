@@ -1163,12 +1163,14 @@
   },
   "8254473453": {
     "username": "User_8254473453",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1Ji0tWBsdtF1Q6ci7uSWvvQ"
+    ]
   },
   "8345179682": {
     "username": "User_8345179682",
