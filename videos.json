@@ -122227,5 +122227,14 @@
     "dur": "02:00:04",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1FbJ2Bd45gU7vNVfIv5i4Xg"
+  },
+  "1rK_Q6nPeDqZ2AI4oxKStxg": {
+    "stream_url": "https://iteraplay.tera-api86.workers.dev/fast_stream?token=e2nR3YwdHOhPdDPIs2G14XNjCIEUCoCUxqj9cIbuZvnUTac9IMrz0mxxnLGqLe8FN3jkXsct06SaFl-2LQCAcXYRKufdfZM7FVcrjcP6owNx19fkG6EtRPmBOoulr6nSfu5X8ttezfMZT2ZPeVMxStPmHwq9qhTGKdVCYNsoVGlmvapcKz_Lv1p280AKlhPjQ_ENeWX5vCcKxpP8QUQW9RtrRu4yhhHKzHkdr_FTSco0JqBoqUoCvTGGf8rNO_Nh42Wj0eldfMS0UEpAFZvXF9VMMISlPzmhNlIEgXN4iHbKZSK8UGkTVv1tY0HfQ3MrEheLPLVuY0u8e9vuICYRofL2M0ImmOItGTpC3w080B9-CNwektL-IlVQPcVdizcGPfjPkT_m3D7R5R4yrQ.m3u8",
+    "title": "(AsupanTeraBoxStream) ATID-456(1).mp4",
+    "size": "990.60 MB",
+    "res": "720p",
+    "dur": "01:58:46",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1rK_Q6nPeDqZ2AI4oxKStxg"
   }
 }
