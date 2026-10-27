@@ -150,10 +150,10 @@
     "is_blocked": false,
     "watched": [
       "116SLJ3YQJIZM3AW4lG9yHg",
-      "1MqPALs9GON6ZnXL9fgiGwg",
       "16e7-dBWRuIiBjpkxVTWQjg",
-      "1yGy_oMMF1L3Kxp4GA_wW5Q",
-      "19OQ8sdealq5lyWO0lhdBtw"
+      "19OQ8sdealq5lyWO0lhdBtw",
+      "1MqPALs9GON6ZnXL9fgiGwg",
+      "1yGy_oMMF1L3Kxp4GA_wW5Q"
     ]
   },
   "5361465032": {
@@ -654,7 +654,7 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": []
   },
   "7061190552": {
