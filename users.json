@@ -114,10 +114,10 @@
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
-    "is_blocked": false,
+    "is_blocked": true,
     "watched": [
-      "1UMZgiS0hCiv-uMehOdcx3A",
       "1Ech0RLihJ3tKdgHir107qg",
+      "1UMZgiS0hCiv-uMehOdcx3A",
       "1vjpJfMe62xTwUEaHTkehVw"
     ]
   },
