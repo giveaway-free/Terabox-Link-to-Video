@@ -1275,12 +1275,14 @@
   },
   "8211433625": {
     "username": "User_8211433625",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1LdmBOjX_GmQralPGDCyk4w"
+    ]
   },
   "8235292360": {
     "username": "User_8235292360",
@@ -1532,15 +1534,14 @@
   },
   "8650539989": {
     "username": "User_8650539989",
-    "credits": 2,
+    "credits": 3,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
     "watched": [
       "1hSPqrA012mI6DiYHpKSikw",
-      "1ouwFEwpgDXI8uGK_dKplsQ",
-      "1Lez3ut3Bcw52wM97k7BU7g"
+      "1ouwFEwpgDXI8uGK_dKplsQ"
     ]
   },
   "8650612551": {
