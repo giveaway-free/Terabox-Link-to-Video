@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: terabox-link-to-video-1
-    env: python
-    region: singapore
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python terastream_all_in_one.py
