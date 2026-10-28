@@ -133172,15 +133172,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1MiFUEIWsYnTKnRunugZvWg"
   },
-  "1rAlEidp24nezS1MK3J-rZg": {
-    "stream_url": "https://iteraplay.tera-api84.workers.dev/fast_stream?token=Y57kMqp55uedRLvhjiLPAeXIK83HREvOi5Ad2C4J2TrqshG-OIA300ItpqTDZFKS3gWG6NGGRtR5Of3TbE5--Y89K7PkaFNBQBVUo3CORL3NxrrugvPzApbLzZGDnzeBdu_BT_NMsb2wMCOFbq_rAzReFcIKpKToYzNGQMMRmqLxOSAkSPMMfu7IgTcDBBP-fSDCWbU_adbVMMKJHkIrzKUhejsFFERfZCBND0Kq4SEIJh8rJI8rCR0pCdd6zvwKAwLqPH3mxWtikJl71ZEZ_S7a4zUqE48Z4X8ri91MiOPYSXt7waYHu63qPahNVjWCt7JQ-sIrSBny4IgWN7iMJOvUBfgxAkz8PUVvxmuKx3W4TKmoTeuGrgWDzQfa4XV2kgl7c20.m3u8",
-    "title": "NGOD-180_HanaHaruna_720p(1).mp4",
-    "size": "466.56 MB",
-    "res": "480p",
-    "dur": "02:04:01",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/1rAlEidp24nezS1MK3J-rZg"
-  },
   "1Y1JcwwDuHPAWg2xzpHxSpg": {
     "stream_url": "https://wandering-snowflake-f16a.xapi5.workers.dev/fast_stream?token=YG02lePbcv24eYXBIrb5xJtQMCYDQSbxwtJa6GNV_wzyw3-pOmBAHMdsASnVyye7RkFZ6BT6e3FpIOMEBHPM_Plo8GTAvAw1Yllz9jg3GEoruyTHpRsbaHwpkK0X0_5NQCE8cQUtbruIBDjYqTDvjTKYVLkihu24odOjAqpBkTTt-ZsHc5KY6xBdre3L-Q5rfld9qp9vR4PxG_tnjobaQHSf9PIxzeLTx1bb5YFMKah-z-ulC6XWYGa_boeIumdgQHErX2EsYcr3JVS-SLRBMdxeem0NmRvugPzRs0cqODUSZaOA3AC9DnX5G1CtHj9BZPRgfehbde9uQd4NsU6uMPnu7bqgMziujfs88qyFqCitsYbr1AxbaWEjF7vrqF0C9bfCnw.m3u8",
     "title": "(Javsubindo) MIDE-690(1).mp4",
@@ -134251,5 +134242,14 @@
     "dur": "01:57:12",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1TYu9Qt2c4UCtgCvN8okTRQ"
+  },
+  "1rAlEidp24nezS1MK3J-rZg": {
+    "stream_url": "https://iteraplay.tera-api84.workers.dev/fast_stream?token=Y57kMqp55uedRLvhjiLPAeXIK83HREvOi5Ad2C4J2TrqshG-OIA300ItpqTDZFKS3gWG6NGGRtR5Of3TbE5--Y89K7PkaFNBQBVUo3CORL3NxrrugvPzApbLzZGDnzeBdu_BT_NMsb2wMCOFbq_rAzReFcIKpKToYzNGQMMRmqLxOSAkSPMMfu7IgTcDBBP-fSDCWbU_adbVMMKJHkIrzKUhejsFFERfZCBND0Kq4SEIJh8rJI8rCR0pCdd6zvwKAwLqPH3mxWtikJl71ZEZ_S7a4zUqE48Z4X8ri91MiOPYSXt7waYHu63qPahNVjWCt7JQ-sIrSBny4IgWN7iMJOvUBfgxAkz8PUVvxmuKx3W4TKmoTeuGrgWDzQfa4XV2kgl7c20.m3u8",
+    "title": "NGOD-180_HanaHaruna_720p(1).mp4",
+    "size": "466.56 MB",
+    "res": "480p",
+    "dur": "02:04:01",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1rAlEidp24nezS1MK3J-rZg"
   }
 }
