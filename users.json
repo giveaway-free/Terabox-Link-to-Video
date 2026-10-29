@@ -1948,12 +1948,14 @@
   },
   "8918552007": {
     "username": "User_8918552007",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1OajvUEzcfrxkbhVuzJ0uzA"
+    ]
   },
   "8919020625": {
     "username": "User_8919020625",
