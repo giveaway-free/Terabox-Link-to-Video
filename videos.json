@@ -155483,15 +155483,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1BSbT6jQRUIb69DzLBEjhFw"
   },
-  "1gMw7HiQ93zaanrPm2Ij17g": {
-    "stream_url": "https://iteraplay.tera-api57.workers.dev/fast_stream?token=cr3jG6N4WD9_ZvSXvpW_6n6bbhcGKxYivVFwNgdJPwDYb6ihtat0BpMOKybuj8qknkazXzD-i2RtHs5XMuJpNYiwpfaZw8yNwCjy3mB67th87q9c3O4pahLuoxoimwE6ah5BpzltUcCp8X8ak0Fh8q6SuCj01wJA3uf_vkKxt8b83okfT9uNaL5wNk8JkC1wRCN1R_cF7cqqpQSO1M-IfIMXyMy729kAuLF_WrppcIegdma4gaqHNlh2hU221Yo2opdOE-mAhKJac7-IgaxC3O-g8gAa6ShugfDYrMy1oNd5m-pN5oq4Us5yXwIMBvTlIzF9faVwEe_NDlzsIK15i8MCngzw4-lQT5pQy3e7.m3u8",
-    "title": "wtin.mp4",
-    "size": "17.45 MB",
-    "res": "480p",
-    "dur": "03:51",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/1gMw7HiQ93zaanrPm2Ij17g"
-  },
   "1F-HMHpPSIsd8qROHSto_Rg": {
     "stream_url": "https://polished-frost-f7ed.bokikavi.workers.dev/fast_stream?token=gY6ZEISaNi2Mmv0DaX5teKG8eKVfYdeP_jAzoE_EQ1XbRN4B8MxSaM-T7C2OAP4UeWn8KNZCCLWopuqmCRPl_e-tSEXB5p48ktQfBjv_0JTVCIwmYbHH0KlM_6jA1grINuVJ9VZCTdIyzCST18VmIJsYrL9LSi7J3d2pupIQXpmkJzWpsde6Zd5Kkp4YG1i_yn76wUOn5B2QnelCaH74afncRZvL4B4wtZ7vappGiKPmB052sxGdIYfjGO2QTU5knjc6W1GZx2r2YE1pZUWR0Hre9AXM3iT4NJeUt3u6t87SaKZlSf5cY0W8D1-62m_81H4c2jDZ54w5p4LaPmw6vSa6ysxDz7am0edgXvy5LJk.m3u8",
     "title": "gesek 1.mp4",
@@ -155617,5 +155608,14 @@
     "dur": "07:22",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1I-2qdBCPM0waBdEoLM6FVA"
+  },
+  "1gMw7HiQ93zaanrPm2Ij17g": {
+    "stream_url": "https://iteraplay.tera-api57.workers.dev/fast_stream?token=cr3jG6N4WD9_ZvSXvpW_6n6bbhcGKxYivVFwNgdJPwDYb6ihtat0BpMOKybuj8qknkazXzD-i2RtHs5XMuJpNYiwpfaZw8yNwCjy3mB67th87q9c3O4pahLuoxoimwE6ah5BpzltUcCp8X8ak0Fh8q6SuCj01wJA3uf_vkKxt8b83okfT9uNaL5wNk8JkC1wRCN1R_cF7cqqpQSO1M-IfIMXyMy729kAuLF_WrppcIegdma4gaqHNlh2hU221Yo2opdOE-mAhKJac7-IgaxC3O-g8gAa6ShugfDYrMy1oNd5m-pN5oq4Us5yXwIMBvTlIzF9faVwEe_NDlzsIK15i8MCngzw4-lQT5pQy3e7.m3u8",
+    "title": "wtin.mp4",
+    "size": "17.45 MB",
+    "res": "480p",
+    "dur": "03:51",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1gMw7HiQ93zaanrPm2Ij17g"
   }
 }
