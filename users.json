@@ -1911,12 +1911,14 @@
   },
   "8860494715": {
     "username": "User_8860494715",
-    "credits": 5,
+    "credits": 4,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "1djw1UFwtGrky7NBxsPV2iA"
+    ]
   },
   "8866095233": {
     "username": "User_8866095233",
