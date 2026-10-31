@@ -193589,15 +193589,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1fC0H_ygqKK6Kd3AOrl2h_g"
   },
-  "1tk6IZ7O2GkNF9F1qvfhsew": {
-    "stream_url": "https://iteraplay.tera-api74-new.workers.dev/fast_stream?token=Ty7Qrz8CEbZpAmtD4SoSzKT4teJ5fSobkbsEWR9BkNMSlJTABIcDGVEwNYkQ9u7LegJMLZKXZuOkaGhRS1yie3BFScuS_pm1J7dulhM5GYotug9dSG6CpEBFlwpYsp0jJ9etRcnKEp2hLpzvzQkR6kjiud-l4N1AalLZf2bWGSHT5znv7Z7xOJkzPbPu2SiamVzlGBFbZdiptngAH7-zHuLe4ib-3PTOrYp0YJYk9F5d9wRbk6rCHcKJmKU4pakSleOWk1ia28N_MAbJvHWlz4grTVCP4ScYhCCugAmNg20Y7H0aUq4SJ5dqSMWjc3gAElh1mWL-WsLriweS1df5t-SvT47UAfRpB_d1QHXkTltL7-58WT8Wvw.m3u8",
-    "title": "VID-1669709728381.mp4",
-    "size": "20.02 MB",
-    "res": "480p",
-    "dur": "03:52",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/1tk6IZ7O2GkNF9F1qvfhsew"
-  },
   "1h_9Q6guessYL3T_qDJdYKg": {
     "stream_url": "https://bitter-frost-8680.lepole.workers.dev/fast_stream?token=fgfPMJMDa275Z5uNVU2Gag9TPbAwS35z49dCsQJnZSoGsmQeFFj9DatLQuDhZAmrAZoqrarBfcwUoaOYoDGb3bXVXYYccvKtqCf47s2SHJ4eM3nq4QiaUKtNxBD_wJuGCbdR6ZKYIrZTSUcbExidDtUrPBJ2j3iQ3D8NkxZdSPxGuIYXk6bEj1IpWsAA_q0eSiVf5JCCjqqJKP9sU5sP9OyRnOwLxtkIqNQ0CeuouKv3bS45QvSmdOpK0R70pwyzZPju7rH-sP0jweHnENGFat1JUUBKYM4qfx3HPUvLMEouFXP1CzbmsoC_qCgVvEVbGB2Cksd89-JU3M5xcbxWywR7VXCT0FFrxYjlmjxYKlIa7yyxb7I49mruODTL3T6lG9x2fAUALcE.m3u8",
     "title": "eacher na kro koi dekh.mp4",
@@ -194371,5 +194362,14 @@
     "dur": "03:01",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1Xq7bU8hBpwtCgUbqkWCjYw"
+  },
+  "1tk6IZ7O2GkNF9F1qvfhsew": {
+    "stream_url": "https://iteraplay.tera-api74-new.workers.dev/fast_stream?token=Ty7Qrz8CEbZpAmtD4SoSzKT4teJ5fSobkbsEWR9BkNMSlJTABIcDGVEwNYkQ9u7LegJMLZKXZuOkaGhRS1yie3BFScuS_pm1J7dulhM5GYotug9dSG6CpEBFlwpYsp0jJ9etRcnKEp2hLpzvzQkR6kjiud-l4N1AalLZf2bWGSHT5znv7Z7xOJkzPbPu2SiamVzlGBFbZdiptngAH7-zHuLe4ib-3PTOrYp0YJYk9F5d9wRbk6rCHcKJmKU4pakSleOWk1ia28N_MAbJvHWlz4grTVCP4ScYhCCugAmNg20Y7H0aUq4SJ5dqSMWjc3gAElh1mWL-WsLriweS1df5t-SvT47UAfRpB_d1QHXkTltL7-58WT8Wvw.m3u8",
+    "title": "VID-1669709728381.mp4",
+    "size": "20.02 MB",
+    "res": "480p",
+    "dur": "03:52",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1tk6IZ7O2GkNF9F1qvfhsew"
   }
 }
