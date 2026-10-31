@@ -185659,5 +185659,14 @@
     "dur": "01:12",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1GyKGnK-oAJTxQFoTJFsAFA"
+  },
+  "1ftwJe1jwm427ogx7a6g40g": {
+    "stream_url": "https://iteraplay.tera-api93.workers.dev/fast_stream?token=rhqVKgjgZZcAy_jFZeCftnIZhuC_qGP1KclNG76YKs4FQspP1doTld6l-wZ2Vj3vSOq6ingKOlKVc5OE50qTbKRdP4KSOSPNH867W5sxnsWJaJmNu42sO7GtcrzznsymACRoUAFW8d08qh0GjyGo6g3hr62EtkR-gY7_CTAV8SPyvfe5FhMVOE3QnndVmL_eI0YC1gWPbgnS0mwIU2nxNJ_kQDjywoO1NOujYIjiQGDSEVSX8z2khgRthEF3sAIFxqUn3liHWxuZcoWSRJqR_XbuPb8gad3p3YtE-tB4hpU_zmM-PUWU5l0kd7SdByoOOR3BETPxP2A0F7H4w2b3jMZDlwfkiJ9lmWR5DYdIVOeSDk8C8Bx_Iv5m86g-R4c.m3u8",
+    "title": "@TeraBoxDlBot-47224(1).mp4",
+    "size": "23.51 MB",
+    "res": "480p",
+    "dur": "02:40",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1ftwJe1jwm427ogx7a6g40g"
   }
 }
