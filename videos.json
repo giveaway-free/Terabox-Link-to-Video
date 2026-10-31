@@ -186470,15 +186470,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1ZiQJW7lBA_3Y3KToo_aj4w"
   },
-  "1vZ7BufzaGbK8fbqFyHRscw": {
-    "stream_url": "https://iteraplay.tera-api30.workers.dev/fast_stream?token=5uSyhoKnfw8SSJ6qoasa-ko53RwE8KqlUWLmel_fs3cq_TPZvgGOSBpbNoD5eI6rqnHN6lLn1Uu-l-XNNsjH050yjuiPQpUBwo3NF06LRyX9_7itAcRUb2XSvge_w1z01QQf4d29shICDZm8HxknUdAnW-mbO-vaqmZbSBe9hbvGI5r3H5yrEHMAfw3rhRBmWH2Rdy_x_QC2XvG0nAJEq4JgTOxmD3NOcM9ImoOZEU8jhhx9hQrtiV5G78TZkLDOtsa9HY1xUy3sk3UhdmcbicGOJ7gYAgrntnmFbJR9R5O3PEWd5A4uoYVIg6d-dEpCi2FfEAlYFkzCi8qi8UDAE5DMEKYWXD8nC-snaPXfcr0_3mk1kReKZHP50t_aJfZe2nmMDuCdfrshzTSNh-OpdsNiOGIx1skPn0_3jE8.m3u8",
-    "title": "@Master_Webseries Kamwali_Bai (2020) S01E01.mp4",
-    "size": "206.18 MB",
-    "res": "720p",
-    "dur": "25:44",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/1vZ7BufzaGbK8fbqFyHRscw"
-  },
   "15L13UeH9GGc6niut0SA5Hw": {
     "stream_url": "https://polished-violet-0aea.qegugo.workers.dev/fast_stream?token=zbFxnIe-dMTeeyMAE_2UBOKFT1TarvVQdmUpOWp_kUy3PpWyaIEpuiAUXiD9xVfbwhav0E0ODWHE0eKegnVXnUewjpQ-6qEU6OJJwEUMY51DQYVKrFG0sdX5hEZddAwQzIKPva31Vc-UyPm1NsXe8USI5WuYmAHd_gH2-kFSXh-KJq8GEiAdfXbHs17etGbbhQD4G9AkQswd8-uYwiLf8o2JphAssiIJZ6o1aCE2zBQaH4Sj11sklJQFRwdfkb5mm8AQugapvLDKIvKU-jdgjLKDcMaIRD5QR90oMacGU21cWJH_9RJ7GYTONmwwQikhI8b1IVZOWpsQn8iYg_2ragwumo6l2R4dMw.m3u8",
     "title": "m7.mp4",
@@ -188287,5 +188278,14 @@
     "dur": "04:26",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1H2rY_NtYtbZ_7kgqySfuRw"
+  },
+  "1vZ7BufzaGbK8fbqFyHRscw": {
+    "stream_url": "https://iteraplay.tera-api30.workers.dev/fast_stream?token=5uSyhoKnfw8SSJ6qoasa-ko53RwE8KqlUWLmel_fs3cq_TPZvgGOSBpbNoD5eI6rqnHN6lLn1Uu-l-XNNsjH050yjuiPQpUBwo3NF06LRyX9_7itAcRUb2XSvge_w1z01QQf4d29shICDZm8HxknUdAnW-mbO-vaqmZbSBe9hbvGI5r3H5yrEHMAfw3rhRBmWH2Rdy_x_QC2XvG0nAJEq4JgTOxmD3NOcM9ImoOZEU8jhhx9hQrtiV5G78TZkLDOtsa9HY1xUy3sk3UhdmcbicGOJ7gYAgrntnmFbJR9R5O3PEWd5A4uoYVIg6d-dEpCi2FfEAlYFkzCi8qi8UDAE5DMEKYWXD8nC-snaPXfcr0_3mk1kReKZHP50t_aJfZe2nmMDuCdfrshzTSNh-OpdsNiOGIx1skPn0_3jE8.m3u8",
+    "title": "@Master_Webseries Kamwali_Bai (2020) S01E01.mp4",
+    "size": "206.18 MB",
+    "res": "720p",
+    "dur": "25:44",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1vZ7BufzaGbK8fbqFyHRscw"
   }
 }
