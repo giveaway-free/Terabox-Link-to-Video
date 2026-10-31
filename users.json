@@ -1215,14 +1215,12 @@
   },
   "8015944480": {
     "username": "User_8015944480",
-    "credits": 4,
+    "credits": 5,
     "is_paid": 0,
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": [
-      "1cBKaHuhg8YwyJGgOClnYOQ"
-    ]
+    "watched": []
   },
   "8037462071": {
     "username": "User_8037462071",
