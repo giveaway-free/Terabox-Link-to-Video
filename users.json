@@ -19,7 +19,7 @@
   },
   "553826070": {
     "username": "tuserahammed",
-    "credits": 10,
+    "credits": 12,
     "is_paid": 1,
     "paid_expiry": "2026-11-15 20:41:36",
     "lang": "en",
@@ -96,6 +96,15 @@
       "1uuk2_zjny7CajgRla4uU_w",
       "new_user"
     ]
+  },
+  "960222674": {
+    "username": "Dimitriii123",
+    "credits": 5,
+    "is_paid": 0,
+    "paid_expiry": null,
+    "lang": "bn",
+    "is_blocked": false,
+    "watched": []
   },
   "964125912": {
     "username": "User_964125912",
@@ -1689,10 +1698,10 @@
       "1GteeZ2xKQHiu5DJq8O_21A",
       "1Ii8KYfS8_E1XTr76RcK4mA",
       "1Z1YdhkS_X_hjyG15FAlI1g",
+      "1bCCp6xC2YL5MIMzQrM0JCg",
       "1gD7-5xC_tKoZXpzdGcgAdQ",
       "1iutc6iMIFWZIQ7PZRe5z9Q",
-      "1zhssyYmWLjyR8f6BjgXT5g",
-      "1bCCp6xC2YL5MIMzQrM0JCg"
+      "1zhssyYmWLjyR8f6BjgXT5g"
     ]
   },
   "8670808476": {
