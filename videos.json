@@ -285433,5 +285433,14 @@
     "dur": "02:17",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1kmHkjtjv-fy60PEQI72EfQ"
+  },
+  "1tvBRdnfRVGuWDnNVnUkwyA": {
+    "stream_url": "https://iteraplay.tera-api54.workers.dev/fast_stream?token=Qt7ggJq9ipWRmS4Me8aFZWKuCuj0wxAvhdx5C0h4yo1mhj-w0dRpr_t9YT0LIqsmiQG3-rFqukTif-Bdc3yRi7CXzr5kRfaN8vL2cu2bK2TlY1WdY1AGym4o1vae7kJQUvi6cy7kKE5JXM7Of4hxdEN5x4DrTWYUI9IoDBqsgDCx7gRIvGw1kdG0j8qJoU_Ez9rbP3pMke7mHw7056Z-IvNJh9_TqYPfcyQm0tykPUS9eI2luhygpoi6mRaM1s67J1RGn6oa5TU2zpKjN49zO-m0fFVEbUZVl1mNZTWA8E8b5g__mCjLk7moO1oiszjPQptcpr_ShVYbOuaKwg2RGDbXg2KOABP3lPwkto6jw6uLccOS4JYCkWJTRno4CvxMbKMEqHs2uhE5FBsh1T7qow.m3u8",
+    "title": "@DD_network 2023-11-24-18-36-20(6).mp4",
+    "size": "3.52 MB",
+    "res": "480p",
+    "dur": "00:23",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1tvBRdnfRVGuWDnNVnUkwyA"
   }
 }
