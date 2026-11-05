@@ -287774,15 +287774,6 @@
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1cLqEbTaDPBXMkQo2QdOasg"
   },
-  "1BpyOcwWBa1lPG9fUxiIo3w": {
-    "stream_url": "https://round-fog-6799.xapi-714.workers.dev/fast_stream?token=iFA5d6mHocNfENesC2YSSF0oNRO7H7X4d72eOKJUYGEF4MspGI8n5JnSZYRrrk00MxQx24ubsaSdSY7NI2UEFhbhRtw2fRD2ZIwG7iR9RL_VMyBNPGERBadPjIbOSovwft-4vKZewgReV7_TUbohRPRVQtAYayqczk1860B8zLnQqY-ckxx5ry7A2uPgHrHhNyZz3z--ZSRn8ZlAQDGjuvwzsp6MwxN7Hs1Yw7Y14mQ5AT6riPF4s6uFTTNcAQMv1pepccvNcO5xWTTkIoD4VFpfC6ow3nXbCeyTvlgDIxuvfkc1Kl6-6MYTBqJAJGWjDVuuXO6xA6UQ4FJYWomj3fTMwSN14PpVWVPCLg4s3Jfj2fj88AoHKO1Ojy50IkFo35TMJyqA-5WbkA.m3u8",
-    "title": "By_@HdExposed_On_Telegram_(18).mp4",
-    "size": "14.53 MB",
-    "res": "720p",
-    "dur": "03:04",
-    "type": "Video",
-    "terabox_url": "https://1024terabox.com/s/1BpyOcwWBa1lPG9fUxiIo3w"
-  },
   "1cfFbx72nLygMG2NYoiHhbw": {
     "stream_url": "https://polished-sun-c583.bixemu.workers.dev/fast_stream?token=rdEjCgUwSyni1r05fZh2alM9OQcERDOQOZ7Xo6aF9fTzrpOoUKyvIzXayeTQj2XikAR_8Csj0D2ABtgCtNTimOer0aPjxTyoXKdnlAzu-6Jd7AQItfj3UvSIKWTgMIwer8E4tsbIh3IDHYCy04F3ksEbn_Ce8EmKehe8tYC-UlJj0cItN0eddT1pzIDxO4R7fPHFxaCV7Q09k9UVZlm8mEDFGtX01kdIGcaaNXXMV0sL9WHCk_MSeebJnMHJz37F12ZgQLI2AUBDoAWPPq2IdmwaSOxKl-PhxUcWKUi-cGmRLDifrJqGo33XH6AcErWFRFzTXl57VKwBa_sZ28oqnTYJUD_cXN2OkD-jo34btOVv_32Ne9KtDsG_-uMMGky5Cg.m3u8",
     "title": "VID_20230628_140423_336.mp4",
@@ -288745,5 +288736,14 @@
     "dur": "08:23",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/10nzWoyGQjouykVPCb_-T2w"
+  },
+  "1BpyOcwWBa1lPG9fUxiIo3w": {
+    "stream_url": "https://round-fog-6799.xapi-714.workers.dev/fast_stream?token=iFA5d6mHocNfENesC2YSSF0oNRO7H7X4d72eOKJUYGEF4MspGI8n5JnSZYRrrk00MxQx24ubsaSdSY7NI2UEFhbhRtw2fRD2ZIwG7iR9RL_VMyBNPGERBadPjIbOSovwft-4vKZewgReV7_TUbohRPRVQtAYayqczk1860B8zLnQqY-ckxx5ry7A2uPgHrHhNyZz3z--ZSRn8ZlAQDGjuvwzsp6MwxN7Hs1Yw7Y14mQ5AT6riPF4s6uFTTNcAQMv1pepccvNcO5xWTTkIoD4VFpfC6ow3nXbCeyTvlgDIxuvfkc1Kl6-6MYTBqJAJGWjDVuuXO6xA6UQ4FJYWomj3fTMwSN14PpVWVPCLg4s3Jfj2fj88AoHKO1Ojy50IkFo35TMJyqA-5WbkA.m3u8",
+    "title": "By_@HdExposed_On_Telegram_(18).mp4",
+    "size": "14.53 MB",
+    "res": "720p",
+    "dur": "03:04",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1BpyOcwWBa1lPG9fUxiIo3w"
   }
 }
