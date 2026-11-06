@@ -298384,5 +298384,14 @@
     "dur": "02:15",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1mLPNbSwtkzuzs3ep_g0nQw"
+  },
+  "1I7YGNcO5pLyQhEjmCP_83Q": {
+    "stream_url": "https://iteraplay.tera-api72.workers.dev/fast_stream?token=Lour_7sLxDXkAgs4ukZNGyYaP8DdRdSQt8OnxBL8Z0Hw2tm1XGXMHi4ND7TRciHfDso9ENbSWscEpIEB-Csh5Q8NYZKfsQgm2qF1pgA5s8i_lWEwURq7wxoIdR1PP5zq8Pm-3CzGfbI06M_jgnpJPr1fSkA07qZCTfOjMkw45TnXU8lnpAdik24sIAF6SFC7lQRNX6e_MqkeW-rHMrrsOb7LkNUU9-dcptVeBoM0F_nTYSLv__pGQYiKj6tUUHGRPbsP8WT2X7MvQJvDdNoiuskTBoUuAQLo3GcmabKJIWM1OsWg8LuIba5Vd6ooe-hQWI_iRhpxChcG9jA-s7mesQBSxABdzW5F17XNLKfSchl_4-6mOV8EK6c-MLU3GlIgkw.m3u8",
+    "title": "a-good-day-s-work_1080p.mp4",
+    "size": "1.58 GB",
+    "res": "1080p",
+    "dur": "40:20",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1I7YGNcO5pLyQhEjmCP_83Q"
   }
 }
