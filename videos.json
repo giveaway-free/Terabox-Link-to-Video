@@ -299365,5 +299365,14 @@
     "dur": "01:01",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1-tNVHlWMnUzjgYyo_FN4QQ"
+  },
+  "1394uhqY37aGE8lQXvIAKxw": {
+    "stream_url": "https://iteraplay.tera-api43.workers.dev/fast_stream?token=97gGkS9c37OK8PN_hbzjRxWNuLwvnspaDEpCTniJEm5V9a_LFw5jbVn74msGJdMSvHtUqaq6kc6lMVm0SKNEtP5x7zxMypj30lhAGHgFPxOK2biZKofVK-fuBaKziM9V04oBJkZE5NFI64bk8j9fwHZrcMjXD4KuiKF2PDVwwhz-vNGo-7_EGVm5gSCw4gHnGuHyaknI88meCh-_x2Kx8w3_dFpasiimWWZXAjM_nQ-38WCkO2_IsF95AGg7THuPKZ00KDp5Sga7SGqacMXKALcZhUM_wu_VAFV-V4oogRzBkC7IpXHiv7f1p1hatLUuePLB8o-lPt7qaOvMoAKOSaumn9uXzW8gQUb-Ycl1YPMWKbwwE3BPjQwkbcSW.m3u8",
+    "title": "2026-09-18-03-15-57.mp4",
+    "size": "46.30 MB",
+    "res": "1080p",
+    "dur": "06:05",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1394uhqY37aGE8lQXvIAKxw"
   }
 }
