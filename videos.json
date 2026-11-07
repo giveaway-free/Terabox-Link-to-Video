@@ -331801,5 +331801,14 @@
     "dur": "01:01:19",
     "type": "Video",
     "terabox_url": "https://1024terabox.com/s/1nbcsKAaoqDq7WJu0IBLs0Q"
+  },
+  "1DAM7B63FlydMXPEIm2EWqA": {
+    "stream_url": "https://iteraplay.tera-api44.workers.dev/fast_stream?token=3yryLaU0N2wBBjjZbm3vS03NkWAD6AjKFuIk4-1B_ZYrxrFQZiI0njty_LYwpEgeRglJ7lBFl6ETEnIyxE8Xo6kFcDzBnRSV5F5HxQ7ClG-Tt3l6lNlDBEpbWw0Sq3iIOVdxkFdtDY5aIeYyEmm5AnZO6YBkd9aczoWUSXkW1-5csUq8q6xOvzwogTdZPRyRJ0VYiaChpHbH4d4lyD1U5vtnDaAkgmFPJZ6Oo2MkNLT2nMWvxJqh8ypGMaZua_8nX2tKh0gZfd7kVnT1eB9bqxhscAaww9IU6tWwUixRpQiEpyTm4W3rGU2QMLKscWsHJeNG3Dpo7O5mnq_LTzc8XI4YeCfbKgV1wbFCspee7MRFh2VcKcJo115aeV1PGwcK8g.m3u8",
+    "title": "2025-09-22-15-08-46(13).mp4",
+    "size": "3.19 MB",
+    "res": "480p",
+    "dur": "01:23",
+    "type": "Video",
+    "terabox_url": "https://1024terabox.com/s/1DAM7B63FlydMXPEIm2EWqA"
   }
 }
