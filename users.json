@@ -461,7 +461,9 @@
     "paid_expiry": null,
     "lang": "bn",
     "is_blocked": false,
-    "watched": []
+    "watched": [
+      "app"
+    ]
   },
   "5932658058": {
     "username": "MahtimMunna",
